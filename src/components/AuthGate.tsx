@@ -215,21 +215,21 @@ export default function AuthGate({ onAuthed }: Props) {
 
       {/* ── academic attribution ── */}
       <footer className="mx-auto mt-12 w-full max-w-5xl border-t border-pine-3 pt-6">
-        <address className="flex flex-col items-center gap-1.5 text-center not-italic">
-          <span className="mb-1.5 h-px w-10 bg-honey/70" aria-hidden="true" />
-          <span className="font-mono text-[10.5px] tracking-wide text-chalk/55">
+        <address className="flex flex-col items-center gap-2 text-center not-italic">
+          <span className="mb-2.5 h-px w-14 bg-honey/80" aria-hidden="true" />
+          <span className="font-mono text-[13px] font-semibold tracking-wide text-chalk/80">
             © 2026{" "}
-            <span className="font-display text-[15px] font-bold tracking-tight text-chalk">
+            <span className="font-display text-[19px] font-extrabold tracking-tight text-chalk">
               Srinivasa K S
             </span>
           </span>
-          <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-chalk/60">
+          <span className="font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-chalk/80">
             Assistant Professor
           </span>
-          <span className="font-mono text-[10.5px] leading-relaxed text-chalk/45">
+          <span className="font-mono text-[12px] font-semibold leading-relaxed text-chalk/70">
             R.V. Teachers College, Jayanagar, Bengaluru – 560011
           </span>
-          <span className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.22em] text-chalk/35">
+          <span className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-chalk/55">
             All Rights Reserved.
           </span>
         </address>
