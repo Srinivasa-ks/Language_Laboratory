@@ -5,6 +5,8 @@ import { computeStats, fmtDate, type ChecksMap } from "../lib/progress";
 interface Props {
   userName: string;
   isGuest: boolean;
+  /** Student ID / roll number, when the learner provided one */
+  roll?: string;
   joinedAt?: number;
   lastSeen?: number;
   checks: ChecksMap;
@@ -51,6 +53,7 @@ const LEVEL_META: { id: LevelId; name: string; hex: string }[] = [
 export default function HomeScreen({
   userName,
   isGuest,
+  roll,
   joinedAt,
   lastSeen,
   checks,
@@ -81,7 +84,8 @@ export default function HomeScreen({
         </div>
         {isGuest && (
           <p className="max-w-[300px] rounded-md border border-dashed border-line bg-card px-3 py-2 font-mono text-[10.5px] leading-snug text-fog">
-            Guest progress is saved on this device. Create an account to keep it under your name.
+            Guest progress is saved on this device. Switch learner any time to keep progress under
+            a named profile — no password needed.
           </p>
         )}
       </div>
@@ -103,9 +107,15 @@ export default function HomeScreen({
               sounds started
             </p>
             <dl className="mt-4 flex flex-col gap-1.5 border-t border-line pt-3 font-mono text-[10.5px] text-fog">
+              {roll && (
+                <div className="flex justify-between gap-2">
+                  <dt className="uppercase tracking-wider text-fog/70">learner ID</dt>
+                  <dd className="tabular-nums text-ink/80">{roll}</dd>
+                </div>
+              )}
               {joinedAt && (
                 <div className="flex justify-between gap-2">
-                  <dt className="uppercase tracking-wider text-fog/70">member since</dt>
+                  <dt className="uppercase tracking-wider text-fog/70">profile created</dt>
                   <dd className="tabular-nums text-ink/80">{fmtDate(joinedAt)}</dd>
                 </div>
               )}
