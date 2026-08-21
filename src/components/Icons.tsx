@@ -71,6 +71,13 @@ export const IconShuffle = ({ className }: IconProps) => (
   </svg>
 );
 
+export const IconLogout = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+    <path d="M13.5 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6.5" {...base} />
+    <path d="M16 8.5 19.5 12 16 15.5M19 12H9.5" {...base} />
+  </svg>
+);
+
 export const IconCompare = ({ className }: IconProps) => (
   <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
     <path d="M3 9c1.8 0 1.8-4 3.6-4s1.8 7 3.6 7 1.8-4 3.6-4 1.8 2 3.6 2 1.6-1 2.6-1" {...base} />

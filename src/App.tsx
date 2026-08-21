@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import AuthGate from "./components/AuthGate";
 import ConsonantTable from "./components/ConsonantTable";
+import HomeScreen from "./components/HomeScreen";
 import PracticeBench from "./components/PracticeBench";
 import VowelChart from "./components/VowelChart";
 import {
@@ -7,6 +9,7 @@ import {
   IconCompare,
   IconEar,
   IconGlobe,
+  IconLogout,
   IconMic,
   IconSpeaker,
   IconWave,
@@ -20,6 +23,19 @@ import {
   VOWELS,
   type LevelId,
 } from "./data/phonemes";
+import {
+  GUEST_ID,
+  displayNameFor,
+  getSession,
+  getUserById,
+  setSession,
+  touchUser,
+} from "./lib/auth";
+import {
+  loadAllProgress,
+  saveAllProgress,
+  type AllProgress,
+} from "./lib/progress";
 import { useSpeech } from "./hooks/useSpeech";
 
 /* ───────────────── scroll reveal ───────────────── */
@@ -106,28 +122,42 @@ function ProgressRing({ value }: { value: number }) {
   );
 }
 
-const CHECK_KEY = "phonelab-checks-v1";
-
 export default function App() {
   const speech = useSpeech();
   const [selectedId, setSelectedId] = useState("iː");
   const [level, setLevel] = useState<LevelId>("syll");
-  const [checks, setChecks] = useState<Record<string, boolean>>(() => {
-    try {
-      return JSON.parse(localStorage.getItem(CHECK_KEY) ?? "{}") as Record<string, boolean>;
-    } catch {
-      return {};
-    }
-  });
+  const [activeId, setActiveId] = useState<string | null>(() => getSession());
+  const [allProgress, setAllProgress] = useState<AllProgress>(() => loadAllProgress());
   const benchRef = useRef<HTMLDivElement>(null);
 
+  const checks = useMemo(() => allProgress[activeId ?? ""] ?? {}, [allProgress, activeId]);
+  const isGuest = activeId === GUEST_ID;
+  const userName = activeId ? displayNameFor(activeId) : "";
+  const account = useMemo(
+    () => (activeId && activeId !== GUEST_ID ? getUserById(activeId) : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeId, allProgress]
+  );
+
   useEffect(() => {
+    saveAllProgress(allProgress);
+  }, [allProgress]);
+
+  const handleAuthed = (id: string) => {
+    setSession(id);
+    if (id !== GUEST_ID) touchUser(id);
+    setActiveId(id);
+  };
+
+  const logout = () => {
     try {
-      localStorage.setItem(CHECK_KEY, JSON.stringify(checks));
+      window.speechSynthesis?.cancel();
     } catch {
-      /* private mode — carry on without persistence */
+      /* nothing playing */
     }
-  }, [checks]);
+    setSession(null);
+    setActiveId(null);
+  };
 
   const selected = useMemo(() => PHONEMES.find((p) => p.id === selectedId) ?? PHONEMES[0], [selectedId]);
 
@@ -161,15 +191,31 @@ export default function App() {
     selectPhoneme(p.id, true);
   };
 
-  const toggleCheck = (key: string) =>
-    setChecks((prev) => {
-      const next = { ...prev };
-      if (next[key]) delete next[key];
-      else next[key] = true;
-      return next;
+  const toggleCheck = (key: string) => {
+    if (!activeId) return;
+    setAllProgress((prev) => {
+      const mine = { ...(prev[activeId] ?? {}) };
+      if (mine[key]) delete mine[key];
+      else mine[key] = true;
+      return { ...prev, [activeId]: mine };
     });
+  };
+
+  const openSound = (id: string, lvl: LevelId) => {
+    setLevel(lvl);
+    selectPhoneme(id, true);
+  };
 
   const soundProgress = practiced.size / PHONEMES.length;
+
+  if (!activeId) {
+    return (
+      <div className="relative min-h-screen overflow-x-clip">
+        <GlyphField />
+        <AuthGate onAuthed={handleAuthed} />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-x-clip">
@@ -208,6 +254,27 @@ export default function App() {
           </div>
 
           <div className="ml-auto flex items-center gap-3">
+            <div
+              className={`flex items-center gap-2 rounded-md border py-1 pl-1 pr-1.5 transition-colors ${
+                isGuest ? "border-dashed border-pine-3 bg-transparent" : "border-pine-3 bg-pine-2/60"
+              }`}
+              title={isGuest ? "Guest session — progress saved on this device" : `Signed in as ${userName}`}
+            >
+              <span className="grid h-7 w-7 place-items-center rounded bg-honey font-display text-[13px] font-extrabold text-pine">
+                {userName.charAt(0).toUpperCase()}
+              </span>
+              <span className="hidden max-w-[110px] truncate font-mono text-[11px] font-semibold text-chalk/85 sm:block">
+                {userName}
+              </span>
+              <button
+                onClick={logout}
+                title="Sign out"
+                aria-label="Sign out"
+                className="grid h-6 w-6 place-items-center rounded text-chalk/45 transition-colors hover:bg-pine-3 hover:text-chalk"
+              >
+                <IconLogout className="h-3.5 w-3.5" />
+              </button>
+            </div>
             <div className="text-right leading-tight">
               <p className="font-display text-[15px] font-bold tabular-nums">
                 {practiced.size}<span className="text-chalk/45">/{PHONEMES.length}</span>
@@ -269,6 +336,21 @@ export default function App() {
       </header>
 
       <main className="relative z-10">
+        {/* ════════════════ STATION 00 · HOME SCREEN ════════════════ */}
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16">
+          <Reveal>
+            <HomeScreen
+              userName={userName}
+              isGuest={isGuest}
+              joinedAt={account?.createdAt}
+              lastSeen={account?.lastSeen}
+              checks={checks}
+              onOpenSound={openSound}
+              onSurprise={surprise}
+            />
+          </Reveal>
+        </section>
+
         {/* ════════════════ STATION 01 · SOUND MAP ════════════════ */}
         <section className="mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pt-16">
           <Reveal>
