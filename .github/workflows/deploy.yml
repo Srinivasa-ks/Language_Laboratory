@@ -44,7 +44,7 @@ jobs:
         run: npm run build
 
       - name: Upload dist/ to remote htdocs/ via FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -57,10 +57,11 @@ jobs:
           # is ever considered for upload.
           local-dir: dist/
 
-          # Remote target: the web root inside the InfinityFree FTP home.
-          # dist/index.html therefore lands directly at htdocs/index.html.
-          # (If your account's FTP login drops you straight inside htdocs,
-          # change this to:  server-dir: / )
+          # Remote target — InfinityFree rule:
+          #   • Keep "htdocs/" if the FTP account ROOT contains the site's
+          #     htdocs folder (standard InfinityFree layout). dist/index.html
+          #     then lands directly at htdocs/index.html.
+          #   • Change to "/" if your FTP login already starts INSIDE htdocs.
           server-dir: htdocs/
 
           # Keep remote files that are not part of the new build instead of
