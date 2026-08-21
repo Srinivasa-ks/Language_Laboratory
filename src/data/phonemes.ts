@@ -1,9 +1,16 @@
-export type LevelId = "word" | "sent";
+export type LevelId = "syll" | "word" | "sent";
 
 export interface Drill {
   ipa: string;
   text: string;
   say?: string;
+}
+
+/** A syllable-level minimal pair: the target syllable (a) against a rival sound's syllable (b). */
+export interface PairDrill {
+  rival: string; // IPA of the contrasting sound ("∅" = silent)
+  a: Drill;
+  b: Drill;
 }
 
 export const CATEGORY_META = {
@@ -28,21 +35,32 @@ export interface Phoneme {
   keywords: string[];
   voiced?: boolean;
   chartPos?: { x: number; y: number };
-  /** classic minimal-pair contrast to train the sound against its nearest rival */
-  contrast: [Drill, Drill];
+  /** syllable-level minimal pairs against the nearest rival sounds */
+  pairs: PairDrill[];
   words: Drill[];
   sentences: Drill[];
 }
 
 export const LEVELS: { id: LevelId; name: string; blurb: string }[] = [
+  { id: "syll", name: "Syllables", blurb: "Minimal pairs — hear your sound against its nearest rival, one syllable at a time." },
   { id: "word", name: "Words", blurb: "The sound inside real vocabulary — ten targets per phoneme." },
   { id: "sent", name: "Sentences", blurb: "Full-speed connected speech — three carrier sentences per phoneme." },
 ];
 
-export const getDrills = (p: Phoneme, level: LevelId): Drill[] =>
+export const getDrills = (p: Phoneme, level: "word" | "sent"): Drill[] =>
   level === "word" ? p.words : p.sentences;
 
+export const getPairs = (p: Phoneme): PairDrill[] => p.pairs;
+
+export const drillsForLevel = (p: Phoneme, level: LevelId): number =>
+  level === "syll" ? p.pairs.length : level === "word" ? p.words.length : p.sentences.length;
+
 const d = (ipa: string, text: string, say?: string): Drill => ({ ipa, text, say });
+const pair = (rival: string, aIpa: string, aText: string, aSay: string | undefined, bIpa: string, bText: string, bSay?: string): PairDrill => ({
+  rival,
+  a: d(aIpa, aText, aSay),
+  b: d(bIpa, bText, bSay),
+});
 
 export const PHONEMES: Phoneme[] = [
   // ───────────────────────── MONOPHTHONGS (12) ─────────────────────────
@@ -51,7 +69,12 @@ export const PHONEMES: Phoneme[] = [
     label: "close front unrounded vowel", keyword: "the FLEECE vowel",
     hint: "Spread your lips into a slight smile, push the tongue high and far forward, and hold the sound long — it is a tense vowel.",
     keywords: ["see", "tree", "machine"],
-    contrast: [d("/ʃiːp/", "sheep"), d("/ʃɪp/", "ship")],
+    pairs: [
+      pair("ɪ", "/ʃiːp/", "sheep", undefined, "/ʃɪp/", "ship"),
+      pair("ɪ", "/siːt/", "seat", undefined, "/sɪt/", "sit"),
+      pair("ɪ", "/liːv/", "leave", undefined, "/lɪv/", "live"),
+      pair("ʊ", "/fiːl/", "feel", undefined, "/fʊl/", "full"),
+    ],
     words: [
       d("/fliːs/", "fleece"), d("/spiːtʃ/", "speech"), d("/rɪˈsiːv/", "receive"),
       d("/məˈʃiːn/", "machine"), d("/ˈpiːpl/", "people"), d("/fiːld/", "field"),
@@ -68,7 +91,12 @@ export const PHONEMES: Phoneme[] = [
     label: "near-close near-front unrounded vowel", keyword: "the KIT vowel",
     hint: "Short and relaxed — the tongue sits a touch lower and further back than /iː/. Never stretch it long.",
     keywords: ["ship", "women", "busy"],
-    contrast: [d("/ʃɪp/", "ship"), d("/ʃiːp/", "sheep")],
+    pairs: [
+      pair("iː", "/ʃɪp/", "ship", undefined, "/ʃiːp/", "sheep"),
+      pair("iː", "/sɪt/", "sit", undefined, "/siːt/", "seat"),
+      pair("iː", "/ɪt/", "it", undefined, "/iːt/", "eat"),
+      pair("iː", "/dɪd/", "did", undefined, "/diːd/", "deed"),
+    ],
     words: [
       d("/ʃɪp/", "ship"), d("/ˈwɪmɪn/", "women"), d("/ˈbɪzi/", "busy"),
       d("/ɡɪlt/", "guilt"), d("/ˈmɪnɪt/", "minute"), d("/ˈsɪstəm/", "system"),
@@ -85,7 +113,12 @@ export const PHONEMES: Phoneme[] = [
     label: "mid front unrounded vowel", keyword: "the DRESS vowel",
     hint: "Drop the jaw a little below /ɪ/ and keep it short and crisp — a plain 'eh', never gliding to 'ay'.",
     keywords: ["bed", "said", "many"],
-    contrast: [d("/bed/", "bed"), d("/bæd/", "bad")],
+    pairs: [
+      pair("æ", "/bed/", "bed", undefined, "/bæd/", "bad"),
+      pair("æ", "/pen/", "pen", undefined, "/pæn/", "pan"),
+      pair("æ", "/met/", "met", undefined, "/mæt/", "mat"),
+      pair("æ", "/sed/", "said", undefined, "/sæd/", "sad"),
+    ],
     words: [
       d("/frend/", "friend"), d("/sed/", "said"), d("/əˈɡen/", "again"),
       d("/hed/", "head"), d("/ˈmeni/", "many"), d("/ˈeni/", "any"),
@@ -102,7 +135,12 @@ export const PHONEMES: Phoneme[] = [
     label: "near-open front unrounded vowel", keyword: "the TRAP vowel",
     hint: "Open wide — jaw down, tongue low and front. A bright, flat 'a', held short.",
     keywords: ["cat", "laugh", "camera"],
-    contrast: [d("/bæd/", "bad"), d("/bed/", "bed")],
+    pairs: [
+      pair("e", "/bæd/", "bad", undefined, "/bed/", "bed"),
+      pair("e", "/pæn/", "pan", undefined, "/pen/", "pen"),
+      pair("ʌ", "/kæt/", "cat", undefined, "/kʌt/", "cut"),
+      pair("ʌ", "/hæt/", "hat", undefined, "/hʌt/", "hut"),
+    ],
     words: [
       d("/ˈæpl/", "apple"), d("/blæk/", "black"), d("/hænd/", "hand"),
       d("/ˈæŋɡri/", "angry"), d("/ˈkæmrə/", "camera"), d("/ˈtrævl/", "travel"),
@@ -119,7 +157,12 @@ export const PHONEMES: Phoneme[] = [
     label: "open-mid central unrounded vowel", keyword: "the STRUT vowel",
     hint: "A short punch from the middle of the mouth — lips neutral, tongue mid-central, like a light 'uh'.",
     keywords: ["cup", "London", "mother"],
-    contrast: [d("/kʌt/", "cut"), d("/kɑːt/", "cart")],
+    pairs: [
+      pair("ɑː", "/kʌt/", "cut", undefined, "/kɑːt/", "cart"),
+      pair("ɒ", "/kʌp/", "cup", undefined, "/kɒp/", "cop"),
+      pair("ɒ", "/hʌt/", "hut", undefined, "/hɒt/", "hot"),
+      pair("ɒ", "/lʌk/", "luck", undefined, "/lɒk/", "lock"),
+    ],
     words: [
       d("/kʌm/", "come"), d("/ˈmʌni/", "money"), d("/ˈlʌndən/", "London"),
       d("/ˈstʌmək/", "stomach"), d("/ˈmʌðə/", "mother"), d("/əˈbʌv/", "above"),
@@ -136,7 +179,12 @@ export const PHONEMES: Phoneme[] = [
     label: "open back rounded vowel", keyword: "the LOT vowel",
     hint: "Round the lips lightly and drop the jaw — a short, dark, open 'o' at the back of the mouth.",
     keywords: ["hot", "want", "sorry"],
-    contrast: [d("/pɒt/", "pot"), d("/pʊt/", "put")],
+    pairs: [
+      pair("ɔː", "/pɒt/", "pot", undefined, "/pɔːt/", "port"),
+      pair("ɔː", "/kɒt/", "cot", undefined, "/kɔːt/", "caught"),
+      pair("ɔː", "/dɒn/", "don", undefined, "/dɔːn/", "dawn"),
+      pair("ɔː", "/hɒk/", "hock", undefined, "/hɔːk/", "hawk"),
+    ],
     words: [
       d("/klɒk/", "clock"), d("/wɒnt/", "want"), d("/bɪˈkɒz/", "because"),
       d("/wɒtʃ/", "watch"), d("/ˈkwɒləti/", "quality"), d("/ˈsɒri/", "sorry"),
@@ -153,7 +201,12 @@ export const PHONEMES: Phoneme[] = [
     label: "near-close near-back rounded vowel", keyword: "the FOOT vowel",
     hint: "Short and loose — lips softly rounded, tongue high and back but relaxed. Never let it glide into /uː/.",
     keywords: ["book", "could", "sugar"],
-    contrast: [d("/fʊl/", "full"), d("/fuːl/", "fool")],
+    pairs: [
+      pair("uː", "/fʊl/", "full", undefined, "/fuːl/", "fool"),
+      pair("uː", "/pʊl/", "pull", undefined, "/puːl/", "pool"),
+      pair("uː", "/lʊk/", "look", undefined, "/luːk/", "luke"),
+      pair("uː", "/sʊt/", "soot", undefined, "/suːt/", "suit"),
+    ],
     words: [
       d("/kʊd/", "could"), d("/wʊd/", "would"), d("/pʊʃ/", "push"),
       d("/ˈbʊtʃə/", "butcher"), d("/ˈʃʊɡə/", "sugar"), d("/ˈkʊʃn/", "cushion"),
@@ -170,7 +223,12 @@ export const PHONEMES: Phoneme[] = [
     label: "mid central unrounded vowel", keyword: "the schwa",
     hint: "The laziest sound in English — mouth barely open, completely relaxed, and always unstressed.",
     keywords: ["about", "teacher", "banana"],
-    contrast: [d("/səˈpɔːt/", "support"), d("/spɔːt/", "sport")],
+    pairs: [
+      pair("ɜː", "/ə/", "a", "uh", "/ɜː/", "err", "ur"),
+      pair("ɒ", "/əv/", "of", "uv", "/ɒv/", "off"),
+      pair("uː", "/tə/", "to", "tuh", "/tuː/", "too"),
+      pair("iː", "/ðə/", "the", "thuh", "/ðiː/", "thee"),
+    ],
     words: [
       d("/əˈbaʊt/", "about"), d("/səˈpɔːt/", "support"), d("/ˈtiːtʃə/", "teacher"),
       d("/ˈdɒktə/", "doctor"), d("/bəˈnɑːnə/", "banana"), d("/ˈmeməri/", "memory"),
@@ -187,7 +245,12 @@ export const PHONEMES: Phoneme[] = [
     label: "close back rounded vowel", keyword: "the GOOSE vowel",
     hint: "Push the lips into a tight circle and raise the tongue high at the back — long and tense.",
     keywords: ["blue", "through", "soup"],
-    contrast: [d("/fuːl/", "fool"), d("/fʊl/", "full")],
+    pairs: [
+      pair("ʊ", "/fuːl/", "fool", undefined, "/fʊl/", "full"),
+      pair("ʊ", "/puːl/", "pool", undefined, "/pʊl/", "pull"),
+      pair("ʊ", "/luːk/", "luke", undefined, "/lʊk/", "look"),
+      pair("ʊ", "/suːt/", "suit", undefined, "/sʊt/", "soot"),
+    ],
     words: [
       d("/duː/", "do"), d("/muːv/", "move"), d("/ɡruːp/", "group"),
       d("/θruː/", "through"), d("/suːp/", "soup"), d("/dʒuːn/", "June"),
@@ -204,7 +267,12 @@ export const PHONEMES: Phoneme[] = [
     label: "open-mid back rounded vowel", keyword: "the THOUGHT vowel",
     hint: "Round and open at the back — jaw fairly low, lips in a firm circle, held long.",
     keywords: ["four", "water", "daughter"],
-    contrast: [d("/pɔːt/", "port"), d("/pɒt/", "pot")],
+    pairs: [
+      pair("ɒ", "/pɔːt/", "port", undefined, "/pɒt/", "pot"),
+      pair("ɒ", "/kɔːt/", "caught", undefined, "/kɒt/", "cot"),
+      pair("əʊ", "/lɔː/", "law", undefined, "/ləʊ/", "low"),
+      pair("ɒ", "/dɔːn/", "dawn", undefined, "/dɒn/", "don"),
+    ],
     words: [
       d("/wɔːk/", "walk"), d("/ˈwɔːtə/", "water"), d("/θɔːt/", "thought"),
       d("/bɔːd/", "board"), d("/bɪˈfɔː/", "before"), d("/ˈdɔːtə/", "daughter"),
@@ -221,7 +289,12 @@ export const PHONEMES: Phoneme[] = [
     label: "open-mid central unrounded vowel", keyword: "the NURSE vowel",
     hint: "Pull the lips back slightly, tongue flat in the centre — a long, neutral hum. Don't roll the r.",
     keywords: ["bird", "world", "journey"],
-    contrast: [d("/wɜːd/", "word"), d("/wʊd/", "wood")],
+    pairs: [
+      pair("ə", "/ɜː/", "err", "ur", "/ə/", "a", "uh"),
+      pair("ʌ", "/bɜːd/", "bird", undefined, "/bʌd/", "bud"),
+      pair("ʊ", "/wɜːd/", "word", undefined, "/wʊd/", "wood"),
+      pair("ɑː", "/fɜːst/", "first", undefined, "/fɑːst/", "fast"),
+    ],
     words: [
       d("/ɡɜːl/", "girl"), d("/wɜːld/", "world"), d("/wɜːd/", "word"),
       d("/hɜːd/", "heard"), d("/ˈɜːli/", "early"), d("/ˈdʒɜːni/", "journey"),
@@ -238,7 +311,12 @@ export const PHONEMES: Phoneme[] = [
     label: "open back unrounded vowel", keyword: "the BATH vowel",
     hint: "Open the jaw wide at the back — no lip rounding, a long dark 'ah' as in 'spa'.",
     keywords: ["car", "dance", "heart"],
-    contrast: [d("/kɑːt/", "cart"), d("/kʌt/", "cut")],
+    pairs: [
+      pair("ʌ", "/kɑːt/", "cart", undefined, "/kʌt/", "cut"),
+      pair("ʌ", "/bɑːn/", "barn", undefined, "/bʌn/", "bun"),
+      pair("ʌ", "/pɑːk/", "park", undefined, "/pʌk/", "puck"),
+      pair("ʌ", "/kɑːm/", "calm", undefined, "/kʌm/", "come"),
+    ],
     words: [
       d("/hɑːt/", "heart"), d("/ˈrɑːðə/", "rather"), d("/mɑːtʃ/", "march"),
       d("/ɑːsk/", "ask"), d("/dɑːns/", "dance"), d("/pɑːst/", "past"),
@@ -257,7 +335,12 @@ export const PHONEMES: Phoneme[] = [
     label: "closing diphthong e → ɪ", keyword: "the FACE vowel",
     hint: "Start on /e/ and glide up towards /ɪ/ — one smooth movement, never two separate vowels.",
     keywords: ["day", "great", "straight"],
-    contrast: [d("/seɪ/", "say"), d("/saɪ/", "sigh")],
+    pairs: [
+      pair("aɪ", "/seɪ/", "say", undefined, "/saɪ/", "sigh"),
+      pair("aɪ", "/meɪt/", "mate", undefined, "/maɪt/", "mite"),
+      pair("aɪ", "/leɪd/", "laid", undefined, "/laɪd/", "lied"),
+      pair("aɪ", "/deɪ/", "day", undefined, "/daɪ/", "die"),
+    ],
     words: [
       d("/meɪk/", "make"), d("/reɪn/", "rain"), d("/ɡreɪt/", "great"),
       d("/ðeɪ/", "they"), d("/tʃeɪndʒ/", "change"), d("/streɪt/", "straight"),
@@ -274,7 +357,12 @@ export const PHONEMES: Phoneme[] = [
     label: "closing diphthong a → ɪ", keyword: "the PRICE vowel",
     hint: "Fall from an open /a/ up to a light /ɪ/ — a big, confident glide.",
     keywords: ["eye", "island", "quiet"],
-    contrast: [d("/saɪ/", "sigh"), d("/seɪ/", "say")],
+    pairs: [
+      pair("eɪ", "/saɪ/", "sigh", undefined, "/seɪ/", "say"),
+      pair("ɔɪ", "/baɪ/", "buy", undefined, "/bɔɪ/", "boy"),
+      pair("iː", "/taɪm/", "time", undefined, "/tiːm/", "team"),
+      pair("iː", "/raɪd/", "ride", undefined, "/riːd/", "read"),
+    ],
     words: [
       d("/aɪ/", "eye"), d("/laɪk/", "like"), d("/waɪt/", "white"),
       d("/raɪs/", "rice"), d("/ˈkwaɪət/", "quiet"), d("/ˈaɪlənd/", "island"),
@@ -291,7 +379,12 @@ export const PHONEMES: Phoneme[] = [
     label: "closing diphthong ɔ → ɪ", keyword: "the CHOICE vowel",
     hint: "Start rounded and open at the back, then glide forward to /ɪ/ — keep it one syllable.",
     keywords: ["boy", "royal", "oyster"],
-    contrast: [d("/bɔɪ/", "boy"), d("/baɪ/", "buy")],
+    pairs: [
+      pair("aɪ", "/bɔɪ/", "boy", undefined, "/baɪ/", "buy"),
+      pair("aɪ", "/tɔɪ/", "toy", undefined, "/taɪ/", "tie"),
+      pair("eɪ", "/kɔɪn/", "coin", undefined, "/keɪn/", "cane"),
+      pair("eɪ", "/tʃɔɪs/", "choice", undefined, "/tʃeɪs/", "chase"),
+    ],
     words: [
       d("/ɪnˈdʒɔɪ/", "enjoy"), d("/nɔɪz/", "noise"), d("/pɔɪnt/", "point"),
       d("/ˈrɔɪəl/", "royal"), d("/ˈɔɪstə/", "oyster"), d("/ˈlɔɪəl/", "loyal"),
@@ -308,7 +401,12 @@ export const PHONEMES: Phoneme[] = [
     label: "closing diphthong ə → ʊ", keyword: "the GOAT vowel",
     hint: "Begin on a central schwa, then round and close towards /ʊ/ — the classic British 'oh'.",
     keywords: ["go", "phone", "alone"],
-    contrast: [d("/bəʊt/", "boat"), d("/bɔːt/", "bought")],
+    pairs: [
+      pair("ɔː", "/bəʊt/", "boat", undefined, "/bɔːt/", "bought"),
+      pair("ɔː", "/kəʊt/", "coat", undefined, "/kɔːt/", "caught"),
+      pair("ɒ", "/ɡəʊt/", "goat", undefined, "/ɡɒt/", "got"),
+      pair("ɔː", "/səʊ/", "so", undefined, "/sɔː/", "saw"),
+    ],
     words: [
       d("/kəʊt/", "coat"), d("/bəʊθ/", "both"), d("/ˈəʊpən/", "open"),
       d("/fəʊn/", "phone"), d("/əˈləʊn/", "alone"), d("/səʊl/", "soul"),
@@ -325,7 +423,12 @@ export const PHONEMES: Phoneme[] = [
     label: "closing diphthong a → ʊ", keyword: "the MOUTH vowel",
     hint: "Open wide on /a/, then round up to /ʊ/ — a big 'ow' glide.",
     keywords: ["how", "south", "allow"],
-    contrast: [d("/naʊ/", "now"), d("/nəʊ/", "no")],
+    pairs: [
+      pair("əʊ", "/naʊ/", "now", undefined, "/nəʊ/", "no"),
+      pair("əʊ", "/laʊd/", "loud", undefined, "/ləʊd/", "load"),
+      pair("əʊ", "/aʊt/", "out", undefined, "/əʊt/", "oat"),
+      pair("ʌ", "/daʊn/", "down", undefined, "/dʌn/", "done"),
+    ],
     words: [
       d("/aʊə/", "our"), d("/saʊθ/", "south"), d("/əˈbaʊt/", "about"),
       d("/faʊnd/", "found"), d("/əˈlaʊ/", "allow"), d("/laʊd/", "loud"),
@@ -342,7 +445,12 @@ export const PHONEMES: Phoneme[] = [
     label: "centring diphthong ɪ → ə", keyword: "the NEAR vowel",
     hint: "Start on a clear /ɪ/, then relax into schwa — no 'r' sound, just the glide.",
     keywords: ["here", "idea", "serious"],
-    contrast: [d("/hɪə/", "here"), d("/heə/", "hair")],
+    pairs: [
+      pair("eə", "/hɪə/", "here", undefined, "/heə/", "hair"),
+      pair("eə", "/bɪə/", "beer", undefined, "/beə/", "bear"),
+      pair("eə", "/pɪə/", "peer", undefined, "/peə/", "pair"),
+      pair("eə", "/fɪə/", "fear", undefined, "/feə/", "fair"),
+    ],
     words: [
       d("/aɪˈdɪə/", "idea"), d("/rɪəl/", "real"), d("/ˈhɪərəʊ/", "hero"),
       d("/ˈsɪəriəs/", "serious"), d("/ˈmɪrə/", "mirror"), d("/hɪə/", "hear"),
@@ -359,7 +467,12 @@ export const PHONEMES: Phoneme[] = [
     label: "centring diphthong e → ə", keyword: "the SQUARE vowel",
     hint: "Open on /e/, glide to a relaxed schwa — as in 'air', with no hard r.",
     keywords: ["there", "parents", "aware"],
-    contrast: [d("/heə/", "hair"), d("/hɪə/", "here")],
+    pairs: [
+      pair("ɪə", "/heə/", "hair", undefined, "/hɪə/", "here"),
+      pair("ɪə", "/beə/", "bear", undefined, "/bɪə/", "beer"),
+      pair("ɪə", "/peə/", "pair", undefined, "/pɪə/", "peer"),
+      pair("ɜː", "/keə/", "care", undefined, "/kɜː/", "cur"),
+    ],
     words: [
       d("/ðeə/", "their"), d("/ʃeə/", "share"), d("/ˈpeərənts/", "parents"),
       d("/prɪˈpeə/", "prepare"), d("/əˈweə/", "aware"), d("/skweə/", "square"),
@@ -376,7 +489,12 @@ export const PHONEMES: Phoneme[] = [
     label: "centring diphthong ʊ → ə", keyword: "the CURE vowel",
     hint: "From a rounded /ʊ/, relax down to schwa — a rarer glide, heard in 'tour' and 'sure'.",
     keywords: ["tour", "Europe", "brochure"],
-    contrast: [d("/tʊə/", "tour"), d("/tɔː/", "tore")],
+    pairs: [
+      pair("ɔː", "/tʊə/", "tour", undefined, "/tɔː/", "tore"),
+      pair("ɔː", "/pʊə/", "poor", undefined, "/pɔː/", "pour"),
+      pair("ɔː", "/kjʊə/", "cure", undefined, "/kɔː/", "core"),
+      pair("ɔː", "/pjʊə/", "pure", undefined, "/pɔː/", "paw"),
+    ],
     words: [
       d("/ˈjʊərəp/", "Europe"), d("/ˈtʊərɪst/", "tourist"), d("/ˈdʒʊəri/", "jury"),
       d("/ˈfjʊəriəs/", "furious"), d("/ˈbrəʊʃʊə/", "brochure"), d("/ɪnˈdjʊə/", "endure"),
@@ -395,7 +513,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless bilabial plosive", keyword: "as in 'paper'",
     hint: "Close both lips, build air pressure, release with a small puff — hold a hand in front of your mouth to feel it.",
     keywords: ["paper", "happy", "perhaps"],
-    contrast: [d("/pæk/", "pack"), d("/bæk/", "back")],
+    pairs: [
+      pair("b", "/pæk/", "pack", undefined, "/bæk/", "back"),
+      pair("b", "/pɪɡ/", "pig", undefined, "/bɪɡ/", "big"),
+      pair("b", "/kæp/", "cap", undefined, "/kæb/", "cab"),
+      pair("b", "/peə/", "pear", undefined, "/beə/", "bear"),
+    ],
     words: [
       d("/ˈpeɪpə/", "paper"), d("/ˈæpl/", "apple"), d("/ˈhæpi/", "happy"),
       d("/pəˈhæps/", "perhaps"), d("/stɒp/", "stop"), d("/ˈpiːpl/", "people"),
@@ -412,7 +535,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced bilabial plosive", keyword: "as in 'bubble'",
     hint: "Same lip closure as /p/, but switch the voice on — no puff of air, just a soft buzz.",
     keywords: ["bubble", "build", "maybe"],
-    contrast: [d("/bæk/", "back"), d("/pæk/", "pack")],
+    pairs: [
+      pair("p", "/bæk/", "back", undefined, "/pæk/", "pack"),
+      pair("p", "/bɪɡ/", "big", undefined, "/pɪɡ/", "pig"),
+      pair("p", "/kæb/", "cab", undefined, "/kæp/", "cap"),
+      pair("p", "/beə/", "bear", undefined, "/peə/", "pear"),
+    ],
     words: [
       d("/ˈbʌbl/", "bubble"), d("/ˈrɒbə/", "robber"), d("/əˈbʌv/", "above"),
       d("/bɪld/", "build"), d("/kəʊm/", "comb"), d("/ˈmeɪbi/", "maybe"),
@@ -429,7 +557,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless alveolar plosive", keyword: "as in 'water'",
     hint: "Tongue tip on the ridge behind the teeth, sharp release with a puff — crisper than in many languages.",
     keywords: ["water", "often", "mountain"],
-    contrast: [d("/taʊn/", "town"), d("/daʊn/", "down")],
+    pairs: [
+      pair("d", "/taʊn/", "town", undefined, "/daʊn/", "down"),
+      pair("d", "/taɪm/", "time", undefined, "/daɪm/", "dime"),
+      pair("d", "/bet/", "bet", undefined, "/bed/", "bed"),
+      pair("d", "/taɪ/", "tie", undefined, "/daɪ/", "die"),
+    ],
     words: [
       d("/ˈwɔːtə/", "water"), d("/ˈletə/", "letter"), d("/ˈbetə/", "better"),
       d("/ˈɒfn/", "often"), d("/ˈmaʊntɪn/", "mountain"), d("/təˈnaɪt/", "tonight"),
@@ -446,7 +579,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced alveolar plosive", keyword: "as in 'ladder'",
     hint: "Tongue tip on the ridge again, voiced and gentle — no puff, the vocal cords hum.",
     keywords: ["ladder", "sudden", "would"],
-    contrast: [d("/daʊn/", "down"), d("/taʊn/", "town")],
+    pairs: [
+      pair("t", "/daʊn/", "down", undefined, "/taʊn/", "town"),
+      pair("t", "/daɪm/", "dime", undefined, "/taɪm/", "time"),
+      pair("t", "/bed/", "bed", undefined, "/bet/", "bet"),
+      pair("t", "/daɪ/", "die", undefined, "/taɪ/", "tie"),
+    ],
     words: [
       d("/ˈlædə/", "ladder"), d("/ˈsʌdn/", "sudden"), d("/ˈhɪdn/", "hidden"),
       d("/wʊd/", "would"), d("/dʒʌdʒ/", "judge"), d("/raɪd/", "ride"),
@@ -463,7 +601,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless velar plosive", keyword: "as in 'quick'",
     hint: "Back of the tongue against the soft palate — the puff is strongest before 'ee', weakest before 'oo'.",
     keywords: ["school", "quick", "chemistry"],
-    contrast: [d("/kəʊt/", "coat"), d("/ɡəʊt/", "goat")],
+    pairs: [
+      pair("ɡ", "/kəʊt/", "coat", undefined, "/ɡəʊt/", "goat"),
+      pair("ɡ", "/keɪm/", "came", undefined, "/ɡeɪm/", "game"),
+      pair("ɡ", "/bæk/", "back", undefined, "/bæɡ/", "bag"),
+      pair("ɡ", "/kɜːl/", "curl", undefined, "/ɡɜːl/", "girl"),
+    ],
     words: [
       d("/skuːl/", "school"), d("/ˈmjuːzɪk/", "music"), d("/kwɪk/", "quick"),
       d("/bɪˈkɒz/", "because"), d("/ˈkemɪstri/", "chemistry"), d("/ˈpɒkɪt/", "pocket"),
@@ -480,7 +623,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced velar plosive", keyword: "as in 'begin'",
     hint: "Same back closure as /k/ with the voice on — a firm 'g', never a throat scrape.",
     keywords: ["again", "guess", "language"],
-    contrast: [d("/ɡəʊt/", "goat"), d("/kəʊt/", "coat")],
+    pairs: [
+      pair("k", "/ɡəʊt/", "goat", undefined, "/kəʊt/", "coat"),
+      pair("k", "/ɡeɪm/", "game", undefined, "/keɪm/", "came"),
+      pair("k", "/bæɡ/", "bag", undefined, "/bæk/", "back"),
+      pair("k", "/ɡɜːl/", "girl", undefined, "/kɜːl/", "curl"),
+    ],
     words: [
       d("/əˈɡen/", "again"), d("/bɪˈɡɪn/", "begin"), d("/ɡes/", "guess"),
       d("/ˈlæŋɡwɪdʒ/", "language"), d("/ˈbɪɡə/", "bigger"), d("/eɡ/", "egg"),
@@ -499,7 +647,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced bilabial nasal", keyword: "as in 'summer'",
     hint: "Lips closed, voice humming out through the nose — let it ring.",
     keywords: ["summer", "hammer", "swimming"],
-    contrast: [d("/sʌm/", "sum"), d("/sʌn/", "sun")],
+    pairs: [
+      pair("n", "/sʌm/", "sum", undefined, "/sʌn/", "sun"),
+      pair("n", "/keɪm/", "came", undefined, "/keɪn/", "cane"),
+      pair("n", "/ræm/", "ram", undefined, "/ræn/", "ran"),
+      pair("n", "/tiːm/", "team", undefined, "/tiːn/", "teen"),
+    ],
     words: [
       d("/ˈsʌmə/", "summer"), d("/ˈhæmə/", "hammer"), d("/kʌm/", "come"),
       d("/neɪm/", "name"), d("/ˈswɪmɪŋ/", "swimming"), d("/mʌm/", "mum"),
@@ -516,7 +669,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced alveolar nasal", keyword: "as in 'dinner'",
     hint: "Tongue tip on the ridge, air through the nose — a bright, forward hum.",
     keywords: ["dinner", "funny", "none"],
-    contrast: [d("/sʌn/", "sun"), d("/sʌm/", "sum")],
+    pairs: [
+      pair("ŋ", "/sʌn/", "sun", undefined, "/sʌŋ/", "sung"),
+      pair("ŋ", "/sɪn/", "sin", undefined, "/sɪŋ/", "sing"),
+      pair("ŋ", "/θɪn/", "thin", undefined, "/θɪŋ/", "thing"),
+      pair("ŋ", "/ræn/", "ran", undefined, "/ræŋ/", "rang"),
+    ],
     words: [
       d("/ˈdɪnə/", "dinner"), d("/ˈfʌni/", "funny"), d("/naɪn/", "nine"),
       d("/nʌn/", "none"), d("/ˈmʌni/", "money"), d("/rʌn/", "run"),
@@ -533,7 +691,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced velar nasal", keyword: "as in 'singing'",
     hint: "Back of the tongue on the soft palate, humming through the nose — it always follows a vowel and never starts a word.",
     keywords: ["morning", "finger", "English"],
-    contrast: [d("/sɪŋ/", "sing"), d("/sɪn/", "sin")],
+    pairs: [
+      pair("n", "/sʌŋ/", "sung", undefined, "/sʌn/", "sun"),
+      pair("n", "/sɪŋ/", "sing", undefined, "/sɪn/", "sin"),
+      pair("n", "/θɪŋ/", "thing", undefined, "/θɪn/", "thin"),
+      pair("n", "/ræŋ/", "rang", undefined, "/ræn/", "ran"),
+    ],
     words: [
       d("/ˈmɔːnɪŋ/", "morning"), d("/ˈfɪŋɡə/", "finger"), d("/ˈɪŋɡlɪʃ/", "English"),
       d("/ˈθɪŋkɪŋ/", "thinking"), d("/jʌŋ/", "young"), d("/ˈhæŋɪŋ/", "hanging"),
@@ -552,7 +715,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless labiodental fricative", keyword: "as in 'coffee'",
     hint: "Top teeth rest on the lower lip — blow air steadily, no voice.",
     keywords: ["coffee", "phone", "laugh"],
-    contrast: [d("/fæn/", "fan"), d("/væn/", "van")],
+    pairs: [
+      pair("v", "/fæn/", "fan", undefined, "/væn/", "van"),
+      pair("v", "/liːf/", "leaf", undefined, "/liːv/", "leave"),
+      pair("v", "/seɪf/", "safe", undefined, "/seɪv/", "save"),
+      pair("v", "/fæt/", "fat", undefined, "/væt/", "vat"),
+    ],
     words: [
       d("/ˈkɒfi/", "coffee"), d("/fəʊn/", "phone"), d("/lɑːf/", "laugh"),
       d("/hɑːf/", "half"), d("/freɪz/", "phrase"), d("/ɡrɑːf/", "graph"),
@@ -569,7 +737,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced labiodental fricative", keyword: "as in 'seven'",
     hint: "Same teeth-on-lip contact as /f/, but add voice — you should feel the lower lip tingle.",
     keywords: ["very", "river", "move"],
-    contrast: [d("/væn/", "van"), d("/fæn/", "fan")],
+    pairs: [
+      pair("f", "/væn/", "van", undefined, "/fæn/", "fan"),
+      pair("f", "/liːv/", "leave", undefined, "/liːf/", "leaf"),
+      pair("f", "/seɪv/", "save", undefined, "/seɪf/", "safe"),
+      pair("f", "/væt/", "vat", undefined, "/fæt/", "fat"),
+    ],
     words: [
       d("/ˈveri/", "very"), d("/ˈsevn/", "seven"), d("/ˈrɪvə/", "river"),
       d("/hæv/", "have"), d("/muːv/", "move"), d("/vɔɪs/", "voice"),
@@ -586,7 +759,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless dental fricative", keyword: "as in 'think'",
     hint: "Tongue tip between the teeth — blow air gently. 'Think', never 'sink' or 'tink'.",
     keywords: ["think", "month", "theatre"],
-    contrast: [d("/θɪŋk/", "think"), d("/sɪŋk/", "sink")],
+    pairs: [
+      pair("s", "/θɪŋk/", "think", undefined, "/sɪŋk/", "sink"),
+      pair("s", "/θaɪ/", "thigh", undefined, "/saɪ/", "sigh"),
+      pair("s", "/maʊθ/", "mouth", undefined, "/maʊs/", "mouse"),
+      pair("s", "/pɑːθ/", "path", undefined, "/pɑːs/", "pass"),
+    ],
     words: [
       d("/θɪŋk/", "think"), d("/mʌnθ/", "month"), d("/ˈnʌθɪŋ/", "nothing"),
       d("/ˈɔːθə/", "author"), d("/ˈθɪətə/", "theatre"), d("/saʊθ/", "south"),
@@ -603,7 +781,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced dental fricative", keyword: "as in 'this'",
     hint: "Tongue between the teeth again, this time with voice — the sound of 'this', 'that', 'the'.",
     keywords: ["mother", "weather", "another"],
-    contrast: [d("/ðaɪ/", "thy"), d("/θaɪ/", "thigh")],
+    pairs: [
+      pair("θ", "/ðaɪ/", "thy", undefined, "/θaɪ/", "thigh"),
+      pair("θ", "/ləʊð/", "loathe", undefined, "/ləʊθ/", "loath"),
+      pair("θ", "/beɪð/", "bathe", undefined, "/bɑːθ/", "bath"),
+      pair("θ", "/briːð/", "breathe", undefined, "/breθ/", "breath"),
+    ],
     words: [
       d("/ˈmʌðə/", "mother"), d("/ˈfɑːðə/", "father"), d("/ˈweðə/", "weather"),
       d("/ˈbrʌðə/", "brother"), d("/əˈnʌðə/", "another"), d("/wɪð/", "with"),
@@ -620,7 +803,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless alveolar fricative", keyword: "as in 'city'",
     hint: "Tongue tip close to the ridge, air hissing down the centre — a sharp, long snake sound.",
     keywords: ["city", "science", "castle"],
-    contrast: [d("/sɪŋk/", "sink"), d("/θɪŋk/", "think")],
+    pairs: [
+      pair("z", "/sɪp/", "sip", undefined, "/zɪp/", "zip"),
+      pair("z", "/bʌs/", "bus", undefined, "/bʌz/", "buzz"),
+      pair("θ", "/sɪŋk/", "sink", undefined, "/θɪŋk/", "think"),
+      pair("θ", "/feɪs/", "face", undefined, "/feɪθ/", "faith"),
+    ],
     words: [
       d("/ˈsɪti/", "city"), d("/ˈsaɪəns/", "science"), d("/naɪs/", "nice"),
       d("/piːs/", "piece"), d("/mɪs/", "miss"), d("/ˈkɑːsl/", "castle"),
@@ -637,7 +825,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced alveolar fricative", keyword: "as in 'busy'",
     hint: "Same position as /s/ with the voice on — a bee's buzz, kept light and forward.",
     keywords: ["busy", "cousin", "scissors"],
-    contrast: [d("/bʌz/", "buzz"), d("/bʌs/", "bus")],
+    pairs: [
+      pair("s", "/zɪp/", "zip", undefined, "/sɪp/", "sip"),
+      pair("s", "/bʌz/", "buzz", undefined, "/bʌs/", "bus"),
+      pair("s", "/aɪz/", "eyes", undefined, "/aɪs/", "ice"),
+      pair("s", "/zuː/", "zoo", undefined, "/suː/", "sue"),
+    ],
     words: [
       d("/ˈbɪzi/", "busy"), d("/pliːz/", "please"), d("/ˈkʌzn/", "cousin"),
       d("/ˈsɪzəz/", "scissors"), d("/ˈhaʊzɪz/", "houses"), d("/nɔɪz/", "noise"),
@@ -654,7 +847,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless post-alveolar fricative", keyword: "as in 'station'",
     hint: "Pull the tongue back from /s/ and round the lips a little — a soft, hushed 'shhh'.",
     keywords: ["station", "ocean", "sugar"],
-    contrast: [d("/ʃɪp/", "ship"), d("/sɪp/", "sip")],
+    pairs: [
+      pair("s", "/ʃɪp/", "ship", undefined, "/sɪp/", "sip"),
+      pair("s", "/ʃɒp/", "shop", undefined, "/sɒp/", "sop"),
+      pair("s", "/ʃuː/", "shoe", undefined, "/suː/", "sue"),
+      pair("s", "/ʃæk/", "shack", undefined, "/sæk/", "sack"),
+    ],
     words: [
       d("/ˈsteɪʃn/", "station"), d("/ˈəʊʃn/", "ocean"), d("/ˈʃʊɡə/", "sugar"),
       d("/məˈʃiːn/", "machine"), d("/ˈspeʃl/", "special"), d("/ʃʊə/", "sure"),
@@ -671,7 +869,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced post-alveolar fricative", keyword: "as in 'vision'",
     hint: "The voiced twin of /ʃ/ — rare in English, hiding inside 'vision', 'measure', 'pleasure'.",
     keywords: ["measure", "treasure", "usually"],
-    contrast: [d("/ˈleʒə/", "leisure"), d("/ˈlesə/", "lesser")],
+    pairs: [
+      pair("ʃ", "/ˈpleʒə/", "pleasure", undefined, "/ˈpreʃə/", "pressure"),
+      pair("ʃ", "/ˈvɪʒn/", "vision", undefined, "/ˈmɪʃn/", "mission"),
+      pair("ʃ", "/ˈsiːʒə/", "seizure", undefined, "/ˈsiːʃɔː/", "seashore"),
+      pair("ʃ", "/ˈɡærɑːʒ/", "garage", undefined, "/ˈɡeərɪʃ/", "garish"),
+    ],
     words: [
       d("/ˈvɪʒn/", "vision"), d("/ˈmeʒə/", "measure"), d("/ˈpleʒə/", "pleasure"),
       d("/ˈjuːʒuəli/", "usually"), d("/ˈtreʒə/", "treasure"), d("/ˈeɪʒə/", "Asia"),
@@ -688,7 +891,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless glottal fricative", keyword: "as in 'hello'",
     hint: "Just a gentle breath of air from the throat — the following vowel gives it its colour.",
     keywords: ["hello", "behind", "vehicle"],
-    contrast: [d("/hæt/", "hat"), d("/æt/", "at")],
+    pairs: [
+      pair("∅", "/hæt/", "hat", undefined, "/æt/", "at"),
+      pair("∅", "/hɪl/", "hill", undefined, "/ɪl/", "ill"),
+      pair("∅", "/hɑːm/", "harm", undefined, "/ɑːm/", "arm"),
+      pair("∅", "/hiːl/", "heal", undefined, "/iːl/", "eel"),
+    ],
     words: [
       d("/həˈləʊ/", "hello"), d("/bɪˈhaɪnd/", "behind"), d("/haʊs/", "house"),
       d("/huː/", "who"), d("/ˈviːɪkl/", "vehicle"), d("/ˈhʌndrəd/", "hundred"),
@@ -707,7 +915,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless post-alveolar affricate", keyword: "as in 'teacher'",
     hint: "A /t/ that melts straight into /ʃ/ — one contact, one burst: 'ch'.",
     keywords: ["teacher", "picture", "question"],
-    contrast: [d("/tʃɪp/", "chip"), d("/ʃɪp/", "ship")],
+    pairs: [
+      pair("ʃ", "/tʃɪp/", "chip", undefined, "/ʃɪp/", "ship"),
+      pair("ʃ", "/tʃeə/", "chair", undefined, "/ʃeə/", "share"),
+      pair("ʃ", "/tʃɪn/", "chin", undefined, "/ʃɪn/", "shin"),
+      pair("ʃ", "/wɒtʃ/", "watch", undefined, "/wɒʃ/", "wash"),
+    ],
     words: [
       d("/ˈtiːtʃə/", "teacher"), d("/ˈpɪktʃə/", "picture"), d("/ˈneɪtʃə/", "nature"),
       d("/ˈtʃɪkɪn/", "chicken"), d("/ˈkwestʃən/", "question"), d("/tʃiːp/", "cheap"),
@@ -724,7 +937,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced post-alveolar affricate", keyword: "as in 'jacket'",
     hint: "/d/ gliding into /ʒ/ with the voice on — a firm 'j', as in 'jam'.",
     keywords: ["jacket", "danger", "major"],
-    contrast: [d("/dʒɔː/", "jaw"), d("/tʃɔː/", "chore")],
+    pairs: [
+      pair("tʃ", "/dʒɔː/", "jaw", undefined, "/tʃɔː/", "chore"),
+      pair("tʃ", "/dʒɪn/", "gin", undefined, "/tʃɪn/", "chin"),
+      pair("tʃ", "/dʒəʊk/", "joke", undefined, "/tʃəʊk/", "choke"),
+      pair("tʃ", "/dʒɑː/", "jar", undefined, "/tʃɑː/", "char"),
+    ],
     words: [
       d("/ˈdʒækɪt/", "jacket"), d("/ˈdeɪndʒə/", "danger"), d("/brɪdʒ/", "bridge"),
       d("/ɪnˈdʒɔɪ/", "enjoy"), d("/ˈmeɪdʒə/", "major"), d("/dʒʌst/", "just"),
@@ -743,7 +961,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced labio-velar approximant", keyword: "as in 'woman'",
     hint: "Round the lips like /uː/ then glide into the vowel — no friction, no biting the lip.",
     keywords: ["woman", "one", "twelve"],
-    contrast: [d("/waɪn/", "wine"), d("/vaɪn/", "vine")],
+    pairs: [
+      pair("v", "/waɪn/", "wine", undefined, "/vaɪn/", "vine"),
+      pair("v", "/west/", "west", undefined, "/vest/", "vest"),
+      pair("v", "/wet/", "wet", undefined, "/vet/", "vet"),
+      pair("v", "/weɪl/", "wail", undefined, "/veɪl/", "vale"),
+    ],
     words: [
       d("/ˈwʊmən/", "woman"), d("/wʌn/", "one"), d("/ˈɔːlweɪz/", "always"),
       d("/kwɪk/", "quick"), d("/ˈlæŋɡwɪdʒ/", "language"), d("/twelv/", "twelve"),
@@ -760,7 +983,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced post-alveolar approximant", keyword: "as in 'really'",
     hint: "Curl the tongue tip towards the ridge without touching — the British r is soft, never rolled or growled.",
     keywords: ["sorry", "hurry", "library"],
-    contrast: [d("/raɪt/", "right"), d("/laɪt/", "light")],
+    pairs: [
+      pair("l", "/raɪt/", "right", undefined, "/laɪt/", "light"),
+      pair("l", "/riːd/", "read", undefined, "/liːd/", "lead"),
+      pair("l", "/rəʊ/", "row", undefined, "/ləʊ/", "low"),
+      pair("l", "/reɪk/", "rake", undefined, "/leɪk/", "lake"),
+    ],
     words: [
       d("/ˈsɒri/", "sorry"), d("/ˈrɪəli/", "really"), d("/ˈhʌri/", "hurry"),
       d("/əˈraʊnd/", "around"), d("/ˈlaɪbrəri/", "library"), d("/ˈmɪrə/", "mirror"),
@@ -777,7 +1005,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced palatal approximant", keyword: "as in 'young'",
     hint: "Start at the /iː/ position and glide into the vowel — the 'y' in 'yes', light and quick.",
     keywords: ["young", "music", "million"],
-    contrast: [d("/jiːst/", "yeast"), d("/iːst/", "east")],
+    pairs: [
+      pair("iː", "/jiːst/", "yeast", undefined, "/iːst/", "east"),
+      pair("ɪə", "/jɪə/", "year", undefined, "/ɪə/", "ear"),
+      pair("əʊ", "/jəʊk/", "yolk", undefined, "/əʊk/", "oak"),
+      pair("æ", "/jæm/", "yam", undefined, "/æm/", "am"),
+    ],
     words: [
       d("/jʌŋ/", "young"), d("/juːz/", "use"), d("/ˈmjuːzɪk/", "music"),
       d("/vjuː/", "view"), d("/ˈmɪljən/", "million"), d("/ˈʌnjən/", "onion"),
@@ -794,7 +1027,12 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced alveolar lateral approximant", keyword: "as in 'little'",
     hint: "Tongue tip on the ridge, air flowing around the sides — light 'l' before vowels, a dark velarised 'l' at the end of words.",
     keywords: ["little", "bottle", "yellow"],
-    contrast: [d("/laɪt/", "light"), d("/raɪt/", "right")],
+    pairs: [
+      pair("r", "/laɪt/", "light", undefined, "/raɪt/", "right"),
+      pair("r", "/liːd/", "lead", undefined, "/riːd/", "read"),
+      pair("r", "/ləʊ/", "low", undefined, "/rəʊ/", "row"),
+      pair("r", "/leɪk/", "lake", undefined, "/reɪk/", "rake"),
+    ],
     words: [
       d("/ˈlɪtl/", "little"), d("/ˈbɒtl/", "bottle"), d("/ˈɔːlweɪz/", "always"),
       d("/ˈjeləʊ/", "yellow"), d("/lʌv/", "love"), d("/ˈrɪəli/", "really"),
@@ -819,7 +1057,7 @@ export const CONSONANTS = PHONEMES.filter(
 export const SOUND_GROUPS: { title: string; hex: string; items: Phoneme[] }[] = [
   { title: "12 vowels", hex: CATEGORY_META.monophthong.hex, items: VOWELS },
   { title: "8 diphthongs", hex: CATEGORY_META.diphthong.hex, items: DIPHTHONGS },
-  { title: "24 consonants", hex: "#d24a2b", items: CONSONANTS },
+  { title: "24 consonants", hex: CATEGORY_META.plosive.hex, items: CONSONANTS },
 ];
 
 export const PLACES = [
@@ -838,6 +1076,7 @@ export const CONSONANT_CELLS = [
   cell(4, 0, ["w"]), cell(4, 3, ["l"]), cell(4, 4, ["r"]), cell(4, 5, ["j"]),
 ];
 
+export const TOTAL_PAIRS = PHONEMES.reduce((n, p) => n + p.pairs.length, 0);
 export const TOTAL_WORDS = PHONEMES.reduce((n, p) => n + p.words.length, 0);
 export const TOTAL_SENTENCES = PHONEMES.reduce((n, p) => n + p.sentences.length, 0);
-export const TOTAL_DRILLS = TOTAL_WORDS + TOTAL_SENTENCES;
+export const TOTAL_DRILLS = TOTAL_PAIRS + TOTAL_WORDS + TOTAL_SENTENCES;

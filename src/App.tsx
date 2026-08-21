@@ -110,7 +110,7 @@ const CHECK_KEY = "phonelab-checks-v1";
 export default function App() {
   const speech = useSpeech();
   const [selectedId, setSelectedId] = useState("iː");
-  const [level, setLevel] = useState<LevelId>("word");
+  const [level, setLevel] = useState<LevelId>("syll");
   const [checks, setChecks] = useState<Record<string, boolean>>(() => {
     try {
       return JSON.parse(localStorage.getItem(CHECK_KEY) ?? "{}") as Record<string, boolean>;
@@ -136,6 +136,16 @@ export default function App() {
   );
   const doneCount = useMemo(() => Object.values(checks).filter(Boolean).length, [checks]);
 
+  const doneBySound = useMemo(() => {
+    const m = new Map<string, number>();
+    Object.keys(checks).forEach((k) => {
+      if (!checks[k]) return;
+      const id = k.split(":")[0];
+      m.set(id, (m.get(id) ?? 0) + 1);
+    });
+    return m;
+  }, [checks]);
+
   const selectPhoneme = (id: string, scroll = false) => {
     setSelectedId(id);
     if (scroll) {
@@ -145,7 +155,7 @@ export default function App() {
 
   const surprise = () => {
     const p = PHONEMES[Math.floor(Math.random() * PHONEMES.length)];
-    const lv = (["word", "sent"] as LevelId[])[Math.floor(Math.random() * 2)];
+    const lv = (["syll", "word", "sent"] as LevelId[])[Math.floor(Math.random() * 3)];
     setLevel(lv);
     selectPhoneme(p.id, true);
   };
@@ -275,9 +285,10 @@ export default function App() {
                   The full 44-phoneme RP inventory laid out the way phoneticians see it — vowels on
                   a trapezoid of tongue position, consonants on a grid of place and manner. Tap any
                   symbol to load it into the bench below, then drill it at{" "}
+                  <strong className="font-semibold text-ink">syllable</strong> level — pitting each
+                  sound against its nearest rival in minimal pairs — before stepping up to{" "}
                   <strong className="font-semibold text-ink">word</strong> and{" "}
-                  <strong className="font-semibold text-ink">sentence</strong> level — with a
-                  minimal-pair contrast check on every sound.
+                  <strong className="font-semibold text-ink">sentence</strong> level.
                 </p>
               </div>
               <div className="flex flex-col gap-2 font-mono text-[11.5px] text-fog">
@@ -337,7 +348,9 @@ export default function App() {
                             key={p.id}
                             onClick={() => selectPhoneme(p.id, true)}
                             aria-pressed={sel}
-                            title={`${p.keyword} — open in the practice bench`}
+                            title={`${p.keyword} · ${doneBySound.get(p.id) ?? 0}/${
+                              p.pairs.length + p.words.length + p.sentences.length
+                            } drills done — open in the practice bench`}
                             className={`relative min-w-[2.3rem] rounded-md border px-2 py-1 font-ipa text-[15px] font-semibold leading-tight transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md ${
                               sel ? "text-chalk shadow-md" : "bg-chalk hover:border-ink/60"
                             }`}
@@ -440,7 +453,7 @@ export default function App() {
                 </div>
                 <p className="font-mono text-[11.5px] tabular-nums text-fog">
                   {Object.keys(checks).filter((k) => k.startsWith(selected.id + ":") && checks[k]).length}{" "}
-                  / {selected.words.length + selected.sentences.length} drills practised for this sound
+                  / {selected.pairs.length + selected.words.length + selected.sentences.length} drills practised for this sound
                 </p>
               </div>
             </Reveal>

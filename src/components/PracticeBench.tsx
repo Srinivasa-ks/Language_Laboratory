@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import {
   CATEGORY_META,
   LEVELS,
+  drillsForLevel,
   getDrills,
   type LevelId,
   type Phoneme,
@@ -58,12 +59,18 @@ export default function PracticeBench({
   const [target, setTarget] = useState<Target | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const drills = getDrills(phoneme, level);
+  const drills = level === "syll" ? [] : getDrills(phoneme, level);
   const activeTarget: Target = target ?? { level, idx: 0 };
-  const targetDrill = getDrills(phoneme, activeTarget.level)[activeTarget.idx];
+  const targetPair = activeTarget.level === "syll" ? phoneme.pairs[activeTarget.idx] : undefined;
+  const targetDrill =
+    activeTarget.level === "syll"
+      ? phoneme.pairs[activeTarget.idx]?.a ?? { ipa: "", text: "" }
+      : getDrills(phoneme, activeTarget.level)[activeTarget.idx];
   const levelDone = (l: LevelId) =>
-    getDrills(phoneme, l).filter((_, i) => checked.has(`${phoneme.id}:${l}:${i}`)).length;
-  const levelTotal = drills.length;
+    l === "syll"
+      ? phoneme.pairs.filter((_, i) => checked.has(`${phoneme.id}:syll:${i}`)).length
+      : getDrills(phoneme, l).filter((_, i) => checked.has(`${phoneme.id}:${l}:${i}`)).length;
+  const levelTotal = drillsForLevel(phoneme, level);
   const levelPct = levelTotal > 0 ? levelDone(level) / levelTotal : 0;
 
   // reset local state when the phoneme changes
@@ -109,12 +116,21 @@ export default function PracticeBench({
   }, [rec.status, rec.getAnalyser]);
 
   const playDrill = (lvl: LevelId, idx: number, rate?: number) => {
-    const dr = getDrills(phoneme, lvl)[idx];
+    const dr = lvl === "syll" ? phoneme.pairs[idx]?.a : getDrills(phoneme, lvl)[idx];
     if (!dr) return;
     setTarget({ level: lvl, idx });
     const key = `${phoneme.id}:${lvl}:${idx}`;
     setCurrent(key);
     speak(dr.say ?? dr.text, { rate, onEnd: () => setCurrent(null) });
+  };
+
+  /** play the rival side of a minimal pair */
+  const playRival = (idx: number, rate?: number) => {
+    const pr = phoneme.pairs[idx];
+    if (!pr) return;
+    const key = `${phoneme.id}:syll:${idx}:r`;
+    setCurrent(key);
+    speak(pr.b.say ?? pr.b.text, { rate, onEnd: () => setCurrent(null) });
   };
 
   const recordingBusy = rec.status === "recording" || rec.status === "requesting";
@@ -179,40 +195,47 @@ export default function PracticeBench({
             </div>
           </div>
 
-          {/* minimal-pair contrast trainer */}
-          <div className="border-t border-line px-5 py-4">
-            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-fog">
-              Minimal-pair contrast
-            </p>
-            <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-2">
-              {[0, 1].map((ci) => (
-                <Fragment key={ci}>
-                  {ci === 1 && (
-                    <span className="grid place-items-center font-display text-lg font-extrabold text-fog" aria-hidden="true">
-                      ↔
-                    </span>
-                  )}
-                  <button
-                    disabled={recordingBusy}
-                    onClick={() => speak(phoneme.contrast[ci].text)}
-                    title={`Listen: ${phoneme.contrast[ci].text}`}
-                    className="group flex flex-col items-center rounded-md border border-line bg-chalk px-2 py-2.5 transition-all hover:-translate-y-0.5 hover:border-ink hover:shadow-md active:scale-95 disabled:opacity-50"
-                  >
-                    <span className="font-display text-[17px] font-bold leading-tight text-ink group-hover:text-ember">
-                      {phoneme.contrast[ci].text}
-                    </span>
-                    <span className="mt-0.5 font-ipa text-[11.5px] text-fog">{phoneme.contrast[ci].ipa}</span>
-                    <span className="mt-1.5 flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-fog opacity-60 transition-opacity group-hover:text-ember group-hover:opacity-100">
-                      <IconSpeaker className="h-3 w-3" /> {ci === 0 ? "A" : "B"}
-                    </span>
-                  </button>
-                </Fragment>
-              ))}
+          {/* signature minimal pair */}
+          {phoneme.pairs[0] && (
+            <div className="border-t border-line px-5 py-4">
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-fog">
+                Signature contrast · vs /{phoneme.pairs[0].rival}/
+              </p>
+              <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-2">
+                {[0, 1].map((ci) => (
+                  <Fragment key={ci}>
+                    {ci === 1 && (
+                      <span className="grid place-items-center font-display text-lg font-extrabold text-fog" aria-hidden="true">
+                        ↔
+                      </span>
+                    )}
+                    <button
+                      disabled={recordingBusy}
+                      onClick={() => speak((ci === 0 ? phoneme.pairs[0].a : phoneme.pairs[0].b).text)}
+                      title={`Listen: ${(ci === 0 ? phoneme.pairs[0].a : phoneme.pairs[0].b).text}`}
+                      className="group flex flex-col items-center rounded-md border border-line bg-chalk px-2 py-2.5 transition-all hover:-translate-y-0.5 hover:border-ink hover:shadow-md active:scale-95 disabled:opacity-50"
+                    >
+                      <span className="font-display text-[17px] font-bold leading-tight text-ink group-hover:text-ember">
+                        {(ci === 0 ? phoneme.pairs[0].a : phoneme.pairs[0].b).text}
+                      </span>
+                      <span className="mt-0.5 font-ipa text-[11.5px] text-fog">
+                        {(ci === 0 ? phoneme.pairs[0].a : phoneme.pairs[0].b).ipa}
+                      </span>
+                      <span className="mt-1.5 flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-fog opacity-60 transition-opacity group-hover:text-ember group-hover:opacity-100">
+                        <IconSpeaker className="h-3 w-3" /> {ci === 0 ? "target" : "rival"}
+                      </span>
+                    </button>
+                  </Fragment>
+                ))}
+              </div>
+              <button
+                onClick={() => onLevel("syll")}
+                className="mt-2.5 w-full rounded-md border border-dashed border-line bg-paper/60 px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-fog transition-all hover:border-ember hover:text-ember active:scale-[0.99]"
+              >
+                ▸ open the full minimal-pair set ({phoneme.pairs.length})
+              </button>
             </div>
-            <p className="mt-2 font-mono text-[10px] leading-relaxed text-fog">
-              Flip between the two — the only difference is /{phoneme.ipa}/.
-            </p>
-          </div>
+          )}
         </div>
 
         {/* recorder */}
@@ -229,9 +252,22 @@ export default function PracticeBench({
 
           <div className="mb-3 rounded-md bg-pine-2/80 px-3 py-2.5">
             <p className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-chalk/50">
-              target · {activeTarget.level === "word" ? "word" : "sentence"} {activeTarget.idx + 1}
+              target ·{" "}
+              {activeTarget.level === "syll"
+                ? `syllable · vs /${targetPair?.rival}/`
+                : activeTarget.level === "word"
+                  ? "word"
+                  : "sentence"}{" "}
+              {activeTarget.idx + 1}
             </p>
-            <p className="mt-0.5 font-display text-lg font-bold leading-snug">{targetDrill.text}</p>
+            <p className="mt-0.5 font-display text-lg font-bold leading-snug">
+              {targetDrill.text}
+              {targetPair && (
+                <span className="ml-2 font-ipa text-[12px] font-normal text-chalk/50">
+                  ≠ {targetPair.b.text} {targetPair.b.ipa}
+                </span>
+              )}
+            </p>
             <p className="font-ipa text-[12px] text-chalk/60">{targetDrill.ipa}</p>
           </div>
 
@@ -298,7 +334,7 @@ export default function PracticeBench({
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex rounded-lg border border-line bg-card p-1">
             {LEVELS.map((l) => {
-              const count = getDrills(phoneme, l.id).length;
+              const count = drillsForLevel(phoneme, l.id);
               const active = level === l.id;
               return (
                 <button
@@ -333,6 +369,161 @@ export default function PracticeBench({
           {LEVELS.find((l) => l.id === level)?.blurb}
         </p>
 
+        {level === "syll" ? (
+          <ol className="flex flex-col gap-2.5">
+            {phoneme.pairs.map((pr, i) => {
+              const key = `${phoneme.id}:syll:${i}`;
+              const isCurrent = current === key;
+              const isRivalCurrent = current === `${key}:r`;
+              const isTarget = activeTarget.level === "syll" && activeTarget.idx === i;
+              const done = checked.has(key);
+              return (
+                <li
+                  key={key}
+                  className={`overflow-hidden rounded-lg border transition-all duration-200 ${
+                    isTarget ? "border-ink/50 bg-chalk shadow-[0_2px_0_rgba(20,48,42,0.08)]" : "border-line bg-card hover:border-ink/30 hover:bg-chalk"
+                  }`}
+                >
+                  <div className="grid sm:grid-cols-[minmax(0,1fr)_minmax(0,0.68fr)]">
+                    {/* target side */}
+                    <div className="grid grid-cols-[26px_minmax(0,1fr)_auto] items-center gap-x-3 px-3.5 py-3 sm:gap-x-4">
+                      <span className="font-mono text-[11px] font-medium text-fog">{String(i + 1).padStart(2, "0")}</span>
+                      <div className="min-w-0">
+                        <p
+                          className={`truncate font-display text-[21px] font-bold leading-tight text-ink sm:text-[23px] ${isCurrent ? "animate-pulse" : ""}`}
+                          style={isCurrent ? { color: meta.hex } : undefined}
+                        >
+                          {pr.a.text}
+                          <span
+                            className="ml-2 rounded-sm px-1.5 py-0.5 align-middle font-mono text-[8.5px] font-bold uppercase tracking-[0.14em] text-chalk"
+                            style={{ backgroundColor: meta.hex }}
+                          >
+                            target
+                          </span>
+                        </p>
+                        <p className="truncate font-ipa text-[13px] text-fog">{pr.a.ipa}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => playDrill("syll", i)}
+                          disabled={recordingBusy}
+                          aria-label={`Listen: ${pr.a.text}`}
+                          title="Listen"
+                          className={`grid h-9 w-9 place-items-center rounded-md border transition-all hover:-translate-y-px active:scale-95 disabled:opacity-40 ${
+                            isCurrent ? "border-transparent text-chalk" : "border-line bg-chalk text-ink hover:border-ink"
+                          }`}
+                          style={isCurrent ? { backgroundColor: meta.hex } : undefined}
+                        >
+                          {isCurrent && speaking ? (
+                            <span className="flex h-3.5 items-end gap-[2.5px]">
+                              <span className="eq-bar h-full w-[3px] rounded-full bg-chalk is-speaking" style={{ animationDelay: "0ms" }} />
+                              <span className="eq-bar h-full w-[3px] rounded-full bg-chalk is-speaking" style={{ animationDelay: "180ms" }} />
+                              <span className="eq-bar h-full w-[3px] rounded-full bg-chalk is-speaking" style={{ animationDelay: "340ms" }} />
+                            </span>
+                          ) : (
+                            <IconPlay className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => playDrill("syll", i, 0.55)}
+                          disabled={recordingBusy}
+                          aria-label={`Slow listen: ${pr.a.text}`}
+                          title="Slow (≈0.5×)"
+                          className="grid h-9 w-9 place-items-center rounded-md border border-line bg-chalk text-ink transition-all hover:-translate-y-px hover:border-ink active:scale-95 disabled:opacity-40"
+                        >
+                          <IconSlow className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setTarget({ level: "syll", idx: i });
+                            toggleRecord();
+                          }}
+                          disabled={rec.status === "processing" || rec.status === "requesting"}
+                          aria-label={`Record yourself saying: ${pr.a.text}`}
+                          title="Record yourself"
+                          className={`grid h-9 w-9 place-items-center rounded-md border transition-all hover:-translate-y-px active:scale-95 disabled:opacity-40 ${
+                            isTarget && recordingBusy
+                              ? "rec-pulse border-transparent bg-ember text-chalk"
+                              : "border-line bg-chalk text-ember hover:border-ember"
+                          }`}
+                        >
+                          {isTarget && recordingBusy ? <IconStop className="h-3.5 w-3.5" /> : <IconMic className="h-4 w-4" />}
+                        </button>
+                        <button
+                          onClick={() => onToggle(key)}
+                          aria-pressed={done}
+                          aria-label={done ? "Mark as not practised" : "Mark as practised"}
+                          title="I've practised this"
+                          className={`grid h-9 w-9 place-items-center rounded-md border transition-all hover:-translate-y-px active:scale-95 ${
+                            done
+                              ? "border-transparent bg-moss text-chalk shadow-sm"
+                              : "border-line bg-chalk text-fog hover:border-moss hover:text-moss"
+                          }`}
+                        >
+                          <IconCheck className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* rival side */}
+                    <div className="relative flex items-center justify-between gap-3 border-t border-dashed border-line bg-paper/70 px-3.5 py-3 sm:border-l sm:border-t-0 sm:pl-5">
+                      <span
+                        aria-hidden="true"
+                        className="absolute -left-[13px] top-1/2 z-10 hidden h-[26px] w-[26px] -translate-y-1/2 place-items-center rounded-full border border-line bg-card font-display text-[13px] font-extrabold text-fog shadow-sm sm:grid"
+                      >
+                        ↔
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-mono text-[8.5px] font-bold uppercase tracking-[0.16em] text-fog">
+                          rival · <span className="font-ipa text-[11px] normal-case tracking-normal">/{pr.rival}/</span>
+                          {pr.rival === "∅" && " silent"}
+                        </p>
+                        <p
+                          className={`truncate font-display text-[18px] font-bold leading-tight text-ink/75 sm:text-[19px] ${isRivalCurrent ? "animate-pulse" : ""}`}
+                          style={isRivalCurrent ? { color: meta.hex } : undefined}
+                        >
+                          {pr.b.text}
+                        </p>
+                        <p className="truncate font-ipa text-[12px] text-fog">{pr.b.ipa}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => playRival(i)}
+                          disabled={recordingBusy}
+                          aria-label={`Listen: ${pr.b.text}`}
+                          title="Listen to the rival"
+                          className={`grid h-9 w-9 place-items-center rounded-md border transition-all hover:-translate-y-px active:scale-95 disabled:opacity-40 ${
+                            isRivalCurrent ? "border-transparent text-chalk" : "border-line bg-chalk text-ink/70 hover:border-ink"
+                          }`}
+                          style={isRivalCurrent ? { backgroundColor: meta.hex } : undefined}
+                        >
+                          {isRivalCurrent && speaking ? (
+                            <span className="flex h-3.5 items-end gap-[2.5px]">
+                              <span className="eq-bar h-full w-[3px] rounded-full bg-chalk is-speaking" style={{ animationDelay: "0ms" }} />
+                              <span className="eq-bar h-full w-[3px] rounded-full bg-chalk is-speaking" style={{ animationDelay: "180ms" }} />
+                              <span className="eq-bar h-full w-[3px] rounded-full bg-chalk is-speaking" style={{ animationDelay: "340ms" }} />
+                            </span>
+                          ) : (
+                            <IconPlay className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => playRival(i, 0.55)}
+                          disabled={recordingBusy}
+                          aria-label={`Slow listen: ${pr.b.text}`}
+                          title="Slow (≈0.5×)"
+                          className="grid h-9 w-9 place-items-center rounded-md border border-line bg-chalk text-ink/70 transition-all hover:-translate-y-px hover:border-ink active:scale-95 disabled:opacity-40"
+                        >
+                          <IconSlow className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        ) : (
         <ol className="flex flex-col gap-2">
           {drills.map((dr, i) => {
             const key = `${phoneme.id}:${level}:${i}`;
@@ -424,6 +615,7 @@ export default function PracticeBench({
             );
           })}
         </ol>
+        )}
       </section>
     </div>
   );
