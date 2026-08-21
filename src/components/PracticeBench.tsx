@@ -61,14 +61,14 @@ export default function PracticeBench({
 
   const drills = level === "syll" ? [] : getDrills(phoneme, level);
   const activeTarget: Target = target ?? { level, idx: 0 };
-  const targetPair = activeTarget.level === "syll" ? phoneme.pairs[activeTarget.idx] : undefined;
+  const targetPair = activeTarget.level === "syll" ? phoneme.pairs?.[activeTarget.idx] : undefined;
   const targetDrill =
     activeTarget.level === "syll"
-      ? phoneme.pairs[activeTarget.idx]?.a ?? { ipa: "", text: "" }
+      ? phoneme.pairs?.[activeTarget.idx]?.a ?? { ipa: "", text: "" }
       : getDrills(phoneme, activeTarget.level)[activeTarget.idx];
   const levelDone = (l: LevelId) =>
     l === "syll"
-      ? phoneme.pairs.filter((_, i) => checked.has(`${phoneme.id}:syll:${i}`)).length
+      ? (phoneme.pairs ?? []).filter((_, i) => checked.has(`${phoneme.id}:syll:${i}`)).length
       : getDrills(phoneme, l).filter((_, i) => checked.has(`${phoneme.id}:${l}:${i}`)).length;
   const levelTotal = drillsForLevel(phoneme, level);
   const levelPct = levelTotal > 0 ? levelDone(level) / levelTotal : 0;
@@ -116,7 +116,7 @@ export default function PracticeBench({
   }, [rec.status, rec.getAnalyser]);
 
   const playDrill = (lvl: LevelId, idx: number, rate?: number) => {
-    const dr = lvl === "syll" ? phoneme.pairs[idx]?.a : getDrills(phoneme, lvl)[idx];
+    const dr = lvl === "syll" ? phoneme.pairs?.[idx]?.a : getDrills(phoneme, lvl)[idx];
     if (!dr) return;
     setTarget({ level: lvl, idx });
     const key = `${phoneme.id}:${lvl}:${idx}`;
@@ -126,7 +126,7 @@ export default function PracticeBench({
 
   /** play the rival side of a minimal pair */
   const playRival = (idx: number, rate?: number) => {
-    const pr = phoneme.pairs[idx];
+    const pr = phoneme.pairs?.[idx];
     if (!pr) return;
     const key = `${phoneme.id}:syll:${idx}:r`;
     setCurrent(key);
@@ -195,44 +195,76 @@ export default function PracticeBench({
             </div>
           </div>
 
-          {/* signature minimal pair */}
-          {phoneme.pairs[0] && (
+          {/* signature minimal pair — or the triphthong glide path */}
+          {phoneme.pairs?.[0] ? (
             <div className="border-t border-line px-5 py-4">
               <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-fog">
                 Signature contrast · vs /{phoneme.pairs[0].rival}/
               </p>
               <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-2">
-                {[0, 1].map((ci) => (
-                  <Fragment key={ci}>
-                    {ci === 1 && (
-                      <span className="grid place-items-center font-display text-lg font-extrabold text-fog" aria-hidden="true">
-                        ↔
-                      </span>
-                    )}
-                    <button
-                      disabled={recordingBusy}
-                      onClick={() => speak((ci === 0 ? phoneme.pairs[0].a : phoneme.pairs[0].b).text)}
-                      title={`Listen: ${(ci === 0 ? phoneme.pairs[0].a : phoneme.pairs[0].b).text}`}
-                      className="group flex flex-col items-center rounded-md border border-line bg-chalk px-2 py-2.5 transition-all hover:-translate-y-0.5 hover:border-ink hover:shadow-md active:scale-95 disabled:opacity-50"
-                    >
-                      <span className="font-display text-[17px] font-bold leading-tight text-ink group-hover:text-ember">
-                        {(ci === 0 ? phoneme.pairs[0].a : phoneme.pairs[0].b).text}
-                      </span>
-                      <span className="mt-0.5 font-ipa text-[11.5px] text-fog">
-                        {(ci === 0 ? phoneme.pairs[0].a : phoneme.pairs[0].b).ipa}
-                      </span>
-                      <span className="mt-1.5 flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-fog opacity-60 transition-opacity group-hover:text-ember group-hover:opacity-100">
-                        <IconSpeaker className="h-3 w-3" /> {ci === 0 ? "target" : "rival"}
-                      </span>
-                    </button>
-                  </Fragment>
-                ))}
+                {[0, 1].map((ci) => {
+                  const side = ci === 0 ? phoneme.pairs![0].a : phoneme.pairs![0].b;
+                  return (
+                    <Fragment key={ci}>
+                      {ci === 1 && (
+                        <span className="grid place-items-center font-display text-lg font-extrabold text-fog" aria-hidden="true">
+                          ↔
+                        </span>
+                      )}
+                      <button
+                        disabled={recordingBusy}
+                        onClick={() => speak(side.text)}
+                        title={`Listen: ${side.text}`}
+                        className="group flex flex-col items-center rounded-md border border-line bg-chalk px-2 py-2.5 transition-all hover:-translate-y-0.5 hover:border-ink hover:shadow-md active:scale-95 disabled:opacity-50"
+                      >
+                        <span className="font-display text-[17px] font-bold leading-tight text-ink group-hover:text-ember">
+                          {side.text}
+                        </span>
+                        <span className="mt-0.5 font-ipa text-[11.5px] text-fog">{side.ipa}</span>
+                        <span className="mt-1.5 flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-fog opacity-60 transition-opacity group-hover:text-ember group-hover:opacity-100">
+                          <IconSpeaker className="h-3 w-3" /> {ci === 0 ? "target" : "rival"}
+                        </span>
+                      </button>
+                    </Fragment>
+                  );
+                })}
               </div>
               <button
                 onClick={() => onLevel("syll")}
                 className="mt-2.5 w-full rounded-md border border-dashed border-line bg-paper/60 px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-fog transition-all hover:border-ember hover:text-ember active:scale-[0.99]"
               >
                 ▸ open the full minimal-pair set ({phoneme.pairs.length})
+              </button>
+            </div>
+          ) : (
+            <div className="border-t border-line px-5 py-4">
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-fog">
+                Triple glide · one syllable
+              </p>
+              <div className="flex items-center gap-3 rounded-md border border-line bg-chalk px-3 py-2.5">
+                <span className="font-ipa text-[22px] font-bold leading-none" style={{ color: meta.hex }}>
+                  /{phoneme.ipa}/
+                </span>
+                <svg viewBox="0 0 44 12" className="h-4 w-14 shrink-0" aria-hidden="true">
+                  <path
+                    d="M3 10 C 9 2 13 2 18 5 C 23 8 27 8 32 4 L 40 2"
+                    fill="none"
+                    stroke={meta.hex}
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    opacity="0.8"
+                  />
+                  <path d="M35.5 0.5 40 2l-3 3.4" fill="none" stroke={meta.hex} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.8" />
+                </svg>
+                <span className="font-mono text-[10px] leading-relaxed text-fog">
+                  three vowels, one movement
+                </span>
+              </div>
+              <button
+                onClick={() => onLevel("word")}
+                className="mt-2.5 w-full rounded-md border border-dashed border-line bg-paper/60 px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-fog transition-all hover:border-ember hover:text-ember active:scale-[0.99]"
+              >
+                ▸ triphthongs train at word &amp; sentence level
               </button>
             </div>
           )}
@@ -369,9 +401,36 @@ export default function PracticeBench({
           {LEVELS.find((l) => l.id === level)?.blurb}
         </p>
 
-        {level === "syll" ? (
+        {level === "syll" && !(phoneme.pairs?.length ?? 0) && (
+          <div className="rounded-lg border-2 border-dashed border-triph/50 bg-card px-6 py-12 text-center">
+            <p className="font-display text-xl font-bold text-ink">
+              No minimal pairs here — triphthongs are trained in context
+            </p>
+            <p className="mx-auto mt-2 max-w-lg text-[14px] leading-relaxed text-fog">
+              /{phoneme.ipa}/ is a three-vowel glide that only exists inside real words, so there are
+              no isolated syllable contrasts to drill. Practise it inside the ten target words and
+              three carrier sentences instead — then record yourself and compare.
+            </p>
+            <div className="mt-5 flex justify-center gap-2.5">
+              <button
+                onClick={() => onLevel("word")}
+                className="rounded-md px-5 py-2.5 font-display text-[13px] font-bold text-chalk transition-all hover:brightness-110 active:scale-95"
+                style={{ backgroundColor: meta.hex }}
+              >
+                Practise words
+              </button>
+              <button
+                onClick={() => onLevel("sent")}
+                className="rounded-md border border-line bg-chalk px-5 py-2.5 font-display text-[13px] font-bold text-ink transition-all hover:-translate-y-px hover:border-ink hover:shadow-sm active:scale-95"
+              >
+                Practise sentences
+              </button>
+            </div>
+          </div>
+        )}
+        {level === "syll" && (phoneme.pairs?.length ?? 0) > 0 ? (
           <ol className="flex flex-col gap-2.5">
-            {phoneme.pairs.map((pr, i) => {
+            {(phoneme.pairs ?? []).map((pr, i) => {
               const key = `${phoneme.id}:syll:${i}`;
               const isCurrent = current === key;
               const isRivalCurrent = current === `${key}:r`;

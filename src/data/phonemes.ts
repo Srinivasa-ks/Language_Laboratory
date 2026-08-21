@@ -16,6 +16,7 @@ export interface PairDrill {
 export const CATEGORY_META = {
   monophthong: { name: "Monophthong", plural: "Monophthongs", text: "text-lagoon", bg: "bg-lagoon", border: "border-lagoon", hex: "#0e7c6b" },
   diphthong:   { name: "Diphthong",   plural: "Diphthongs",   text: "text-honey",  bg: "bg-honey",  border: "border-honey",  hex: "#a8720a" },
+  triphthong:  { name: "Triphthong",  plural: "Triphthongs",  text: "text-triph",  bg: "bg-triph",  border: "border-triph",  hex: "#0a8b9e" },
   plosive:     { name: "Plosive",     plural: "Plosives",     text: "text-ember",  bg: "bg-ember",  border: "border-ember",  hex: "#d24a2b" },
   fricative:   { name: "Fricative",   plural: "Fricatives",   text: "text-cobalt", bg: "bg-cobalt", border: "border-cobalt", hex: "#2460c0" },
   affricate:   { name: "Affricate",   plural: "Affricates",   text: "text-plum",   bg: "bg-plum",   border: "border-plum",   hex: "#8a44a6" },
@@ -35,8 +36,8 @@ export interface Phoneme {
   keywords: string[];
   voiced?: boolean;
   chartPos?: { x: number; y: number };
-  /** syllable-level minimal pairs against the nearest rival sounds */
-  pairs: PairDrill[];
+  /** syllable-level minimal pairs against the nearest rival sounds (omitted for triphthongs, which train at word and sentence level) */
+  pairs?: PairDrill[];
   words: Drill[];
   sentences: Drill[];
 }
@@ -50,10 +51,10 @@ export const LEVELS: { id: LevelId; name: string; blurb: string }[] = [
 export const getDrills = (p: Phoneme, level: "word" | "sent"): Drill[] =>
   level === "word" ? p.words : p.sentences;
 
-export const getPairs = (p: Phoneme): PairDrill[] => p.pairs;
+export const getPairs = (p: Phoneme): PairDrill[] => p.pairs ?? [];
 
 export const drillsForLevel = (p: Phoneme, level: LevelId): number =>
-  level === "syll" ? p.pairs.length : level === "word" ? p.words.length : p.sentences.length;
+  level === "syll" ? p.pairs?.length ?? 0 : level === "word" ? p.words.length : p.sentences.length;
 
 const d = (ipa: string, text: string, say?: string): Drill => ({ ipa, text, say });
 const pair = (rival: string, aIpa: string, aText: string, aSay: string | undefined, bIpa: string, bText: string, bSay?: string): PairDrill => ({
@@ -504,6 +505,88 @@ export const PHONEMES: Phoneme[] = [
       d("/ɑː juː ʃʊə ðə tʊə wəz pjʊə fʌn/", "Are you sure the tour was pure fun?"),
       d("/ðə pʊə ˈtʊərɪst lɒst ðə ˈbrəʊʃʊə/", "The poor tourist lost the brochure."),
       d("/ðə ˈfjʊəriəs ˈdʒʊəri ɪnˈdjʊəd ðə lɒŋ tʊə/", "The furious jury endured the long tour."),
+    ],
+  },
+
+  // ───────────────────────── TRIPHTHONGS (5) ─────────────────────────
+  {
+    id: "eɪə", ipa: "eɪə", category: "triphthong",
+    label: "triphthong e → ɪ → ə", keyword: "as in 'player'",
+    hint: "Three vowel glides in a single syllable: rise on /eɪ/, then let it collapse into schwa. Say 'player' slowly — pay-uh — then run it together.",
+    keywords: ["player", "layer", "betrayal"],
+    words: [
+      d("/ˈpleɪə/", "player"), d("/ˈleɪə/", "layer"), d("/ˈpeɪə/", "payer"),
+      d("/ˈpreɪə/", "prayer"), d("/ˈsleɪə/", "slayer"), d("/ˈɡreɪə/", "greyer"),
+      d("/bɪˈtreɪəl/", "betrayal"), d("/ˈkreɪən/", "crayon"), d("/ˈleɪəbaʊt/", "layabout"), d("/kənˈveɪə/", "conveyor"),
+    ],
+    sentences: [
+      d("/ðə ˈpleɪə leɪd ə ˈleɪə ɒv peɪnt/", "The player laid a layer of paint."),
+      d("/bɪˈtreɪəl wəz nəʊt ɪn ðə ˈpleɪəz pleɪn/", "Betrayal was not in the player's plan."),
+      d("/ðə kənˈveɪə ˈkærɪd ðə ˈkreɪənz əˈweɪ/", "The conveyor carried the crayons away."),
+    ],
+  },
+  {
+    id: "aɪə", ipa: "aɪə", category: "triphthong",
+    label: "triphthong a → ɪ → ə", keyword: "as in 'fire'",
+    hint: "Start wide-open on /a/, glide up through /ɪ/, then fall away into schwa — the three-step glide inside 'fire' and 'tyre'.",
+    keywords: ["fire", "tyre", "admire"],
+    words: [
+      d("/ˈfaɪə/", "fire"), d("/ˈtaɪə/", "tyre"), d("/ˈhaɪə/", "hire"),
+      d("/ˈwaɪə/", "wire"), d("/ˈlaɪə/", "liar"), d("/ˈpraɪə/", "prior"),
+      d("/ˈbaɪə/", "buyer"), d("/ədˈmaɪə/", "admire"), d("/rɪˈtaɪə/", "retire"), d("/ˈdaɪəmənd/", "diamond"),
+    ],
+    sentences: [
+      d("/ðə ˈfaɪə lɪt ðə waɪə ənd ðə taɪə/", "The fire lit the wire and the tyre."),
+      d("/hi rɪˈtaɪəd frɒm ðə ˈfaɪə ˈsteɪʃn/", "He retired from the fire station."),
+      d("/ðə ˈlaɪə ədˈmaɪəd ðə ˈdaɪəmənd ˈsaɪləntli/", "The liar admired the diamond silently."),
+    ],
+  },
+  {
+    id: "ɔɪə", ipa: "ɔɪə", category: "triphthong",
+    label: "triphthong ɔ → ɪ → ə", keyword: "as in 'employer'",
+    hint: "Round and open on /ɔ/, glide through /ɪ/, release into schwa — the rarest English triphthong, hiding in 'employer' and 'lawyer'.",
+    keywords: ["employer", "lawyer", "royal"],
+    words: [
+      d("/ɪmˈplɔɪə/", "employer"), d("/ˈlɔɪə/", "lawyer"), d("/ˈlɔɪəl/", "loyal"),
+      d("/ˈrɔɪəl/", "royal"), d("/ˈdʒɔɪəs/", "joyous"), d("/ɪnˈdʒɔɪəbl/", "enjoyable"),
+      d("/əˈnɔɪəns/", "annoyance"), d("/ˈlɔɪəlti/", "loyalty"), d("/ˈrɔɪəlti/", "royalty"), d("/ˈrɔɪəlɪst/", "royalist"),
+    ],
+    sentences: [
+      d("/ðə ˈlɔɪə wɜːkt fɔː ði ɪmˈplɔɪə/", "The lawyer worked for the employer."),
+      d("/ˈrɔɪəl ˈlɔɪəlti ɪz ə ˈdʒɔɪəs θɪŋ/", "Royal loyalty is a joyous thing."),
+      d("/hɜː əˈnɔɪəns kɒst ðə ˈrɔɪəlɪst ðə praɪz/", "Her annoyance cost the royalist the prize."),
+    ],
+  },
+  {
+    id: "əʊə", ipa: "əʊə", category: "triphthong",
+    label: "triphthong ə → ʊ → ə", keyword: "as in 'lower'",
+    hint: "A schwa that rounds up into /ʊ/ and relaxes straight back to schwa — 'lower', said in one unbroken movement.",
+    keywords: ["lower", "mower", "borrower"],
+    words: [
+      d("/ˈləʊə/", "lower"), d("/ˈməʊə/", "mower"), d("/ˈsləʊə/", "slower"),
+      d("/ˈɡrəʊə/", "grower"), d("/ˈθrəʊə/", "thrower"), d("/ˈsəʊə/", "sower"),
+      d("/ˈhɒləʊə/", "hollower"), d("/ˈbɒrəʊə/", "borrower"), d("/ˈfɒləʊə/", "follower"), d("/ˈnærəʊə/", "narrower"),
+    ],
+    sentences: [
+      d("/ðə ˈsləʊə ˈɡrəʊə ˈfɒləʊd ðə ˈnærəʊə rəʊd/", "The slower grower followed the narrower road."),
+      d("/ðə ˈməʊə ənd ðə ˈθrəʊə ˈbɒrəʊd ðə ˈlædə/", "The mower and the thrower borrowed the ladder."),
+      d("/ðə ˈbɒrəʊə ˈfɒləʊd ðə ˈləʊə rəʊd həʊm/", "The borrower followed the lower road home."),
+    ],
+  },
+  {
+    id: "aʊə", ipa: "aʊə", category: "triphthong",
+    label: "triphthong a → ʊ → ə", keyword: "as in 'hour'",
+    hint: "Open on /a/, round up through /ʊ/, relax to schwa — the long, luxurious glide of 'hour', 'power' and 'flower'.",
+    keywords: ["hour", "power", "flower"],
+    words: [
+      d("/ˈaʊə/", "hour"), d("/ˈpaʊə/", "power"), d("/ˈflaʊə/", "flower"),
+      d("/ˈtaʊə/", "tower"), d("/ˈʃaʊə/", "shower"), d("/ˈsaʊə/", "sour"),
+      d("/ˈflaʊə/", "flour"), d("/ˈkaʊəd/", "coward"), d("/dɪˈvaʊə/", "devour"), d("/ɪmˈpaʊə/", "empower"),
+    ],
+    sentences: [
+      d("/ðə ˈflaʊə ɪn ðə ˈtaʊə bluːmz ˈevri aʊə/", "The flower in the tower blooms every hour."),
+      d("/ə ˈsaʊə ˈʃaʊə fel əˈraʊnd ðə ˈtaʊə/", "A sour shower fell around the tower."),
+      d("/ðə ˈkaʊəd dɪˈvaʊəd ðə ˈflaʊə ɪn ən aʊə/", "The coward devoured the flower in an hour."),
     ],
   },
 
@@ -1050,13 +1133,15 @@ export const PHONEME_MAP = new Map(PHONEMES.map((p) => [p.id, p]));
 
 export const VOWELS = PHONEMES.filter((p) => p.category === "monophthong");
 export const DIPHTHONGS = PHONEMES.filter((p) => p.category === "diphthong");
+export const TRIPHTHONGS = PHONEMES.filter((p) => p.category === "triphthong");
 export const CONSONANTS = PHONEMES.filter(
-  (p) => p.category !== "monophthong" && p.category !== "diphthong"
+  (p) => p.category !== "monophthong" && p.category !== "diphthong" && p.category !== "triphthong"
 );
 
 export const SOUND_GROUPS: { title: string; hex: string; items: Phoneme[] }[] = [
   { title: "12 vowels", hex: CATEGORY_META.monophthong.hex, items: VOWELS },
   { title: "8 diphthongs", hex: CATEGORY_META.diphthong.hex, items: DIPHTHONGS },
+  { title: "5 triphthongs", hex: CATEGORY_META.triphthong.hex, items: TRIPHTHONGS },
   { title: "24 consonants", hex: CATEGORY_META.plosive.hex, items: CONSONANTS },
 ];
 
@@ -1076,7 +1161,7 @@ export const CONSONANT_CELLS = [
   cell(4, 0, ["w"]), cell(4, 3, ["l"]), cell(4, 4, ["r"]), cell(4, 5, ["j"]),
 ];
 
-export const TOTAL_PAIRS = PHONEMES.reduce((n, p) => n + p.pairs.length, 0);
+export const TOTAL_PAIRS = PHONEMES.reduce((n, p) => n + (p.pairs?.length ?? 0), 0);
 export const TOTAL_WORDS = PHONEMES.reduce((n, p) => n + p.words.length, 0);
 export const TOTAL_SENTENCES = PHONEMES.reduce((n, p) => n + p.sentences.length, 0);
 export const TOTAL_DRILLS = TOTAL_PAIRS + TOTAL_WORDS + TOTAL_SENTENCES;

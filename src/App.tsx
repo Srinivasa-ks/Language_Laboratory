@@ -16,6 +16,7 @@ import {
   PHONEMES,
   SOUND_GROUPS,
   TOTAL_DRILLS,
+  TRIPHTHONGS,
   VOWELS,
   type LevelId,
 } from "./data/phonemes";
@@ -186,7 +187,7 @@ export default function App() {
                 Phonetics<span className="text-honey">·</span>Lab
               </p>
               <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.22em] text-chalk/55">
-                British English · RP · 44 phonemes
+                British English · RP · 49 sounds
               </p>
             </div>
           </div>
@@ -282,21 +283,23 @@ export default function App() {
                   <span className="text-ember"> trainable</span>.
                 </h1>
                 <p className="mt-4 max-w-xl text-[15.5px] leading-relaxed text-ink/75">
-                  The full 44-phoneme RP inventory laid out the way phoneticians see it — vowels on
-                  a trapezoid of tongue position, consonants on a grid of place and manner. Tap any
+                  The full RP inventory laid out the way phoneticians see it — vowels on a
+                  trapezoid of tongue position, consonants on a grid of place and manner. Tap any
                   symbol to load it into the bench below, then drill it at{" "}
                   <strong className="font-semibold text-ink">syllable</strong> level — pitting each
                   sound against its nearest rival in minimal pairs — before stepping up to{" "}
                   <strong className="font-semibold text-ink">word</strong> and{" "}
-                  <strong className="font-semibold text-ink">sentence</strong> level.
+                  <strong className="font-semibold text-ink">sentence</strong> level. The five
+                  triphthongs round out the set at word and sentence level too.
                 </p>
               </div>
               <div className="flex flex-col gap-2 font-mono text-[11.5px] text-fog">
                 <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-lagoon" /> 12 vowels</span>
                 <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-honey" /> 8 diphthongs</span>
+                <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-triph" /> 5 triphthongs</span>
                 <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-ember" /> 24 consonants</span>
                 <span className="flex items-center gap-2 font-semibold text-ink">
-                  <i className="h-2.5 w-2.5 rounded-full border-2 border-ink" /> = 44 phonemes
+                  <i className="h-2.5 w-2.5 rounded-full border-2 border-ink" /> = 49 phonemes
                 </span>
                 <span className="mt-2 border-t border-line pt-2 tabular-nums">
                   {doneCount} / {TOTAL_DRILLS} drills ticked off
@@ -310,6 +313,7 @@ export default function App() {
               <VowelChart
                 vowels={VOWELS}
                 diphthongs={DIPHTHONGS}
+                triphthongs={TRIPHTHONGS}
                 selectedId={selectedId}
                 practiced={practiced}
                 onSelect={(id) => selectPhoneme(id, true)}
@@ -323,11 +327,11 @@ export default function App() {
             <div className="rounded-md border border-line bg-card p-4 shadow-[0_1px_0_rgba(20,48,42,0.06)] sm:p-5">
               <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
                 <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-ink">
-                  All 44 sounds — the full index
+                  All 49 sounds — the full index
                 </h3>
                 <p className="font-mono text-[10px] uppercase tracking-wider text-fog">
-                  12 vowels + 8 diphthongs + 24 consonants ·{" "}
-                  <span className="font-semibold text-ember">{practiced.size}/44</span> covered
+                  12 vowels + 8 diphthongs + 5 triphthongs + 24 consonants ·{" "}
+                  <span className="font-semibold text-ember">{practiced.size}/{PHONEMES.length}</span> covered
                 </p>
               </div>
               <div className="flex flex-col gap-3.5">
@@ -349,7 +353,7 @@ export default function App() {
                             onClick={() => selectPhoneme(p.id, true)}
                             aria-pressed={sel}
                             title={`${p.keyword} · ${doneBySound.get(p.id) ?? 0}/${
-                              p.pairs.length + p.words.length + p.sentences.length
+                              (p.pairs?.length ?? 0) + p.words.length + p.sentences.length
                             } drills done — open in the practice bench`}
                             className={`relative min-w-[2.3rem] rounded-md border px-2 py-1 font-ipa text-[15px] font-semibold leading-tight transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md ${
                               sel ? "text-chalk shadow-md" : "bg-chalk hover:border-ink/60"
@@ -453,7 +457,7 @@ export default function App() {
                 </div>
                 <p className="font-mono text-[11.5px] tabular-nums text-fog">
                   {Object.keys(checks).filter((k) => k.startsWith(selected.id + ":") && checks[k]).length}{" "}
-                  / {selected.pairs.length + selected.words.length + selected.sentences.length} drills practised for this sound
+                  / {(selected.pairs?.length ?? 0) + selected.words.length + selected.sentences.length} drills practised for this sound
                 </p>
               </div>
             </Reveal>

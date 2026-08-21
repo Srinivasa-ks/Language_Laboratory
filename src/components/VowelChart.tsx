@@ -3,6 +3,7 @@ import { CATEGORY_META, type Phoneme } from "../data/phonemes";
 interface Props {
   vowels: Phoneme[];
   diphthongs: Phoneme[];
+  triphthongs: Phoneme[];
   selectedId: string;
   practiced: Set<string>;
   onSelect: (id: string) => void;
@@ -15,8 +16,9 @@ const HEIGHTS = [
   { y: 220, label: "OPEN" },
 ];
 
-export default function VowelChart({ vowels, diphthongs, selectedId, practiced, onSelect }: Props) {
+export default function VowelChart({ vowels, diphthongs, triphthongs, selectedId, practiced, onSelect }: Props) {
   const mono = CATEGORY_META.monophthong;
+  const triph = CATEGORY_META.triphthong;
 
   return (
     <div className="flex flex-col gap-5">
@@ -130,6 +132,52 @@ export default function VowelChart({ vowels, diphthongs, selectedId, practiced, 
         </div>
         <p className="mt-3 font-mono text-[10.5px] leading-relaxed text-fog">
           Each arrow traces the glide: start vowel → end vowel, one syllable only.
+        </p>
+      </div>
+
+      {/* triphthongs */}
+      <div className="rounded-md border border-line bg-card p-4 shadow-[0_1px_0_rgba(20,48,42,0.06)]">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-ink">
+            Triple glides
+          </h3>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-fog">5 triphthongs</span>
+        </div>
+        <div className="grid grid-cols-5 gap-2">
+          {triphthongs.map((tp) => {
+            const sel = tp.id === selectedId;
+            const done = practiced.has(tp.id);
+            return (
+              <button
+                key={tp.id}
+                onClick={() => onSelect(tp.id)}
+                aria-pressed={sel}
+                className={`group relative flex flex-col items-center rounded-md border px-1 pb-1.5 pt-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                  sel ? "border-transparent text-chalk shadow-md" : "border-line bg-chalk hover:border-triph"
+                }`}
+                style={sel ? { backgroundColor: triph.hex } : { color: triph.hex }}
+              >
+                <span className="font-ipa text-[15px] font-semibold leading-none">{tp.ipa}</span>
+                <svg viewBox="0 0 40 11" className="mt-1 h-2.5 w-9" aria-hidden="true">
+                  <path
+                    d="M3 9 C 8 2 12 2 17 5 C 22 8 26 7 31 3.5 L 36 2"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    opacity="0.75"
+                  />
+                  <path d="M32 0.5 36 2l-2.8 3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.75" />
+                </svg>
+                {done && (
+                  <span className="absolute -right-1.5 -top-1.5 h-3.5 w-3.5 rounded-full border-2 border-card bg-ember" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-3 font-mono text-[10.5px] leading-relaxed text-fog">
+          Three vowels in one syllable — drilled at word and sentence level in the bench below.
         </p>
       </div>
     </div>
