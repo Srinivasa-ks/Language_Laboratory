@@ -76,6 +76,64 @@ const GLYPHS = [
   { ch: "ɒ", top: "58%", left: "70%", size: 88, dur: 16 },
 ];
 
+/* ───────────────── offline status badge ───────────────── */
+function OfflineBadge() {
+  const [online, setOnline] = useState(() => navigator.onLine);
+  const [swReady, setSwReady] = useState(() => Boolean(navigator.serviceWorker?.controller));
+
+  useEffect(() => {
+    const goOnline = () => setOnline(true);
+    const goOffline = () => setOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.ready.then(() => setSwReady(true)).catch(() => undefined);
+      navigator.serviceWorker.addEventListener("controllerchange", () => setSwReady(true));
+    }
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, []);
+
+  const state = !online ? "offline" : swReady ? "ready" : "caching";
+  const dot = !online ? "bg-honey" : swReady ? "bg-moss" : "bg-chalk/40";
+  const label = !online ? "offline · cached copy" : swReady ? "offline-ready" : "caching…";
+
+  return (
+    <span
+      className="hidden items-center gap-2 rounded-md border border-pine-3 bg-pine-2/70 px-2.5 py-1.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-chalk/70 sm:flex"
+      title={
+        !online
+          ? "No connection — the lab is running entirely from your device."
+          : swReady
+            ? "Every asset is cached on this device. The lab works with no connection."
+            : "The service worker is caching the lab for offline use…"
+      }
+    >
+      <span className={`blink-dot inline-block h-2 w-2 rounded-full ${dot}`} />
+      {label}
+    </span>
+  );
+}
+
+/* ───────────────── font-subset primer ───────────────── */
+/* Renders every IPA glyph once (invisibly) so the browser downloads — and the
+   service worker caches — all Noto Sans subsets needed offline, incl. Greek θ. */
+const IPA_PRIMER =
+  "ɑæɒʌɔəɜɪʊiːuːeɪaɪɔɪəʊaʊɪəeəʊəpbtdkɡfvθðszʃʒhtʃdʒmnŋwrljˈˌ·—";
+
+function FontPrimer() {
+  return (
+    <span
+      aria-hidden="true"
+      className="font-ipa pointer-events-none fixed left-0 top-0 h-px w-px select-none overflow-hidden opacity-0"
+    >
+      {IPA_PRIMER}
+    </span>
+  );
+}
+
 function GlyphField() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
@@ -212,6 +270,7 @@ export default function App() {
     return (
       <div className="relative min-h-screen overflow-x-clip">
         <GlyphField />
+        <FontPrimer />
         <AuthGate onAuthed={handleAuthed} />
       </div>
     );
@@ -220,6 +279,7 @@ export default function App() {
   return (
     <div className="relative min-h-screen overflow-x-clip">
       <GlyphField />
+      <FontPrimer />
 
       {/* ════════════════ HEADER / VOICE CONSOLE ════════════════ */}
       <header className="bg-blueprint-dark sticky top-0 z-40 border-b border-pine-3 bg-pine text-chalk shadow-lg shadow-pine/20">
@@ -252,6 +312,8 @@ export default function App() {
               {speech.speaking ? "voice live" : "voice idle"}
             </span>
           </div>
+
+          <OfflineBadge />
 
           <div className="ml-auto flex items-center gap-3">
             <div
@@ -515,6 +577,7 @@ export default function App() {
 
             <Reveal delay={220}>
               <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-2 border-t border-pine-3 pt-5 font-mono text-[11px] text-chalk/50">
+                <span>▸ 100% offline — install it like an app and train anywhere</span>
                 <span>▸ recordings never leave your browser</span>
                 <span>▸ progress is saved on this device</span>
                 <span>▸ works best in Chrome or Edge with a UK voice installed</span>
@@ -573,7 +636,9 @@ export default function App() {
           </div>
           <p className="max-w-xl font-mono text-[10.5px] leading-relaxed text-chalk/45">
             Inventory follows the IPA chart for Received Pronunciation. Model audio via the Web
-            Speech API (en-GB); recording via MediaRecorder — both run entirely on your device.
+            Speech API (en-GB); recording via MediaRecorder. Fonts, data and the app shell are all
+            bundled and cached by a service worker — after the first visit the lab runs with no
+            connection at all.
           </p>
         </div>
       </footer>

@@ -1,0 +1,73 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Phonetics Lab — production deployment
+#
+# Triggers on every push to main, builds the Vite bundle with npm ci
+# (lockfile-pinned), and uploads ONLY the contents of dist/ to the
+# InfinityFree web root (htdocs/) over FTP.
+#
+# Credentials are read exclusively from repository secrets:
+#   FTP_SERVER / FTP_USERNAME / FTP_PASSWORD
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Deploy to InfinityFree
+
+on:
+  push:
+    branches:
+      - main
+
+# Cancel any deploy still running when a newer push lands, so two builds
+# never race over the same htdocs folder.
+concurrency:
+  group: deploy-infinityfree-main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & upload dist/ to htdocs/
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm # uses the existing package-lock.json
+
+      - name: Install dependencies (lockfile-strict)
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Upload dist/ to remote htdocs/ via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+
+          # Local source: the Vite build output ONLY.
+          # Nothing outside dist/ (no src/, node_modules/, .git/, package.json)
+          # is ever considered for upload.
+          local-dir: dist/
+
+          # Remote target — InfinityFree rule:
+          #   • Keep "htdocs/" if the FTP account ROOT contains the site's
+          #     htdocs folder (standard InfinityFree layout). dist/index.html
+          #     then lands directly at htdocs/index.html.
+          #   • Change to "/" if your FTP login already starts INSIDE htdocs.
+          server-dir: htdocs/
+
+          # Keep remote files that are not part of the new build instead of
+          # wiping the folder — safer for the live PWA/service-worker cache.
+          dangerous-clean-slate: false
+
+          # Set to true for a test run that prints the upload plan
+          # without transferring anything:
+          # dry-run: true
