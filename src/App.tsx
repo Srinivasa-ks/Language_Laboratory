@@ -641,6 +641,28 @@ export default function App() {
             connection at all.
           </p>
         </div>
+
+        {/* ── academic attribution ── */}
+        <div className="mx-auto mt-8 max-w-6xl border-t border-pine-3 px-4 pt-7 sm:px-6">
+          <address className="flex flex-col items-center gap-1.5 text-center not-italic">
+            <span className="mb-1.5 h-px w-10 bg-honey/70" aria-hidden="true" />
+            <span className="font-mono text-[10.5px] tracking-wide text-chalk/55">
+              © 2026{" "}
+              <span className="font-display text-[15px] font-bold tracking-tight text-chalk">
+                Srinivasa K S
+              </span>
+            </span>
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-chalk/60">
+              Assistant Professor
+            </span>
+            <span className="font-mono text-[10.5px] leading-relaxed text-chalk/45">
+              R.V. Teachers College, Jayanagar, Bengaluru – 560011
+            </span>
+            <span className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.22em] text-chalk/35">
+              All Rights Reserved.
+            </span>
+          </address>
+        </div>
       </footer>
     </div>
   );
