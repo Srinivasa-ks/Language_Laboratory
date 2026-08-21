@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import AuthGate from "./components/AuthGate";
 import ConsonantTable from "./components/ConsonantTable";
+import LearnerGate from "./components/LearnerGate";
 import HomeScreen from "./components/HomeScreen";
 import PracticeBench from "./components/PracticeBench";
 import VowelChart from "./components/VowelChart";
@@ -26,11 +26,14 @@ import {
 import {
   GUEST_ID,
   displayNameFor,
-  getSession,
-  getUserById,
-  setSession,
-  touchUser,
-} from "./lib/auth";
+  getActiveLearner,
+  getLearnerById,
+  getLearners,
+  removeLearner,
+  rollFor,
+  setActiveLearner,
+  touchLearner,
+} from "./lib/learners";
 import {
   loadAllProgress,
   saveAllProgress,
@@ -184,15 +187,22 @@ export default function App() {
   const speech = useSpeech();
   const [selectedId, setSelectedId] = useState("iː");
   const [level, setLevel] = useState<LevelId>("syll");
-  const [activeId, setActiveId] = useState<string | null>(() => getSession());
+  const [activeId, setActiveId] = useState<string | null>(() => getActiveLearner());
   const [allProgress, setAllProgress] = useState<AllProgress>(() => loadAllProgress());
   const benchRef = useRef<HTMLDivElement>(null);
 
   const checks = useMemo(() => allProgress[activeId ?? ""] ?? {}, [allProgress, activeId]);
   const isGuest = activeId === GUEST_ID;
   const userName = activeId ? displayNameFor(activeId) : "";
-  const account = useMemo(
-    () => (activeId && activeId !== GUEST_ID ? getUserById(activeId) : undefined),
+  const userRoll = activeId ? rollFor(activeId) : undefined;
+  /* recomputed whenever the gate is (re)opened or progress changes */
+  const profiles = useMemo(
+    () => getLearners(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeId, allProgress]
+  );
+  const learner = useMemo(
+    () => (activeId && activeId !== GUEST_ID ? getLearnerById(activeId) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activeId, allProgress]
   );
@@ -201,20 +211,41 @@ export default function App() {
     saveAllProgress(allProgress);
   }, [allProgress]);
 
-  const handleAuthed = (id: string) => {
-    setSession(id);
-    if (id !== GUEST_ID) touchUser(id);
+  /** enter the lab as an existing profile, a fresh profile, or the guest */
+  const enterLab = (id: string) => {
+    setActiveLearner(id);
+    if (id !== GUEST_ID) touchLearner(id);
     setActiveId(id);
   };
 
-  const logout = () => {
+  /** return to the learner-entry desk (switch learner / continue as guest) */
+  const switchLearner = () => {
     try {
       window.speechSynthesis?.cancel();
     } catch {
       /* nothing playing */
     }
-    setSession(null);
+    setActiveLearner(null);
     setActiveId(null);
+  };
+
+  /** wipe one learner's drill ledger, keeping their profile card */
+  const resetLearnerProgress = (id: string) => {
+    setAllProgress((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  /** delete a profile card and its ledger from this device entirely */
+  const removeProfile = (id: string) => {
+    removeLearner(id);
+    setAllProgress((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
 
   const selected = useMemo(() => PHONEMES.find((p) => p.id === selectedId) ?? PHONEMES[0], [selectedId]);
@@ -271,7 +302,13 @@ export default function App() {
       <div className="relative min-h-screen overflow-x-clip">
         <GlyphField />
         <FontPrimer />
-        <AuthGate onAuthed={handleAuthed} />
+        <LearnerGate
+          profiles={profiles}
+          progress={allProgress}
+          onEnter={enterLab}
+          onResetProgress={resetLearnerProgress}
+          onRemoveProfile={removeProfile}
+        />
       </div>
     );
   }
@@ -320,18 +357,23 @@ export default function App() {
               className={`flex items-center gap-2 rounded-md border py-1 pl-1 pr-1.5 transition-colors ${
                 isGuest ? "border-dashed border-pine-3 bg-transparent" : "border-pine-3 bg-pine-2/60"
               }`}
-              title={isGuest ? "Guest session — progress saved on this device" : `Signed in as ${userName}`}
+              title={
+                isGuest
+                  ? "Guest session — progress saved on this device"
+                  : `Learner: ${userName}${userRoll ? ` · ID ${userRoll}` : ""} — switch learner`
+              }
             >
               <span className="grid h-7 w-7 place-items-center rounded bg-honey font-display text-[13px] font-extrabold text-pine">
                 {userName.charAt(0).toUpperCase()}
               </span>
-              <span className="hidden max-w-[110px] truncate font-mono text-[11px] font-semibold text-chalk/85 sm:block">
+              <span className="hidden max-w-[130px] truncate font-mono text-[11px] font-semibold text-chalk/85 sm:block">
                 {userName}
+                {userRoll && <span className="text-chalk/50"> · {userRoll}</span>}
               </span>
               <button
-                onClick={logout}
-                title="Sign out"
-                aria-label="Sign out"
+                onClick={switchLearner}
+                title="Switch learner / open learner entry"
+                aria-label="Switch learner"
                 className="grid h-6 w-6 place-items-center rounded text-chalk/45 transition-colors hover:bg-pine-3 hover:text-chalk"
               >
                 <IconLogout className="h-3.5 w-3.5" />
@@ -404,8 +446,9 @@ export default function App() {
             <HomeScreen
               userName={userName}
               isGuest={isGuest}
-              joinedAt={account?.createdAt}
-              lastSeen={account?.lastSeen}
+              roll={userRoll}
+              joinedAt={learner?.createdAt}
+              lastSeen={learner?.lastSeen}
               checks={checks}
               onOpenSound={openSound}
               onSurprise={surprise}

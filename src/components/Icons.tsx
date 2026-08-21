@@ -110,3 +110,17 @@ export const IconGlobe = ({ className }: IconProps) => (
     <path d="M3.5 12h17M12 3.5c2.6 2.4 3.9 5.2 3.9 8.5s-1.3 6.1-3.9 8.5c-2.6-2.4-3.9-5.2-3.9-8.5s1.3-6.1 3.9-8.5Z" {...base} />
   </svg>
 );
+
+export const IconTrash = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+    <path d="M4.5 6.5h15M9.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v1.5M6.5 6.5l.8 12A1.5 1.5 0 0 0 8.8 20h6.4a1.5 1.5 0 0 0 1.5-1.5l.8-12" {...base} />
+    <path d="M10.2 10.5v5.5M13.8 10.5v5.5" {...base} />
+  </svg>
+);
+
+export const IconUser = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+    <circle cx="12" cy="8" r="3.6" {...base} />
+    <path d="M5 20c.8-3.4 3.4-5.3 7-5.3s6.2 1.9 7 5.3" {...base} />
+  </svg>
+);
