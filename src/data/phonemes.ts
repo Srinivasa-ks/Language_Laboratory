@@ -1,4 +1,4 @@
-export type LevelId = "syll" | "word" | "sent";
+export type LevelId = "word" | "sent";
 
 export interface Drill {
   ipa: string;
@@ -28,34 +28,39 @@ export interface Phoneme {
   keywords: string[];
   voiced?: boolean;
   chartPos?: { x: number; y: number };
-  syllables: Drill[];
+  /** classic minimal-pair contrast to train the sound against its nearest rival */
+  contrast: [Drill, Drill];
   words: Drill[];
   sentences: Drill[];
 }
 
 export const LEVELS: { id: LevelId; name: string; blurb: string }[] = [
-  { id: "syll", name: "Syllables", blurb: "Tiny one-beat building blocks." },
-  { id: "word", name: "Words", blurb: "The sound inside real vocabulary." },
-  { id: "sent", name: "Sentences", blurb: "Full-speed connected speech." },
+  { id: "word", name: "Words", blurb: "The sound inside real vocabulary — ten targets per phoneme." },
+  { id: "sent", name: "Sentences", blurb: "Full-speed connected speech — three carrier sentences per phoneme." },
 ];
 
 export const getDrills = (p: Phoneme, level: LevelId): Drill[] =>
-  level === "syll" ? p.syllables : level === "word" ? p.words : p.sentences;
+  level === "word" ? p.words : p.sentences;
 
 const d = (ipa: string, text: string, say?: string): Drill => ({ ipa, text, say });
 
 export const PHONEMES: Phoneme[] = [
-  // ───────────────────────── MONOPHTHONGS ─────────────────────────
+  // ───────────────────────── MONOPHTHONGS (12) ─────────────────────────
   {
     id: "iː", ipa: "iː", category: "monophthong", chartPos: { x: 66, y: 30 },
     label: "close front unrounded vowel", keyword: "the FLEECE vowel",
     hint: "Spread your lips into a slight smile, push the tongue high and far forward, and hold the sound long — it is a tense vowel.",
     keywords: ["see", "tree", "machine"],
-    syllables: [d("/biː/", "bee"), d("/siː/", "sea"), d("/miː/", "me"), d("/tiː/", "tea"), d("/kiː/", "key")],
-    words: [d("/fliːs/", "fleece"), d("/bɪˈliːv/", "believe"), d("/rɪˈsiːt/", "receipt"), d("/ˈpiːpl/", "people"), d("/məˈʃiːn/", "machine"), d("/fiːld/", "field")],
+    contrast: [d("/ʃiːp/", "sheep"), d("/ʃɪp/", "ship")],
+    words: [
+      d("/fliːs/", "fleece"), d("/spiːtʃ/", "speech"), d("/rɪˈsiːv/", "receive"),
+      d("/məˈʃiːn/", "machine"), d("/ˈpiːpl/", "people"), d("/fiːld/", "field"),
+      d("/bɪˈliːv/", "believe"), d("/bɪˈtwiːn/", "between"), d("/ˈiːvn/", "even"), d("/pəˈliːs/", "police"),
+    ],
     sentences: [
-      d("/ʃiː siːz θriː ɡriːn triːz baɪ ðə siː/", "She sees three green trees by the sea."),
-      d("/pliːz kiːp ðə rɪˈsiːt bɪˈliːv miː/", "Please keep the receipt — believe me."),
+      d("/ʃi siːz θriː ɡriːn triːz baɪ ðə siː/", "She sees three green trees by the sea."),
+      d("/pliːz kiːp ðə rɪˈsiːt ənd bɪˈliːv miː/", "Please keep the receipt and believe me."),
+      d("/hi iːts tʃiːz ənd piːz ˈevri ˈiːvnɪŋ/", "He eats cheese and peas every evening."),
     ],
   },
   {
@@ -63,11 +68,16 @@ export const PHONEMES: Phoneme[] = [
     label: "near-close near-front unrounded vowel", keyword: "the KIT vowel",
     hint: "Short and relaxed — the tongue sits a touch lower and further back than /iː/. Never stretch it long.",
     keywords: ["ship", "women", "busy"],
-    syllables: [d("/bɪt/", "bit"), d("/sɪt/", "sit"), d("/hɪp/", "hip"), d("/lɪd/", "lid"), d("/kɪs/", "kiss")],
-    words: [d("/ʃɪp/", "ship"), d("/ˈwɪmɪn/", "women"), d("/ˈbɪzi/", "busy"), d("/brɪdʒ/", "bridge"), d("/ˈmɪnɪt/", "minute"), d("/ɡɪlt/", "guilt")],
+    contrast: [d("/ʃɪp/", "ship"), d("/ʃiːp/", "sheep")],
+    words: [
+      d("/ʃɪp/", "ship"), d("/ˈwɪmɪn/", "women"), d("/ˈbɪzi/", "busy"),
+      d("/ɡɪlt/", "guilt"), d("/ˈmɪnɪt/", "minute"), d("/ˈsɪstəm/", "system"),
+      d("/ˈmɪrə/", "mirror"), d("/brɪdʒ/", "bridge"), d("/ˈvɪlɪdʒ/", "village"), d("/ˈbɪldɪŋ/", "building"),
+    ],
     sentences: [
       d("/sɪks slɪm ʃɪps slɪpt ˈɪntə ˈhɑːbə/", "Six slim ships slipped into harbour."),
       d("/ðɪs ˈlɪtl ˈvɪlɪdʒ ɪz kwaɪt bɪɡ/", "This little village is quite big."),
+      d("/ɡɪv ɪm ə ˈmɪnɪt tə ˈfɪnɪʃ ðə ˈsɪstəm/", "Give him a minute to finish the system."),
     ],
   },
   {
@@ -75,11 +85,16 @@ export const PHONEMES: Phoneme[] = [
     label: "mid front unrounded vowel", keyword: "the DRESS vowel",
     hint: "Drop the jaw a little below /ɪ/ and keep it short and crisp — a plain 'eh', never gliding to 'ay'.",
     keywords: ["bed", "said", "many"],
-    syllables: [d("/bed/", "bed"), d("/red/", "red"), d("/pen/", "pen"), d("/leɡ/", "leg"), d("/nek/", "neck")],
-    words: [d("/frend/", "friend"), d("/sed/", "said"), d("/əˈɡen/", "again"), d("/hed/", "head"), d("/ˈmeni/", "many"), d("/ˈeni/", "any")],
+    contrast: [d("/bed/", "bed"), d("/bæd/", "bad")],
+    words: [
+      d("/frend/", "friend"), d("/sed/", "said"), d("/əˈɡen/", "again"),
+      d("/hed/", "head"), d("/ˈmeni/", "many"), d("/ˈeni/", "any"),
+      d("/ˈhevi/", "heavy"), d("/ˈredi/", "ready"), d("/ˈweðə/", "weather"), d("/ˈlemən/", "lemon"),
+    ],
     sentences: [
       d("/ɡet ˈredi ðen lets ɡəʊ tə bed/", "Get ready, then let's go to bed."),
       d("/ðə red hen pekt ət ðə bred/", "The red hen pecked at the bread."),
+      d("/ʃi sed ðə ˈweðə ɡets ˈbetər ɪn sepˈtembə/", "She said the weather gets better in September."),
     ],
   },
   {
@@ -87,11 +102,16 @@ export const PHONEMES: Phoneme[] = [
     label: "near-open front unrounded vowel", keyword: "the TRAP vowel",
     hint: "Open wide — jaw down, tongue low and front. A bright, flat 'a', held short.",
     keywords: ["cat", "laugh", "camera"],
-    syllables: [d("/kæt/", "cat"), d("/mæp/", "map"), d("/tæp/", "tap"), d("/dʒæm/", "jam"), d("/hæd/", "had")],
-    words: [d("/ˈæpl/", "apple"), d("/blæk/", "black"), d("/hænd/", "hand"), d("/ˈæŋɡri/", "angry"), d("/ˈkæmrə/", "camera"), d("/ˈtrævl/", "travel")],
+    contrast: [d("/bæd/", "bad"), d("/bed/", "bed")],
+    words: [
+      d("/ˈæpl/", "apple"), d("/blæk/", "black"), d("/hænd/", "hand"),
+      d("/ˈæŋɡri/", "angry"), d("/ˈkæmrə/", "camera"), d("/ˈtrævl/", "travel"),
+      d("/ˈdʒækɪt/", "jacket"), d("/ˈmænə/", "manner"), d("/ˈsædl/", "saddle"), d("/ˈplænɪt/", "planet"),
+    ],
     sentences: [
       d("/ə fæt kæt sæt ɒn ə blæk mæt/", "A fat cat sat on a black mat."),
       d("/sæm hæz hæm ənd dʒæm ɪn ðə pæn/", "Sam has ham and jam in the pan."),
+      d("/dʒæk hæd ə bæd kəʊld lɑːst ˈdʒænjuəri/", "Jack had a bad cold last January."),
     ],
   },
   {
@@ -99,11 +119,16 @@ export const PHONEMES: Phoneme[] = [
     label: "open-mid central unrounded vowel", keyword: "the STRUT vowel",
     hint: "A short punch from the middle of the mouth — lips neutral, tongue mid-central, like a light 'uh'.",
     keywords: ["cup", "London", "mother"],
-    syllables: [d("/kʌp/", "cup"), d("/sʌn/", "sun"), d("/mʌd/", "mud"), d("/lʌv/", "love"), d("/bʌs/", "bus")],
-    words: [d("/kʌm/", "come"), d("/ˈmʌni/", "money"), d("/ˈlʌndən/", "London"), d("/ˈstʌmək/", "stomach"), d("/ˈmʌðə/", "mother"), d("/əˈbʌv/", "above")],
+    contrast: [d("/kʌt/", "cut"), d("/kɑːt/", "cart")],
+    words: [
+      d("/kʌm/", "come"), d("/ˈmʌni/", "money"), d("/ˈlʌndən/", "London"),
+      d("/ˈstʌmək/", "stomach"), d("/ˈmʌðə/", "mother"), d("/əˈbʌv/", "above"),
+      d("/ˈkʌpl/", "couple"), d("/ˈhʌndrəd/", "hundred"), d("/ˈkʌlə/", "colour"), d("/ˈnʌθɪŋ/", "nothing"),
+    ],
     sentences: [
       d("/ðə jʌŋ ˈrʌnə lʌvz ðə sʌn/", "The young runner loves the sun."),
       d("/ˈnʌθɪŋ əˈbʌv ʌs bʌt ˈsʌmə klaʊdz/", "Nothing above us but summer clouds."),
+      d("/maɪ ˈbrʌðə wʌn ɪˈnʌf ˈmʌni ɒn ˈsʌndeɪ/", "My brother won enough money on Sunday."),
     ],
   },
   {
@@ -111,11 +136,16 @@ export const PHONEMES: Phoneme[] = [
     label: "open back rounded vowel", keyword: "the LOT vowel",
     hint: "Round the lips lightly and drop the jaw — a short, dark, open 'o' at the back of the mouth.",
     keywords: ["hot", "want", "sorry"],
-    syllables: [d("/hɒt/", "hot"), d("/dɒɡ/", "dog"), d("/bɒks/", "box"), d("/pɒt/", "pot"), d("/wɒʃ/", "wash")],
-    words: [d("/klɒk/", "clock"), d("/wɒnt/", "want"), d("/bɪˈkɒz/", "because"), d("/wɒtʃ/", "watch"), d("/ˈkwɒləti/", "quality"), d("/ˈsɒri/", "sorry")],
+    contrast: [d("/pɒt/", "pot"), d("/pʊt/", "put")],
+    words: [
+      d("/klɒk/", "clock"), d("/wɒnt/", "want"), d("/bɪˈkɒz/", "because"),
+      d("/wɒtʃ/", "watch"), d("/ˈkwɒləti/", "quality"), d("/ˈsɒri/", "sorry"),
+      d("/ˈprɒbləm/", "problem"), d("/ˈɒfɪs/", "office"), d("/ˈmɒdl/", "model"), d("/ˈɒnɪst/", "honest"),
+    ],
     sentences: [
       d("/stɒp ðə kɑː ðə pɒt ɪz hɒt/", "Stop the car — the pot is hot."),
       d("/ðə dɒɡ ɡɒt lɒst ɒn ðə ˈkɒmən/", "The dog got lost on the common."),
+      d("/tɒm ɡɒt ə dʒɒb ɪn ən ˈɒfɪs ɪn ˈlʌndən/", "Tom got a job in an office in London."),
     ],
   },
   {
@@ -123,11 +153,16 @@ export const PHONEMES: Phoneme[] = [
     label: "near-close near-back rounded vowel", keyword: "the FOOT vowel",
     hint: "Short and loose — lips softly rounded, tongue high and back but relaxed. Never let it glide into /uː/.",
     keywords: ["book", "could", "sugar"],
-    syllables: [d("/bʊk/", "book"), d("/pʊt/", "put"), d("/lʊk/", "look"), d("/ɡʊd/", "good"), d("/fʊl/", "full")],
-    words: [d("/kʊd/", "could"), d("/wʊd/", "would"), d("/pʊʃ/", "push"), d("/ˈbʊtʃə/", "butcher"), d("/ˈʃʊɡə/", "sugar"), d("/ˈkʊʃn/", "cushion")],
+    contrast: [d("/fʊl/", "full"), d("/fuːl/", "fool")],
+    words: [
+      d("/kʊd/", "could"), d("/wʊd/", "would"), d("/pʊʃ/", "push"),
+      d("/ˈbʊtʃə/", "butcher"), d("/ˈʃʊɡə/", "sugar"), d("/ˈkʊʃn/", "cushion"),
+      d("/bʊk/", "book"), d("/ɡʊd/", "good"), d("/ˈwʊmən/", "woman"), d("/wʊlf/", "wolf"),
+    ],
     sentences: [
       d("/pʊt ðə ɡʊd bʊk ɒn ðə ʃelf/", "Put the good book on the shelf."),
       d("/ə ɡʊd kʊk kʊd pʊʃ ðə ˈkʊʃn/", "A good cook could push the cushion."),
+      d("/ðə ˈbʊtʃəz ˈwʊmən sɔː ə wʊlf ɪn ðə wʊd/", "The butcher's woman saw a wolf in the wood."),
     ],
   },
   {
@@ -135,11 +170,16 @@ export const PHONEMES: Phoneme[] = [
     label: "mid central unrounded vowel", keyword: "the schwa",
     hint: "The laziest sound in English — mouth barely open, completely relaxed, and always unstressed.",
     keywords: ["about", "teacher", "banana"],
-    syllables: [d("/ə/", "uh"), d("/ðə/", "the"), d("/ə/", "a"), d("/əv/", "of"), d("/tə/", "to")],
-    words: [d("/əˈbaʊt/", "about"), d("/səˈpɔːt/", "support"), d("/ˈtiːtʃə/", "teacher"), d("/ˈdɒktə/", "doctor"), d("/bəˈnɑːnə/", "banana"), d("/ˈmeməri/", "memory")],
+    contrast: [d("/səˈpɔːt/", "support"), d("/spɔːt/", "sport")],
+    words: [
+      d("/əˈbaʊt/", "about"), d("/səˈpɔːt/", "support"), d("/ˈtiːtʃə/", "teacher"),
+      d("/ˈdɒktə/", "doctor"), d("/bəˈnɑːnə/", "banana"), d("/ˈmeməri/", "memory"),
+      d("/ˈsəʊfə/", "sofa"), d("/ˈkæmrə/", "camera"), d("/ˈpiːtsə/", "pizza"), d("/əˈɡen/", "again"),
+    ],
     sentences: [
       d("/ə bəˈnɑːnə ənd ə təˈmɑːtəʊ pliːz/", "A banana and a tomato, please."),
       d("/ðə ˈdɒktə rɪˈmembəd ði ʌmˈbrelə/", "The doctor remembered the umbrella."),
+      d("/ðə ˈsəʊfə əˈbaʊt ðə ˈkɔːnə sjuːts əˈmændə/", "The sofa about the corner suits Amanda."),
     ],
   },
   {
@@ -147,11 +187,16 @@ export const PHONEMES: Phoneme[] = [
     label: "close back rounded vowel", keyword: "the GOOSE vowel",
     hint: "Push the lips into a tight circle and raise the tongue high at the back — long and tense.",
     keywords: ["blue", "through", "soup"],
-    syllables: [d("/bluː/", "blue"), d("/fuːd/", "food"), d("/ʃuː/", "shoe"), d("/tuː/", "two"), d("/huː/", "who")],
-    words: [d("/duː/", "do"), d("/muːv/", "move"), d("/ɡruːp/", "group"), d("/θruː/", "through"), d("/suːp/", "soup"), d("/dʒuːn/", "June")],
+    contrast: [d("/fuːl/", "fool"), d("/fʊl/", "full")],
+    words: [
+      d("/duː/", "do"), d("/muːv/", "move"), d("/ɡruːp/", "group"),
+      d("/θruː/", "through"), d("/suːp/", "soup"), d("/dʒuːn/", "June"),
+      d("/bluː/", "blue"), d("/skuːl/", "school"), d("/tʃuːz/", "choose"), d("/njuː/", "new"),
+    ],
     sentences: [
       d("/huː muːvd maɪ bluː ʃuːz/", "Who moved my blue shoes?"),
       d("/ðə muːn rəʊz ˈəʊvə ðə leɪk ɪn dʒuːn/", "The moon rose over the lake in June."),
+      d("/tuː ɡruːps muːvd θruː ðə skuːl/", "Two groups moved through the school."),
     ],
   },
   {
@@ -159,11 +204,16 @@ export const PHONEMES: Phoneme[] = [
     label: "open-mid back rounded vowel", keyword: "the THOUGHT vowel",
     hint: "Round and open at the back — jaw fairly low, lips in a firm circle, held long.",
     keywords: ["four", "water", "daughter"],
-    syllables: [d("/fɔː/", "four"), d("/dɔː/", "door"), d("/mɔː/", "more"), d("/sɔː/", "saw"), d("/tɔːl/", "tall")],
-    words: [d("/wɔːk/", "walk"), d("/ˈwɔːtə/", "water"), d("/θɔːt/", "thought"), d("/bɔːd/", "board"), d("/bɪˈfɔː/", "before"), d("/ˈdɔːtə/", "daughter")],
+    contrast: [d("/pɔːt/", "port"), d("/pɒt/", "pot")],
+    words: [
+      d("/wɔːk/", "walk"), d("/ˈwɔːtə/", "water"), d("/θɔːt/", "thought"),
+      d("/bɔːd/", "board"), d("/bɪˈfɔː/", "before"), d("/ˈdɔːtə/", "daughter"),
+      d("/dɔː/", "door"), d("/ˈmɔːnɪŋ/", "morning"), d("/ˈɔːtəm/", "autumn"), d("/lɔː/", "law"),
+    ],
     sentences: [
       d("/ɔːl smɔːl bɔɪz əˈdɔː ðə ˈdaɪnəsɔː/", "All small boys adore the dinosaur."),
       d("/fɔː mɔː dɔːz nəʊ mɔː ðæn bɪˈfɔː/", "Four more doors — no more than before."),
+      d("/hə ˈdɔːtə tɔːks fər ˈaʊəz ˈevri ˈmɔːnɪŋ/", "Her daughter talks for hours every morning."),
     ],
   },
   {
@@ -171,11 +221,16 @@ export const PHONEMES: Phoneme[] = [
     label: "open-mid central unrounded vowel", keyword: "the NURSE vowel",
     hint: "Pull the lips back slightly, tongue flat in the centre — a long, neutral hum. Don't roll the r.",
     keywords: ["bird", "world", "journey"],
-    syllables: [d("/bɜːd/", "bird"), d("/hɜː/", "her"), d("/fɜː/", "fur"), d("/wɜːk/", "work"), d("/lɜːn/", "learn")],
-    words: [d("/ɡɜːl/", "girl"), d("/wɜːld/", "world"), d("/wɜːd/", "word"), d("/hɜːd/", "heard"), d("/ˈɜːli/", "early"), d("/ˈdʒɜːni/", "journey")],
+    contrast: [d("/wɜːd/", "word"), d("/wʊd/", "wood")],
+    words: [
+      d("/ɡɜːl/", "girl"), d("/wɜːld/", "world"), d("/wɜːd/", "word"),
+      d("/hɜːd/", "heard"), d("/ˈɜːli/", "early"), d("/ˈdʒɜːni/", "journey"),
+      d("/bɜːd/", "bird"), d("/fɜːst/", "first"), d("/wɜːk/", "work"), d("/ˈθɜːzdeɪ/", "Thursday"),
+    ],
     sentences: [
       d("/hɜː fɜːst wɜːd wəz hɜːd baɪ ðə nɜːs/", "Her first word was heard by the nurse."),
       d("/ˈθɜːti bɜːdz tɜːnd təˈwɔːdz ði ɜːθ/", "Thirty birds turned towards the earth."),
+      d("/hi wɜːks ˈɜːli ənd lɜːnz ˈdʒɜːmən fɜːst/", "He works early and learns German first."),
     ],
   },
   {
@@ -183,25 +238,35 @@ export const PHONEMES: Phoneme[] = [
     label: "open back unrounded vowel", keyword: "the BATH vowel",
     hint: "Open the jaw wide at the back — no lip rounding, a long dark 'ah' as in 'spa'.",
     keywords: ["car", "dance", "heart"],
-    syllables: [d("/kɑː/", "car"), d("/bɑː/", "bar"), d("/fɑː/", "far"), d("/pɑːk/", "park"), d("/kɑːm/", "calm")],
-    words: [d("/hɑːt/", "heart"), d("/ˈrɑːðə/", "rather"), d("/mɑːtʃ/", "march"), d("/ɑːsk/", "ask"), d("/dɑːns/", "dance"), d("/pɑːst/", "past")],
+    contrast: [d("/kɑːt/", "cart"), d("/kʌt/", "cut")],
+    words: [
+      d("/hɑːt/", "heart"), d("/ˈrɑːðə/", "rather"), d("/mɑːtʃ/", "march"),
+      d("/ɑːsk/", "ask"), d("/dɑːns/", "dance"), d("/pɑːst/", "past"),
+      d("/kɑː/", "car"), d("/pɑːk/", "park"), d("/ˈɡɑːdn/", "garden"), d("/klɑːs/", "class"),
+    ],
     sentences: [
       d("/maɪ ˈfɑːðə ˈdɑːnsɪz ɪn ðə ˈɡɑːdn/", "My father dances in the garden."),
       d("/hɑːf ðə klɑːs pɑːst ði ɪɡˈzæm/", "Half the class passed the exam."),
+      d("/ði ˈɑːtɪst pɑːkt ðə kɑː fɑː frɒm ðə pɑːk/", "The artist parked the car far from the park."),
     ],
   },
 
-  // ───────────────────────── DIPHTHONGS ─────────────────────────
+  // ───────────────────────── DIPHTHONGS (8) ─────────────────────────
   {
     id: "eɪ", ipa: "eɪ", category: "diphthong",
     label: "closing diphthong e → ɪ", keyword: "the FACE vowel",
     hint: "Start on /e/ and glide up towards /ɪ/ — one smooth movement, never two separate vowels.",
     keywords: ["day", "great", "straight"],
-    syllables: [d("/deɪ/", "day"), d("/seɪ/", "say"), d("/meɪ/", "may"), d("/eɪt/", "eight"), d("/weɪt/", "wait")],
-    words: [d("/meɪk/", "make"), d("/reɪn/", "rain"), d("/ɡreɪt/", "great"), d("/ðeɪ/", "they"), d("/tʃeɪndʒ/", "change"), d("/streɪt/", "straight")],
+    contrast: [d("/seɪ/", "say"), d("/saɪ/", "sigh")],
+    words: [
+      d("/meɪk/", "make"), d("/reɪn/", "rain"), d("/ɡreɪt/", "great"),
+      d("/ðeɪ/", "they"), d("/tʃeɪndʒ/", "change"), d("/streɪt/", "straight"),
+      d("/deɪ/", "day"), d("/neɪm/", "name"), d("/ˈsteɪʃn/", "station"), d("/ˈeɪprəl/", "April"),
+    ],
     sentences: [
       d("/ðeɪ pleɪ ɔːl deɪ ɪn meɪ/", "They play all day in May."),
       d("/ðə treɪn keɪm leɪt əˈɡen təˈdeɪ/", "The train came late again today."),
+      d("/ɡreɪt ˈtʃeɪndʒɪz keɪm tə ðə ˈsteɪʃn ɪn ˈeɪprəl/", "Great changes came to the station in April."),
     ],
   },
   {
@@ -209,11 +274,16 @@ export const PHONEMES: Phoneme[] = [
     label: "closing diphthong a → ɪ", keyword: "the PRICE vowel",
     hint: "Fall from an open /a/ up to a light /ɪ/ — a big, confident glide.",
     keywords: ["eye", "island", "quiet"],
-    syllables: [d("/aɪ/", "I"), d("/maɪ/", "my"), d("/haɪ/", "high"), d("/flaɪ/", "fly"), d("/taɪm/", "time")],
-    words: [d("/aɪ/", "eye"), d("/laɪk/", "like"), d("/waɪt/", "white"), d("/raɪs/", "rice"), d("/ˈkwaɪət/", "quiet"), d("/ˈaɪlənd/", "island")],
+    contrast: [d("/saɪ/", "sigh"), d("/seɪ/", "say")],
+    words: [
+      d("/aɪ/", "eye"), d("/laɪk/", "like"), d("/waɪt/", "white"),
+      d("/raɪs/", "rice"), d("/ˈkwaɪət/", "quiet"), d("/ˈaɪlənd/", "island"),
+      d("/taɪm/", "time"), d("/faɪv/", "five"), d("/tʃaɪld/", "child"), d("/kaɪnd/", "kind"),
+    ],
     sentences: [
       d("/aɪ laɪk braɪt waɪt raɪs/", "I like bright white rice."),
       d("/faɪv ˈdraɪvəz əˈraɪvd ət naɪn/", "Five drivers arrived at nine."),
+      d("/ðə tʃaɪld faʊnd faɪv kɔɪnz ɒn ˈfraɪdeɪ/", "The child found five coins on Friday."),
     ],
   },
   {
@@ -221,11 +291,16 @@ export const PHONEMES: Phoneme[] = [
     label: "closing diphthong ɔ → ɪ", keyword: "the CHOICE vowel",
     hint: "Start rounded and open at the back, then glide forward to /ɪ/ — keep it one syllable.",
     keywords: ["boy", "royal", "oyster"],
-    syllables: [d("/bɔɪ/", "boy"), d("/tɔɪ/", "toy"), d("/ɔɪl/", "oil"), d("/kɔɪn/", "coin"), d("/vɔɪs/", "voice")],
-    words: [d("/ɪnˈdʒɔɪ/", "enjoy"), d("/nɔɪz/", "noise"), d("/pɔɪnt/", "point"), d("/ˈrɔɪəl/", "royal"), d("/ˈɔɪstə/", "oyster"), d("/ˈlɔɪəl/", "loyal")],
+    contrast: [d("/bɔɪ/", "boy"), d("/baɪ/", "buy")],
+    words: [
+      d("/ɪnˈdʒɔɪ/", "enjoy"), d("/nɔɪz/", "noise"), d("/pɔɪnt/", "point"),
+      d("/ˈrɔɪəl/", "royal"), d("/ˈɔɪstə/", "oyster"), d("/ˈlɔɪəl/", "loyal"),
+      d("/bɔɪ/", "boy"), d("/tɔɪ/", "toy"), d("/kɔɪn/", "coin"), d("/vɔɪs/", "voice"),
+    ],
     sentences: [
       d("/ðə ˈlɪtl bɔɪ meɪd ə laʊd nɔɪz/", "The little boy made a loud noise."),
       d("/ɪnˈdʒɔɪ ði ˈɔɪstə ɪts ə ˈrɔɪəl triːt/", "Enjoy the oyster — it's a royal treat."),
+      d("/hə vɔɪs ˈkærid əˈkrɒs ðə ˈrɔɪəl hɔːl/", "Her voice carried across the royal hall."),
     ],
   },
   {
@@ -233,11 +308,16 @@ export const PHONEMES: Phoneme[] = [
     label: "closing diphthong ə → ʊ", keyword: "the GOAT vowel",
     hint: "Begin on a central schwa, then round and close towards /ʊ/ — the classic British 'oh'.",
     keywords: ["go", "phone", "alone"],
-    syllables: [d("/ɡəʊ/", "go"), d("/nəʊ/", "no"), d("/həʊm/", "home"), d("/rəʊd/", "road"), d("/nəʊ/", "know")],
-    words: [d("/kəʊt/", "coat"), d("/bəʊθ/", "both"), d("/ˈəʊpən/", "open"), d("/fəʊn/", "phone"), d("/əˈləʊn/", "alone"), d("/səʊl/", "soul")],
+    contrast: [d("/bəʊt/", "boat"), d("/bɔːt/", "bought")],
+    words: [
+      d("/kəʊt/", "coat"), d("/bəʊθ/", "both"), d("/ˈəʊpən/", "open"),
+      d("/fəʊn/", "phone"), d("/əˈləʊn/", "alone"), d("/səʊl/", "soul"),
+      d("/ɡəʊ/", "go"), d("/həʊm/", "home"), d("/rəʊd/", "road"), d("/nəʊ/", "know"),
+    ],
     sentences: [
       d("/dəʊnt ɡəʊ həʊm səʊ suːn/", "Don't go home so soon."),
       d("/nəʊ wʌn nəʊz ði əʊld rəʊd/", "No one knows the old road."),
+      d("/ðə bəʊt fləʊts ˈsləʊli bɪˈləʊ ðə snəʊ/", "The boat floats slowly below the snow."),
     ],
   },
   {
@@ -245,11 +325,16 @@ export const PHONEMES: Phoneme[] = [
     label: "closing diphthong a → ʊ", keyword: "the MOUTH vowel",
     hint: "Open wide on /a/, then round up to /ʊ/ — a big 'ow' glide.",
     keywords: ["how", "south", "allow"],
-    syllables: [d("/haʊ/", "how"), d("/naʊ/", "now"), d("/aʊt/", "out"), d("/taʊn/", "town"), d("/haʊs/", "house")],
-    words: [d("/aʊə/", "our"), d("/saʊθ/", "south"), d("/əˈbaʊt/", "about"), d("/faʊnd/", "found"), d("/əˈlaʊ/", "allow"), d("/laʊd/", "loud")],
+    contrast: [d("/naʊ/", "now"), d("/nəʊ/", "no")],
+    words: [
+      d("/aʊə/", "our"), d("/saʊθ/", "south"), d("/əˈbaʊt/", "about"),
+      d("/faʊnd/", "found"), d("/əˈlaʊ/", "allow"), d("/laʊd/", "loud"),
+      d("/haʊ/", "how"), d("/haʊs/", "house"), d("/taʊn/", "town"), d("/maʊθ/", "mouth"),
+    ],
     sentences: [
       d("/haʊ naʊ braʊn kaʊ/", "How now, brown cow?"),
       d("/aʊə haʊs stændz saʊθ əv taʊn/", "Our house stands south of town."),
+      d("/ðə maʊs ræn aʊt əv ðə haʊs/", "The mouse ran out of the house."),
     ],
   },
   {
@@ -257,11 +342,16 @@ export const PHONEMES: Phoneme[] = [
     label: "centring diphthong ɪ → ə", keyword: "the NEAR vowel",
     hint: "Start on a clear /ɪ/, then relax into schwa — no 'r' sound, just the glide.",
     keywords: ["here", "idea", "serious"],
-    syllables: [d("/hɪə/", "here"), d("/ɪə/", "ear"), d("/jɪə/", "year"), d("/nɪə/", "near"), d("/bɪə/", "beer")],
-    words: [d("/aɪˈdɪə/", "idea"), d("/rɪəl/", "real"), d("/ˈhɪərəʊ/", "hero"), d("/ˈsɪəriəs/", "serious"), d("/ˈmɪrə/", "mirror"), d("/hɪə/", "hear")],
+    contrast: [d("/hɪə/", "here"), d("/heə/", "hair")],
+    words: [
+      d("/aɪˈdɪə/", "idea"), d("/rɪəl/", "real"), d("/ˈhɪərəʊ/", "hero"),
+      d("/ˈsɪəriəs/", "serious"), d("/ˈmɪrə/", "mirror"), d("/hɪə/", "hear"),
+      d("/hɪə/", "here"), d("/ɪə/", "ear"), d("/nɪə/", "near"), d("/klɪə/", "clear"),
+    ],
     sentences: [
       d("/kʌm nɪə ənd hɪə ðɪs aɪˈdɪə/", "Come near and hear this idea."),
       d("/ðə ˈhɪərəʊ ɪz ˈrɪəli ˈsɪəriəs/", "The hero is really serious."),
+      d("/kæn juː hɪə miː ˈklɪəli frɒm hɪə/", "Can you hear me clearly from here?"),
     ],
   },
   {
@@ -269,11 +359,16 @@ export const PHONEMES: Phoneme[] = [
     label: "centring diphthong e → ə", keyword: "the SQUARE vowel",
     hint: "Open on /e/, glide to a relaxed schwa — as in 'air', with no hard r.",
     keywords: ["there", "parents", "aware"],
-    syllables: [d("/eə/", "air"), d("/ðeə/", "there"), d("/weə/", "where"), d("/keə/", "care"), d("/tʃeə/", "chair")],
-    words: [d("/ðeə/", "their"), d("/ʃeə/", "share"), d("/ˈpeərənts/", "parents"), d("/prɪˈpeə/", "prepare"), d("/əˈweə/", "aware"), d("/skweə/", "square")],
+    contrast: [d("/heə/", "hair"), d("/hɪə/", "here")],
+    words: [
+      d("/ðeə/", "their"), d("/ʃeə/", "share"), d("/ˈpeərənts/", "parents"),
+      d("/prɪˈpeə/", "prepare"), d("/əˈweə/", "aware"), d("/skweə/", "square"),
+      d("/ðeə/", "there"), d("/weə/", "where"), d("/tʃeə/", "chair"), d("/keə/", "care"),
+    ],
     sentences: [
       d("/weəz ðə tʃeə ˈəʊvə ðeə/", "Where's the chair over there?"),
       d("/teɪk keə ɒn ðə skweə stəʊn steəz/", "Take care on the square stone stairs."),
+      d("/ðeɪ ʃeə ə peə ɒn ðə rɪˈpeə dʒɒb/", "They share a pear on the repair job."),
     ],
   },
   {
@@ -281,11 +376,16 @@ export const PHONEMES: Phoneme[] = [
     label: "centring diphthong ʊ → ə", keyword: "the CURE vowel",
     hint: "From a rounded /ʊ/, relax down to schwa — a rarer glide, heard in 'tour' and 'sure'.",
     keywords: ["tour", "Europe", "brochure"],
-    syllables: [d("/tʊə/", "tour"), d("/pjʊə/", "pure"), d("/ʃʊə/", "sure"), d("/kjʊə/", "cure"), d("/pʊə/", "poor")],
-    words: [d("/ˈjʊərəp/", "Europe"), d("/ˈtʊərɪst/", "tourist"), d("/ˈdʒʊəri/", "jury"), d("/ˈfjʊəriəs/", "furious"), d("/ˈbrəʊʃʊə/", "brochure"), d("/ɪnˈdjʊə/", "endure")],
+    contrast: [d("/tʊə/", "tour"), d("/tɔː/", "tore")],
+    words: [
+      d("/ˈjʊərəp/", "Europe"), d("/ˈtʊərɪst/", "tourist"), d("/ˈdʒʊəri/", "jury"),
+      d("/ˈfjʊəriəs/", "furious"), d("/ˈbrəʊʃʊə/", "brochure"), d("/ɪnˈdjʊə/", "endure"),
+      d("/tʊə/", "tour"), d("/pjʊə/", "pure"), d("/ʃʊə/", "sure"), d("/kjʊə/", "cure"),
+    ],
     sentences: [
       d("/ɑː juː ʃʊə ðə tʊə wəz pjʊə fʌn/", "Are you sure the tour was pure fun?"),
       d("/ðə pʊə ˈtʊərɪst lɒst ðə ˈbrəʊʃʊə/", "The poor tourist lost the brochure."),
+      d("/ðə ˈfjʊəriəs ˈdʒʊəri ɪnˈdjʊəd ðə lɒŋ tʊə/", "The furious jury endured the long tour."),
     ],
   },
 
@@ -295,11 +395,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless bilabial plosive", keyword: "as in 'paper'",
     hint: "Close both lips, build air pressure, release with a small puff — hold a hand in front of your mouth to feel it.",
     keywords: ["paper", "happy", "perhaps"],
-    syllables: [d("/piː/", "pea"), d("/peɪ/", "pay"), d("/pɒp/", "pop"), d("/ʌp/", "up"), d("/pʌp/", "pup")],
-    words: [d("/ˈpeɪpə/", "paper"), d("/ˈæpl/", "apple"), d("/ˈhæpi/", "happy"), d("/pəˈhæps/", "perhaps"), d("/stɒp/", "stop"), d("/ˈpiːpl/", "people")],
+    contrast: [d("/pæk/", "pack"), d("/bæk/", "back")],
+    words: [
+      d("/ˈpeɪpə/", "paper"), d("/ˈæpl/", "apple"), d("/ˈhæpi/", "happy"),
+      d("/pəˈhæps/", "perhaps"), d("/stɒp/", "stop"), d("/ˈpiːpl/", "people"),
+      d("/pen/", "pen"), d("/kʌp/", "cup"), d("/tɒp/", "top"), d("/mæp/", "map"),
+    ],
     sentences: [
       d("/ˈpiːtə pɪkt ə pek əv ˈpepəz/", "Peter picked a peck of peppers."),
       d("/pɒp ðə tɒp ɒf ðə ˈplɑːstɪk pɒt/", "Pop the top off the plastic pot."),
+      d("/ʃi pʊt ðə ˈpeɪpər ɪn ðə pɪŋk kʌp/", "She put the paper in the pink cup."),
     ],
   },
   {
@@ -307,11 +412,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced bilabial plosive", keyword: "as in 'bubble'",
     hint: "Same lip closure as /p/, but switch the voice on — no puff of air, just a soft buzz.",
     keywords: ["bubble", "build", "maybe"],
-    syllables: [d("/biː/", "bee"), d("/baɪ/", "buy"), d("/bɒb/", "bob"), d("/bɪb/", "bib"), d("/tʌb/", "tub")],
-    words: [d("/ˈbʌbl/", "bubble"), d("/ˈrɒbə/", "robber"), d("/əˈbʌv/", "above"), d("/bɪld/", "build"), d("/kəʊm/", "comb"), d("/ˈmeɪbi/", "maybe")],
+    contrast: [d("/bæk/", "back"), d("/pæk/", "pack")],
+    words: [
+      d("/ˈbʌbl/", "bubble"), d("/ˈrɒbə/", "robber"), d("/əˈbʌv/", "above"),
+      d("/bɪld/", "build"), d("/kəʊm/", "comb"), d("/ˈmeɪbi/", "maybe"),
+      d("/bed/", "bed"), d("/ˈbeɪbi/", "baby"), d("/bɪɡ/", "big"), d("/klʌb/", "club"),
+    ],
     sentences: [
       d("/ˈbɒbi bɪlt ə bɪɡ bluː bəʊt/", "Bobby built a big blue boat."),
       d("/ðə ˈræbɪt bɪt ðə ˈrʌbə bænd/", "The rabbit bit the rubber band."),
+      d("/ðə ˈbeɪbi brɪŋz ðə bluː bɔːl bæk/", "The baby brings the blue ball back."),
     ],
   },
   {
@@ -319,11 +429,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless alveolar plosive", keyword: "as in 'water'",
     hint: "Tongue tip on the ridge behind the teeth, sharp release with a puff — crisper than in many languages.",
     keywords: ["water", "often", "mountain"],
-    syllables: [d("/tiː/", "tea"), d("/taɪ/", "tie"), d("/taɪt/", "tight"), d("/ɪt/", "it"), d("/kæt/", "cat")],
-    words: [d("/ˈwɔːtə/", "water"), d("/ˈletə/", "letter"), d("/ˈbetə/", "better"), d("/ˈɒfn/", "often"), d("/ˈmaʊntɪn/", "mountain"), d("/təˈnaɪt/", "tonight")],
+    contrast: [d("/taʊn/", "town"), d("/daʊn/", "down")],
+    words: [
+      d("/ˈwɔːtə/", "water"), d("/ˈletə/", "letter"), d("/ˈbetə/", "better"),
+      d("/ˈɒfn/", "often"), d("/ˈmaʊntɪn/", "mountain"), d("/təˈnaɪt/", "tonight"),
+      d("/tiː/", "tea"), d("/taɪm/", "time"), d("/kæt/", "cat"), d("/striːt/", "street"),
+    ],
     sentences: [
       d("/ˈtwenti ˈtaɪni ˈtaɪɡəz tʊk ðə treɪn/", "Twenty tiny tigers took the train."),
       d("/wɒt ə lɒt əv ˈwɔːtər ɪn ðə ˈbɒtl/", "What a lot of water in the bottle."),
+      d("/teɪk ðə swiːt tiː tə ðə ˈteɪbl/", "Take the sweet tea to the table."),
     ],
   },
   {
@@ -331,11 +446,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced alveolar plosive", keyword: "as in 'ladder'",
     hint: "Tongue tip on the ridge again, voiced and gentle — no puff, the vocal cords hum.",
     keywords: ["ladder", "sudden", "would"],
-    syllables: [d("/deɪ/", "day"), d("/daɪ/", "die"), d("/dɒɡ/", "dog"), d("/dɪd/", "did"), d("/ɒd/", "odd")],
-    words: [d("/ˈlædə/", "ladder"), d("/ˈsʌdn/", "sudden"), d("/ˈhɪdn/", "hidden"), d("/wʊd/", "would"), d("/dʒʌdʒ/", "judge"), d("/raɪd/", "ride")],
+    contrast: [d("/daʊn/", "down"), d("/taʊn/", "town")],
+    words: [
+      d("/ˈlædə/", "ladder"), d("/ˈsʌdn/", "sudden"), d("/ˈhɪdn/", "hidden"),
+      d("/wʊd/", "would"), d("/dʒʌdʒ/", "judge"), d("/raɪd/", "ride"),
+      d("/deɪ/", "day"), d("/dɔː/", "door"), d("/dɑːns/", "dance"), d("/praʊd/", "proud"),
+    ],
     sentences: [
       d("/ˈdeɪvɪd dɪd ðə ˈdɪʃɪz ˈɑːftə ˈdɪnə/", "David did the dishes after dinner."),
       d("/ə ɡʊd diːd ɪz ˈnevə ˈhɪdn/", "A good deed is never hidden."),
+      d("/ˈdeɪvɪd dɑːnst daʊn ðə rəʊd ət dɔːn/", "David danced down the road at dawn."),
     ],
   },
   {
@@ -343,11 +463,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless velar plosive", keyword: "as in 'quick'",
     hint: "Back of the tongue against the soft palate — the puff is strongest before 'ee', weakest before 'oo'.",
     keywords: ["school", "quick", "chemistry"],
-    syllables: [d("/kiː/", "key"), d("/kɑː/", "car"), d("/kʊk/", "cook"), d("/kæt/", "cat"), d("/bæk/", "back")],
-    words: [d("/skuːl/", "school"), d("/ˈmjuːzɪk/", "music"), d("/kwɪk/", "quick"), d("/bɪˈkɒz/", "because"), d("/ˈkemɪstri/", "chemistry"), d("/ˈpɒkɪt/", "pocket")],
+    contrast: [d("/kəʊt/", "coat"), d("/ɡəʊt/", "goat")],
+    words: [
+      d("/skuːl/", "school"), d("/ˈmjuːzɪk/", "music"), d("/kwɪk/", "quick"),
+      d("/bɪˈkɒz/", "because"), d("/ˈkemɪstri/", "chemistry"), d("/ˈpɒkɪt/", "pocket"),
+      d("/kæt/", "cat"), d("/kiː/", "key"), d("/klɒk/", "clock"), d("/pɑːk/", "park"),
+    ],
     sentences: [
       d("/kæn ðə kʊk kiːp ðə ˈkɪtʃɪn kliːn/", "Can the cook keep the kitchen clean?"),
       d("/ə kwɪk kɪk krækt ðə klɒk/", "A quick kick cracked the clock."),
+      d("/ðə kæt kɔːt ə kəʊld ɪn ðə ˈkɪtʃɪn/", "The cat caught a cold in the kitchen."),
     ],
   },
   {
@@ -355,11 +480,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced velar plosive", keyword: "as in 'begin'",
     hint: "Same back closure as /k/ with the voice on — a firm 'g', never a throat scrape.",
     keywords: ["again", "guess", "language"],
-    syllables: [d("/ɡəʊ/", "go"), d("/ɡet/", "get"), d("/bɪɡ/", "big"), d("/ɡæɡ/", "gag"), d("/ɡæs/", "gas")],
-    words: [d("/əˈɡen/", "again"), d("/bɪˈɡɪn/", "begin"), d("/ɡes/", "guess"), d("/ˈlæŋɡwɪdʒ/", "language"), d("/ˈbɪɡə/", "bigger"), d("/eɡ/", "egg")],
+    contrast: [d("/ɡəʊt/", "goat"), d("/kəʊt/", "coat")],
+    words: [
+      d("/əˈɡen/", "again"), d("/bɪˈɡɪn/", "begin"), d("/ɡes/", "guess"),
+      d("/ˈlæŋɡwɪdʒ/", "language"), d("/ˈbɪɡə/", "bigger"), d("/eɡ/", "egg"),
+      d("/ɡet/", "get"), d("/ɡɜːl/", "girl"), d("/ɡʊd/", "good"), d("/bæɡ/", "bag"),
+    ],
     sentences: [
       d("/ðə ɡɜːl ɡeɪv ðə dɒɡ ə ɡʊd hʌɡ/", "The girl gave the dog a good hug."),
       d("/bɪˈɡɪn əˈɡen ənd ɡɪv ɪt ə ɡəʊ/", "Begin again and give it a go."),
+      d("/ə ɡreɪ ɡuːs ɡɒt lɒst ɪn ðə fɒɡ/", "A grey goose got lost in the fog."),
     ],
   },
 
@@ -369,11 +499,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced bilabial nasal", keyword: "as in 'summer'",
     hint: "Lips closed, voice humming out through the nose — let it ring.",
     keywords: ["summer", "hammer", "swimming"],
-    syllables: [d("/miː/", "me"), d("/maɪ/", "my"), d("/həʊm/", "home"), d("/sʌm/", "sum"), d("/mæp/", "map")],
-    words: [d("/ˈsʌmə/", "summer"), d("/ˈhæmə/", "hammer"), d("/kʌm/", "come"), d("/neɪm/", "name"), d("/ˈswɪmɪŋ/", "swimming"), d("/mʌm/", "mum")],
+    contrast: [d("/sʌm/", "sum"), d("/sʌn/", "sun")],
+    words: [
+      d("/ˈsʌmə/", "summer"), d("/ˈhæmə/", "hammer"), d("/kʌm/", "come"),
+      d("/neɪm/", "name"), d("/ˈswɪmɪŋ/", "swimming"), d("/mʌm/", "mum"),
+      d("/mæn/", "man"), d("/taɪm/", "time"), d("/həʊm/", "home"), d("/læmp/", "lamp"),
+    ],
     sentences: [
       d("/maɪ mʌm meɪks ˈmɑːməleɪd ɪn meɪ/", "My mum makes marmalade in May."),
       d("/ˈmeni men məʊ ðə ˈmedəʊ/", "Many men mow the meadow."),
+      d("/ðə smɔːl mæn swæm tə ðə ˈmɪdl əv ðə leɪk/", "The small man swam to the middle of the lake."),
     ],
   },
   {
@@ -381,11 +516,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced alveolar nasal", keyword: "as in 'dinner'",
     hint: "Tongue tip on the ridge, air through the nose — a bright, forward hum.",
     keywords: ["dinner", "funny", "none"],
-    syllables: [d("/nəʊ/", "no"), d("/nəʊ/", "know"), d("/sʌn/", "sun"), d("/net/", "net"), d("/ɒn/", "on")],
-    words: [d("/ˈdɪnə/", "dinner"), d("/ˈfʌni/", "funny"), d("/naɪn/", "nine"), d("/nʌn/", "none"), d("/ˈmʌni/", "money"), d("/rʌn/", "run")],
+    contrast: [d("/sʌn/", "sun"), d("/sʌm/", "sum")],
+    words: [
+      d("/ˈdɪnə/", "dinner"), d("/ˈfʌni/", "funny"), d("/naɪn/", "nine"),
+      d("/nʌn/", "none"), d("/ˈmʌni/", "money"), d("/rʌn/", "run"),
+      d("/nəʊ/", "no"), d("/neɪm/", "name"), d("/naɪt/", "night"), d("/ˈnevə/", "never"),
+    ],
     sentences: [
       d("/ˈnænsi niːdz naɪn njuː ˈnəʊtbʊks/", "Nancy needs nine new notebooks."),
       d("/nəʊ wʌn ˈnəʊtɪst ðə nɔɪz ət nuːn/", "No one noticed the noise at noon."),
+      d("/hi ˈnevə rʌnz ɪn ðə reɪn ət naɪt/", "He never runs in the rain at night."),
     ],
   },
   {
@@ -393,11 +533,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced velar nasal", keyword: "as in 'singing'",
     hint: "Back of the tongue on the soft palate, humming through the nose — it always follows a vowel and never starts a word.",
     keywords: ["morning", "finger", "English"],
-    syllables: [d("/sɪŋ/", "sing"), d("/lɒŋ/", "long"), d("/rɪŋ/", "ring"), d("/sɒŋ/", "song"), d("/kɪŋ/", "king")],
-    words: [d("/ˈmɔːnɪŋ/", "morning"), d("/ˈfɪŋɡə/", "finger"), d("/ˈɪŋɡlɪʃ/", "English"), d("/ˈθɪŋkɪŋ/", "thinking"), d("/jʌŋ/", "young"), d("/ˈhæŋɪŋ/", "hanging")],
+    contrast: [d("/sɪŋ/", "sing"), d("/sɪn/", "sin")],
+    words: [
+      d("/ˈmɔːnɪŋ/", "morning"), d("/ˈfɪŋɡə/", "finger"), d("/ˈɪŋɡlɪʃ/", "English"),
+      d("/ˈθɪŋkɪŋ/", "thinking"), d("/jʌŋ/", "young"), d("/ˈhæŋɪŋ/", "hanging"),
+      d("/sɪŋ/", "sing"), d("/lɒŋ/", "long"), d("/rɪŋ/", "ring"), d("/kɪŋ/", "king"),
+    ],
     sentences: [
       d("/ðə jʌŋ kɪŋ sæŋ ə lɒŋ sɒŋ/", "The young king sang a long song."),
       d("/ˈmɔːnɪŋ brɪŋz ə njuː bɪˈɡɪnɪŋ/", "Morning brings a new beginning."),
+      d("/brɪŋ ðə strɒŋ strɪŋ əˈlɒŋ/", "Bring the strong string along."),
     ],
   },
 
@@ -407,11 +552,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless labiodental fricative", keyword: "as in 'coffee'",
     hint: "Top teeth rest on the lower lip — blow air steadily, no voice.",
     keywords: ["coffee", "phone", "laugh"],
-    syllables: [d("/fiː/", "fee"), d("/fɔː/", "four"), d("/liːf/", "leaf"), d("/ɒf/", "off"), d("/ɪf/", "if")],
-    words: [d("/ˈkɒfi/", "coffee"), d("/fəʊn/", "phone"), d("/lɑːf/", "laugh"), d("/hɑːf/", "half"), d("/freɪz/", "phrase"), d("/ɡrɑːf/", "graph")],
+    contrast: [d("/fæn/", "fan"), d("/væn/", "van")],
+    words: [
+      d("/ˈkɒfi/", "coffee"), d("/fəʊn/", "phone"), d("/lɑːf/", "laugh"),
+      d("/hɑːf/", "half"), d("/freɪz/", "phrase"), d("/ɡrɑːf/", "graph"),
+      d("/fɪʃ/", "fish"), d("/faɪv/", "five"), d("/liːf/", "leaf"), d("/ɒf/", "off"),
+    ],
     sentences: [
       d("/fɔː faɪn fɪʃ fel ɒf ðə fens/", "Four fine fish fell off the fence."),
       d("/fəʊn ðə ˈkæfeɪ əˈbaʊt ðə ˈfəʊtəʊ/", "Phone the café about the photo."),
+      d("/ðə fɒks faɪndz fuːd ɪn ðə ˈfɒrɪst/", "The fox finds food in the forest."),
     ],
   },
   {
@@ -419,11 +569,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced labiodental fricative", keyword: "as in 'seven'",
     hint: "Same teeth-on-lip contact as /f/, but add voice — you should feel the lower lip tingle.",
     keywords: ["very", "river", "move"],
-    syllables: [d("/vaɪ/", "vie"), d("/vaʊ/", "vow"), d("/lʌv/", "love"), d("/faɪv/", "five"), d("/dʌv/", "dove")],
-    words: [d("/ˈveri/", "very"), d("/ˈsevn/", "seven"), d("/ˈrɪvə/", "river"), d("/hæv/", "have"), d("/muːv/", "move"), d("/vɔɪs/", "voice")],
+    contrast: [d("/væn/", "van"), d("/fæn/", "fan")],
+    words: [
+      d("/ˈveri/", "very"), d("/ˈsevn/", "seven"), d("/ˈrɪvə/", "river"),
+      d("/hæv/", "have"), d("/muːv/", "move"), d("/vɔɪs/", "voice"),
+      d("/faɪv/", "five"), d("/lʌv/", "love"), d("/lɪv/", "live"), d("/ˈvɪlɪdʒ/", "village"),
+    ],
     sentences: [
       d("/vɪv ɡeɪv ˈsevn ˈveri ˈvæljuəbl ˈvɑːzɪz/", "Viv gave seven very valuable vases."),
       d("/ðə ˈrɪvə muːvz ˈəʊvə ðə stəʊnz/", "The river moves over the stones."),
+      d("/wi lʌv ðə wɔːm ˈsʌmər ˈiːvnɪŋz/", "We love the warm summer evenings."),
     ],
   },
   {
@@ -431,11 +586,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless dental fricative", keyword: "as in 'think'",
     hint: "Tongue tip between the teeth — blow air gently. 'Think', never 'sink' or 'tink'.",
     keywords: ["think", "month", "theatre"],
-    syllables: [d("/θaɪ/", "thigh"), d("/θʌm/", "thumb"), d("/θriː/", "three"), d("/bɑːθ/", "bath"), d("/bəʊθ/", "both")],
-    words: [d("/θɪŋk/", "think"), d("/mʌnθ/", "month"), d("/ˈnʌθɪŋ/", "nothing"), d("/ˈɔːθə/", "author"), d("/ˈθɪətə/", "theatre"), d("/saʊθ/", "south")],
+    contrast: [d("/θɪŋk/", "think"), d("/sɪŋk/", "sink")],
+    words: [
+      d("/θɪŋk/", "think"), d("/mʌnθ/", "month"), d("/ˈnʌθɪŋ/", "nothing"),
+      d("/ˈɔːθə/", "author"), d("/ˈθɪətə/", "theatre"), d("/saʊθ/", "south"),
+      d("/θriː/", "three"), d("/θɪŋ/", "thing"), d("/maʊθ/", "mouth"), d("/bəʊθ/", "both"),
+    ],
     sentences: [
       d("/ði ˈæθliːt θɪŋks əˈbaʊt ˈθɜːzdeɪ/", "The athlete thinks about Thursday."),
       d("/ˈθɜːti ˈθaʊznd ˈfeðəz bəʊθ təˈɡeðə/", "Thirty thousand feathers, both together."),
+      d("/ðə θriː ˈbrʌðəz θɪŋk əˈbaʊt ðə ˈθɪətə/", "The three brothers think about the theatre."),
     ],
   },
   {
@@ -443,11 +603,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced dental fricative", keyword: "as in 'this'",
     hint: "Tongue between the teeth again, this time with voice — the sound of 'this', 'that', 'the'.",
     keywords: ["mother", "weather", "another"],
-    syllables: [d("/ðɪs/", "this"), d("/ðæt/", "that"), d("/beɪð/", "bathe"), d("/briːð/", "breathe"), d("/smuːð/", "smooth")],
-    words: [d("/ˈmʌðə/", "mother"), d("/ˈfɑːðə/", "father"), d("/ˈweðə/", "weather"), d("/ˈbrʌðə/", "brother"), d("/əˈnʌðə/", "another"), d("/wɪð/", "with")],
+    contrast: [d("/ðaɪ/", "thy"), d("/θaɪ/", "thigh")],
+    words: [
+      d("/ˈmʌðə/", "mother"), d("/ˈfɑːðə/", "father"), d("/ˈweðə/", "weather"),
+      d("/ˈbrʌðə/", "brother"), d("/əˈnʌðə/", "another"), d("/wɪð/", "with"),
+      d("/ðɪs/", "this"), d("/ðæt/", "that"), d("/beɪð/", "bathe"), d("/smuːð/", "smooth"),
+    ],
     sentences: [
       d("/ðɪs ənd ðæt ðiːz ənd ðəʊz/", "This and that, these and those."),
       d("/maɪ ˈmʌðər ənd ˈfɑːðə breɪvd ðə ˈweðə/", "My mother and father braved the weather."),
+      d("/ðə ˈweðər ɪz ˈbetə ðæn ði ˈʌðə deɪ/", "The weather is better than the other day."),
     ],
   },
   {
@@ -455,11 +620,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless alveolar fricative", keyword: "as in 'city'",
     hint: "Tongue tip close to the ridge, air hissing down the centre — a sharp, long snake sound.",
     keywords: ["city", "science", "castle"],
-    syllables: [d("/siː/", "sea"), d("/sɪt/", "sit"), d("/bʌs/", "bus"), d("/jes/", "yes"), d("/aɪs/", "ice")],
-    words: [d("/ˈsɪti/", "city"), d("/ˈsaɪəns/", "science"), d("/naɪs/", "nice"), d("/piːs/", "piece"), d("/mɪs/", "miss"), d("/ˈkɑːsl/", "castle")],
+    contrast: [d("/sɪŋk/", "sink"), d("/θɪŋk/", "think")],
+    words: [
+      d("/ˈsɪti/", "city"), d("/ˈsaɪəns/", "science"), d("/naɪs/", "nice"),
+      d("/piːs/", "piece"), d("/mɪs/", "miss"), d("/ˈkɑːsl/", "castle"),
+      d("/sʌn/", "sun"), d("/sɪks/", "six"), d("/siː/", "sea"), d("/bʌs/", "bus"),
+    ],
     sentences: [
       d("/sɪks slɪm swɒnz swæm ˈsləʊli saʊθ/", "Six slim swans swam slowly south."),
       d("/ðə ˈsaɪəns klɑːs sɔː ðə ˈkɑːsl/", "The science class saw the castle."),
+      d("/sɪks ˈsɪstəz sæt ɪn ðə sʌn/", "Six sisters sat in the sun."),
     ],
   },
   {
@@ -467,11 +637,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced alveolar fricative", keyword: "as in 'busy'",
     hint: "Same position as /s/ with the voice on — a bee's buzz, kept light and forward.",
     keywords: ["busy", "cousin", "scissors"],
-    syllables: [d("/zuː/", "zoo"), d("/ˈzɪərəʊ/", "zero"), d("/hɪz/", "his"), d("/dʒæz/", "jazz"), d("/bʌz/", "buzz")],
-    words: [d("/ˈbɪzi/", "busy"), d("/pliːz/", "please"), d("/ˈkʌzn/", "cousin"), d("/ˈsɪzəz/", "scissors"), d("/ˈhaʊzɪz/", "houses"), d("/nɔɪz/", "noise")],
+    contrast: [d("/bʌz/", "buzz"), d("/bʌs/", "bus")],
+    words: [
+      d("/ˈbɪzi/", "busy"), d("/pliːz/", "please"), d("/ˈkʌzn/", "cousin"),
+      d("/ˈsɪzəz/", "scissors"), d("/ˈhaʊzɪz/", "houses"), d("/nɔɪz/", "noise"),
+      d("/zuː/", "zoo"), d("/ˈzɪərəʊ/", "zero"), d("/hɪz/", "his"), d("/dʒæz/", "jazz"),
+    ],
     sentences: [
       d("/ˈzəʊiz ˈkʌzn tʃəʊz ðəʊz ˈrəʊzɪz/", "Zoe's cousin chose those roses."),
       d("/ðə biːz bʌz ɪn ðə briːz/", "The bees buzz in the breeze."),
+      d("/ðə ˈziːbrəz ɪn ðə zuː ɑː ˈleɪzi/", "The zebras in the zoo are lazy."),
     ],
   },
   {
@@ -479,11 +654,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless post-alveolar fricative", keyword: "as in 'station'",
     hint: "Pull the tongue back from /s/ and round the lips a little — a soft, hushed 'shhh'.",
     keywords: ["station", "ocean", "sugar"],
-    syllables: [d("/ʃiː/", "she"), d("/ʃəʊ/", "show"), d("/ʃuː/", "shoe"), d("/dɪʃ/", "dish"), d("/wɪʃ/", "wish")],
-    words: [d("/ˈsteɪʃn/", "station"), d("/ˈəʊʃn/", "ocean"), d("/ˈʃʊɡə/", "sugar"), d("/məˈʃiːn/", "machine"), d("/ˈspeʃl/", "special"), d("/ʃʊə/", "sure")],
+    contrast: [d("/ʃɪp/", "ship"), d("/sɪp/", "sip")],
+    words: [
+      d("/ˈsteɪʃn/", "station"), d("/ˈəʊʃn/", "ocean"), d("/ˈʃʊɡə/", "sugar"),
+      d("/məˈʃiːn/", "machine"), d("/ˈspeʃl/", "special"), d("/ʃʊə/", "sure"),
+      d("/ʃiː/", "she"), d("/ʃuː/", "shoe"), d("/fɪʃ/", "fish"), d("/wɒʃ/", "wash"),
+    ],
     sentences: [
       d("/ʃi selz ˈsiːʃelz baɪ ðə ˈsiːʃɔː/", "She sells seashells by the seashore."),
       d("/ðə ʃef wɒʃt ðə ˈdɪʃɪz ˈsləʊli/", "The chef washed the dishes slowly."),
+      d("/ðə ˈneɪʃn wɒtʃt ði ˈəʊʃn reɪs/", "The nation watched the ocean race."),
     ],
   },
   {
@@ -491,11 +671,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced post-alveolar fricative", keyword: "as in 'vision'",
     hint: "The voiced twin of /ʃ/ — rare in English, hiding inside 'vision', 'measure', 'pleasure'.",
     keywords: ["measure", "treasure", "usually"],
-    syllables: [d("/ruːʒ/", "rouge"), d("/beɪʒ/", "beige"), d("/ˈɡærɑːʒ/", "garage"), d("/ˈvɪʒn/", "vision"), d("/ˈmeʒə/", "measure")],
-    words: [d("/ˈvɪʒn/", "vision"), d("/ˈmeʒə/", "measure"), d("/ˈpleʒə/", "pleasure"), d("/ˈjuːʒuəli/", "usually"), d("/ˈtreʒə/", "treasure"), d("/ˈeɪʒə/", "Asia")],
+    contrast: [d("/ˈleʒə/", "leisure"), d("/ˈlesə/", "lesser")],
+    words: [
+      d("/ˈvɪʒn/", "vision"), d("/ˈmeʒə/", "measure"), d("/ˈpleʒə/", "pleasure"),
+      d("/ˈjuːʒuəli/", "usually"), d("/ˈtreʒə/", "treasure"), d("/ˈeɪʒə/", "Asia"),
+      d("/ruːʒ/", "rouge"), d("/beɪʒ/", "beige"), d("/ˈɡærɑːʒ/", "garage"), d("/ˈtelɪvɪʒn/", "television"),
+    ],
     sentences: [
       d("/ðə ˈtreʒə wəz bɪˈjɒnd ˈmeʒə/", "The treasure was beyond measure."),
       d("/ʃi tʊk ˈpleʒər ɪn ði ˈjuːʒuəl ruːˈtiːn/", "She took pleasure in the usual routine."),
+      d("/hi wɒtʃt ˈtelɪvɪʒn ət ˈleʒə/", "He watched television at leisure."),
     ],
   },
   {
@@ -503,11 +688,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless glottal fricative", keyword: "as in 'hello'",
     hint: "Just a gentle breath of air from the throat — the following vowel gives it its colour.",
     keywords: ["hello", "behind", "vehicle"],
-    syllables: [d("/hiː/", "he"), d("/haɪ/", "hi"), d("/hæt/", "hat"), d("/hɪl/", "hill"), d("/əˈhed/", "ahead")],
-    words: [d("/həˈləʊ/", "hello"), d("/bɪˈhaɪnd/", "behind"), d("/haʊs/", "house"), d("/huː/", "who"), d("/ˈviːɪkl/", "vehicle"), d("/ˈhʌndrəd/", "hundred")],
+    contrast: [d("/hæt/", "hat"), d("/æt/", "at")],
+    words: [
+      d("/həˈləʊ/", "hello"), d("/bɪˈhaɪnd/", "behind"), d("/haʊs/", "house"),
+      d("/huː/", "who"), d("/ˈviːɪkl/", "vehicle"), d("/ˈhʌndrəd/", "hundred"),
+      d("/hæt/", "hat"), d("/hɪl/", "hill"), d("/hænd/", "hand"), d("/help/", "help"),
+    ],
     sentences: [
       d("/hi hɜːd ə hɔːs ɪn ðə hɔːl/", "He heard a horse in the hall."),
       d("/ə ˈhʌndrəd hæts hʌŋ ɒn ðə hɪl/", "A hundred hats hung on the hill."),
+      d("/ðə ˈhɪərəʊ held ðə ˈhevi ˈhæmə/", "The hero held the heavy hammer."),
     ],
   },
 
@@ -517,11 +707,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiceless post-alveolar affricate", keyword: "as in 'teacher'",
     hint: "A /t/ that melts straight into /ʃ/ — one contact, one burst: 'ch'.",
     keywords: ["teacher", "picture", "question"],
-    syllables: [d("/tʃeə/", "chair"), d("/tʃɪn/", "chin"), d("/wɒtʃ/", "watch"), d("/tiːtʃ/", "teach"), d("/rɪtʃ/", "rich")],
-    words: [d("/ˈtiːtʃə/", "teacher"), d("/ˈpɪktʃə/", "picture"), d("/ˈneɪtʃə/", "nature"), d("/ˈtʃɪkɪn/", "chicken"), d("/ˈkwestʃən/", "question"), d("/tʃiːp/", "cheap")],
+    contrast: [d("/tʃɪp/", "chip"), d("/ʃɪp/", "ship")],
+    words: [
+      d("/ˈtiːtʃə/", "teacher"), d("/ˈpɪktʃə/", "picture"), d("/ˈneɪtʃə/", "nature"),
+      d("/ˈtʃɪkɪn/", "chicken"), d("/ˈkwestʃən/", "question"), d("/tʃiːp/", "cheap"),
+      d("/tʃeə/", "chair"), d("/tʃaɪld/", "child"), d("/tʃiːz/", "cheese"), d("/wɒtʃ/", "watch"),
+    ],
     sentences: [
       d("/ˈtʃɑːli tʃəʊz ə ˈtʃɒklɪt tʃɪp/", "Charlie chose a chocolate chip."),
       d("/iːtʃ tʃaɪld wɒtʃt ðə ˈtʃɪkɪn tʃeɪs/", "Each child watched the chicken chase."),
+      d("/ðə ˈtiːtʃə tɔːt ðə ˈtʃɪldrən ət tʃɜːtʃ/", "The teacher taught the children at church."),
     ],
   },
   {
@@ -529,11 +724,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced post-alveolar affricate", keyword: "as in 'jacket'",
     hint: "/d/ gliding into /ʒ/ with the voice on — a firm 'j', as in 'jam'.",
     keywords: ["jacket", "danger", "major"],
-    syllables: [d("/dʒæm/", "jam"), d("/dʒɔː/", "jaw"), d("/peɪdʒ/", "page"), d("/eɪdʒ/", "age"), d("/hjuːdʒ/", "huge")],
-    words: [d("/ˈdʒækɪt/", "jacket"), d("/ˈdeɪndʒə/", "danger"), d("/brɪdʒ/", "bridge"), d("/ɪnˈdʒɔɪ/", "enjoy"), d("/ˈmeɪdʒə/", "major"), d("/dʒʌst/", "just")],
+    contrast: [d("/dʒɔː/", "jaw"), d("/tʃɔː/", "chore")],
+    words: [
+      d("/ˈdʒækɪt/", "jacket"), d("/ˈdeɪndʒə/", "danger"), d("/brɪdʒ/", "bridge"),
+      d("/ɪnˈdʒɔɪ/", "enjoy"), d("/ˈmeɪdʒə/", "major"), d("/dʒʌst/", "just"),
+      d("/dʒæm/", "jam"), d("/dʒɒb/", "job"), d("/peɪdʒ/", "page"), d("/eɪdʒ/", "age"),
+    ],
     sentences: [
       d("/ðə dʒʌdʒ ɪnˈdʒɔɪd ði ˈɒrɪndʒ dʒæm/", "The judge enjoyed the orange jam."),
       d("/ə ˈdʒentl ˈdʒaɪənt dʒɒɡd əˈkrɒs ðə brɪdʒ/", "A gentle giant jogged across the bridge."),
+      d("/hɪz ˈdʒɜːni bɪˈɡæn ət ðə lɑːdʒ ˈɡærɑːʒ/", "His journey began at the large garage."),
     ],
   },
 
@@ -543,11 +743,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced labio-velar approximant", keyword: "as in 'woman'",
     hint: "Round the lips like /uː/ then glide into the vowel — no friction, no biting the lip.",
     keywords: ["woman", "one", "twelve"],
-    syllables: [d("/wiː/", "we"), d("/waɪ/", "why"), d("/waɪn/", "wine"), d("/wet/", "wet"), d("/əˈweɪ/", "away")],
-    words: [d("/ˈwʊmən/", "woman"), d("/wʌn/", "one"), d("/ˈɔːlweɪz/", "always"), d("/kwɪk/", "quick"), d("/ˈlæŋɡwɪdʒ/", "language"), d("/twelv/", "twelve")],
+    contrast: [d("/waɪn/", "wine"), d("/vaɪn/", "vine")],
+    words: [
+      d("/ˈwʊmən/", "woman"), d("/wʌn/", "one"), d("/ˈɔːlweɪz/", "always"),
+      d("/kwɪk/", "quick"), d("/ˈlæŋɡwɪdʒ/", "language"), d("/twelv/", "twelve"),
+      d("/wiː/", "we"), d("/ˈwɔːtə/", "water"), d("/waɪ/", "why"), d("/əˈweɪ/", "away"),
+    ],
     sentences: [
       d("/wi went west wɪð ðə wɪnd/", "We went west with the wind."),
       d("/ðə ˈwʊmən wʌn twelv wɔːm ˈswetəz/", "The woman won twelve warm sweaters."),
+      d("/waɪ wəz ðə ˈwɔːtə səʊ wɔːm ɪn ˈwɪntə/", "Why was the water so warm in winter?"),
     ],
   },
   {
@@ -555,11 +760,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced post-alveolar approximant", keyword: "as in 'really'",
     hint: "Curl the tongue tip towards the ridge without touching — the British r is soft, never rolled or growled.",
     keywords: ["sorry", "hurry", "library"],
-    syllables: [d("/red/", "red"), d("/rəʊd/", "road"), d("/rɪŋ/", "ring"), d("/raɪt/", "right"), d("/ˈveri/", "very")],
-    words: [d("/ˈsɒri/", "sorry"), d("/ˈrɪəli/", "really"), d("/ˈhʌri/", "hurry"), d("/əˈraʊnd/", "around"), d("/ˈlaɪbrəri/", "library"), d("/ˈmɪrə/", "mirror")],
+    contrast: [d("/raɪt/", "right"), d("/laɪt/", "light")],
+    words: [
+      d("/ˈsɒri/", "sorry"), d("/ˈrɪəli/", "really"), d("/ˈhʌri/", "hurry"),
+      d("/əˈraʊnd/", "around"), d("/ˈlaɪbrəri/", "library"), d("/ˈmɪrə/", "mirror"),
+      d("/red/", "red"), d("/rəʊd/", "road"), d("/rʌn/", "run"), d("/reɪn/", "rain"),
+    ],
     sentences: [
       d("/ˈrɔːri rəʊld ðə red ˈlɒri raʊnd ðə ˈkɔːnə/", "Rory rolled the red lorry round the corner."),
       d("/ˈhʌri ðə treɪn əˈraɪvz əˈraʊnd θriː/", "Hurry — the train arrives around three."),
+      d("/ðə red ˈræbɪt ræn raʊnd ðə ˈɡɑːdn/", "The red rabbit ran round the garden."),
     ],
   },
   {
@@ -567,11 +777,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced palatal approximant", keyword: "as in 'young'",
     hint: "Start at the /iː/ position and glide into the vowel — the 'y' in 'yes', light and quick.",
     keywords: ["young", "music", "million"],
-    syllables: [d("/jes/", "yes"), d("/juː/", "you"), d("/jɪə/", "year"), d("/jet/", "yet"), d("/bɪˈjɒnd/", "beyond")],
-    words: [d("/jʌŋ/", "young"), d("/juːz/", "use"), d("/ˈmjuːzɪk/", "music"), d("/vjuː/", "view"), d("/ˈmɪljən/", "million"), d("/ˈʌnjən/", "onion")],
+    contrast: [d("/jiːst/", "yeast"), d("/iːst/", "east")],
+    words: [
+      d("/jʌŋ/", "young"), d("/juːz/", "use"), d("/ˈmjuːzɪk/", "music"),
+      d("/vjuː/", "view"), d("/ˈmɪljən/", "million"), d("/ˈʌnjən/", "onion"),
+      d("/jes/", "yes"), d("/juː/", "you"), d("/jɪə/", "year"), d("/ˈjestədeɪ/", "yesterday"),
+    ],
     sentences: [
       d("/juː njuː ðə njuːz wəz truː/", "You knew the news was true."),
       d("/ə ˈmɪljən vjuːz əv ðə ˈjeləʊ muːn/", "A million views of the yellow moon."),
+      d("/dɪd juː juːz ðə ˈjeləʊ ʌmˈbrelə ˈjestədeɪ/", "Did you use the yellow umbrella yesterday?"),
     ],
   },
   {
@@ -579,11 +794,16 @@ export const PHONEMES: Phoneme[] = [
     label: "voiced alveolar lateral approximant", keyword: "as in 'little'",
     hint: "Tongue tip on the ridge, air flowing around the sides — light 'l' before vowels, a dark velarised 'l' at the end of words.",
     keywords: ["little", "bottle", "yellow"],
-    syllables: [d("/leɪ/", "lay"), d("/ləʊ/", "low"), d("/laɪt/", "light"), d("/wel/", "well"), d("/fʊl/", "full")],
-    words: [d("/ˈlɪtl/", "little"), d("/ˈbɒtl/", "bottle"), d("/ˈɔːlweɪz/", "always"), d("/ˈjeləʊ/", "yellow"), d("/lʌv/", "love"), d("/ˈrɪəli/", "really")],
+    contrast: [d("/laɪt/", "light"), d("/raɪt/", "right")],
+    words: [
+      d("/ˈlɪtl/", "little"), d("/ˈbɒtl/", "bottle"), d("/ˈɔːlweɪz/", "always"),
+      d("/ˈjeləʊ/", "yellow"), d("/lʌv/", "love"), d("/ˈrɪəli/", "really"),
+      d("/leɡ/", "leg"), d("/pleɪ/", "play"), d("/bluː/", "blue"), d("/fʊl/", "full"),
+    ],
     sentences: [
       d("/ˈlɪli lʌvz ðə ˈlɪtl ˈbluːbelz/", "Lily loves the little bluebells."),
       d("/ðə tɔːl wɔːl fel ɪn ðə hɔːl/", "The tall wall fell in the hall."),
+      d("/pliːz ˈlɪsn tə ðə laɪt reɪn ɒn ðə liːvz/", "Please listen to the light rain on the leaves."),
     ],
   },
 ];
@@ -595,6 +815,12 @@ export const DIPHTHONGS = PHONEMES.filter((p) => p.category === "diphthong");
 export const CONSONANTS = PHONEMES.filter(
   (p) => p.category !== "monophthong" && p.category !== "diphthong"
 );
+
+export const SOUND_GROUPS: { title: string; hex: string; items: Phoneme[] }[] = [
+  { title: "12 vowels", hex: CATEGORY_META.monophthong.hex, items: VOWELS },
+  { title: "8 diphthongs", hex: CATEGORY_META.diphthong.hex, items: DIPHTHONGS },
+  { title: "24 consonants", hex: "#d24a2b", items: CONSONANTS },
+];
 
 export const PLACES = [
   "Bilabial", "Labio-dental", "Dental", "Alveolar", "Post-alveolar", "Palatal", "Velar", "Glottal",
@@ -612,7 +838,6 @@ export const CONSONANT_CELLS = [
   cell(4, 0, ["w"]), cell(4, 3, ["l"]), cell(4, 4, ["r"]), cell(4, 5, ["j"]),
 ];
 
-export const TOTAL_DRILLS = PHONEMES.reduce(
-  (n, p) => n + p.syllables.length + p.words.length + p.sentences.length,
-  0
-);
+export const TOTAL_WORDS = PHONEMES.reduce((n, p) => n + p.words.length, 0);
+export const TOTAL_SENTENCES = PHONEMES.reduce((n, p) => n + p.sentences.length, 0);
+export const TOTAL_DRILLS = TOTAL_WORDS + TOTAL_SENTENCES;

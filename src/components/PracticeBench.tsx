@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import {
   CATEGORY_META,
   LEVELS,
@@ -61,6 +61,10 @@ export default function PracticeBench({
   const drills = getDrills(phoneme, level);
   const activeTarget: Target = target ?? { level, idx: 0 };
   const targetDrill = getDrills(phoneme, activeTarget.level)[activeTarget.idx];
+  const levelDone = (l: LevelId) =>
+    getDrills(phoneme, l).filter((_, i) => checked.has(`${phoneme.id}:${l}:${i}`)).length;
+  const levelTotal = drills.length;
+  const levelPct = levelTotal > 0 ? levelDone(level) / levelTotal : 0;
 
   // reset local state when the phoneme changes
   useEffect(() => {
@@ -174,6 +178,41 @@ export default function PracticeBench({
               ))}
             </div>
           </div>
+
+          {/* minimal-pair contrast trainer */}
+          <div className="border-t border-line px-5 py-4">
+            <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-fog">
+              Minimal-pair contrast
+            </p>
+            <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-2">
+              {[0, 1].map((ci) => (
+                <Fragment key={ci}>
+                  {ci === 1 && (
+                    <span className="grid place-items-center font-display text-lg font-extrabold text-fog" aria-hidden="true">
+                      ↔
+                    </span>
+                  )}
+                  <button
+                    disabled={recordingBusy}
+                    onClick={() => speak(phoneme.contrast[ci].text)}
+                    title={`Listen: ${phoneme.contrast[ci].text}`}
+                    className="group flex flex-col items-center rounded-md border border-line bg-chalk px-2 py-2.5 transition-all hover:-translate-y-0.5 hover:border-ink hover:shadow-md active:scale-95 disabled:opacity-50"
+                  >
+                    <span className="font-display text-[17px] font-bold leading-tight text-ink group-hover:text-ember">
+                      {phoneme.contrast[ci].text}
+                    </span>
+                    <span className="mt-0.5 font-ipa text-[11.5px] text-fog">{phoneme.contrast[ci].ipa}</span>
+                    <span className="mt-1.5 flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-fog opacity-60 transition-opacity group-hover:text-ember group-hover:opacity-100">
+                      <IconSpeaker className="h-3 w-3" /> {ci === 0 ? "A" : "B"}
+                    </span>
+                  </button>
+                </Fragment>
+              ))}
+            </div>
+            <p className="mt-2 font-mono text-[10px] leading-relaxed text-fog">
+              Flip between the two — the only difference is /{phoneme.ipa}/.
+            </p>
+          </div>
         </div>
 
         {/* recorder */}
@@ -190,7 +229,7 @@ export default function PracticeBench({
 
           <div className="mb-3 rounded-md bg-pine-2/80 px-3 py-2.5">
             <p className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-chalk/50">
-              target · {activeTarget.level === "syll" ? "syllable" : activeTarget.level === "word" ? "word" : "sentence"} {activeTarget.idx + 1}
+              target · {activeTarget.level === "word" ? "word" : "sentence"} {activeTarget.idx + 1}
             </p>
             <p className="mt-0.5 font-display text-lg font-bold leading-snug">{targetDrill.text}</p>
             <p className="font-ipa text-[12px] text-chalk/60">{targetDrill.ipa}</p>
@@ -272,11 +311,11 @@ export default function PracticeBench({
                 >
                   {l.name}
                   <span
-                    className={`rounded-sm px-1.5 py-px font-mono text-[10px] font-semibold ${
+                    className={`rounded-sm px-1.5 py-px font-mono text-[10px] font-semibold tabular-nums ${
                       active ? "bg-chalk/20 text-chalk" : "bg-paper text-fog"
                     }`}
                   >
-                    {count}
+                    {levelDone(l.id)}/{count}
                   </span>
                 </button>
               );

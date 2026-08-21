@@ -14,6 +14,7 @@ import {
 import {
   DIPHTHONGS,
   PHONEMES,
+  SOUND_GROUPS,
   TOTAL_DRILLS,
   VOWELS,
   type LevelId,
@@ -109,7 +110,7 @@ const CHECK_KEY = "phonelab-checks-v1";
 export default function App() {
   const speech = useSpeech();
   const [selectedId, setSelectedId] = useState("iː");
-  const [level, setLevel] = useState<LevelId>("syll");
+  const [level, setLevel] = useState<LevelId>("word");
   const [checks, setChecks] = useState<Record<string, boolean>>(() => {
     try {
       return JSON.parse(localStorage.getItem(CHECK_KEY) ?? "{}") as Record<string, boolean>;
@@ -144,7 +145,7 @@ export default function App() {
 
   const surprise = () => {
     const p = PHONEMES[Math.floor(Math.random() * PHONEMES.length)];
-    const lv = (["syll", "word", "sent"] as LevelId[])[Math.floor(Math.random() * 3)];
+    const lv = (["word", "sent"] as LevelId[])[Math.floor(Math.random() * 2)];
     setLevel(lv);
     selectPhoneme(p.id, true);
   };
@@ -274,15 +275,18 @@ export default function App() {
                   The full 44-phoneme RP inventory laid out the way phoneticians see it — vowels on
                   a trapezoid of tongue position, consonants on a grid of place and manner. Tap any
                   symbol to load it into the bench below, then drill it at{" "}
-                  <strong className="font-semibold text-ink">syllable</strong>,{" "}
                   <strong className="font-semibold text-ink">word</strong> and{" "}
-                  <strong className="font-semibold text-ink">sentence</strong> level.
+                  <strong className="font-semibold text-ink">sentence</strong> level — with a
+                  minimal-pair contrast check on every sound.
                 </p>
               </div>
               <div className="flex flex-col gap-2 font-mono text-[11.5px] text-fog">
-                <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-lagoon" /> 12 monophthongs</span>
+                <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-lagoon" /> 12 vowels</span>
                 <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-honey" /> 8 diphthongs</span>
                 <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-ember" /> 24 consonants</span>
+                <span className="flex items-center gap-2 font-semibold text-ink">
+                  <i className="h-2.5 w-2.5 rounded-full border-2 border-ink" /> = 44 phonemes
+                </span>
                 <span className="mt-2 border-t border-line pt-2 tabular-nums">
                   {doneCount} / {TOTAL_DRILLS} drills ticked off
                 </span>
@@ -300,6 +304,60 @@ export default function App() {
                 onSelect={(id) => selectPhoneme(id, true)}
               />
               <ConsonantTable selectedId={selectedId} practiced={practiced} onSelect={(id) => selectPhoneme(id, true)} />
+            </div>
+          </Reveal>
+
+          {/* ── all-44 index rail ── */}
+          <Reveal delay={200} className="mt-6">
+            <div className="rounded-md border border-line bg-card p-4 shadow-[0_1px_0_rgba(20,48,42,0.06)] sm:p-5">
+              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-ink">
+                  All 44 sounds — the full index
+                </h3>
+                <p className="font-mono text-[10px] uppercase tracking-wider text-fog">
+                  12 vowels + 8 diphthongs + 24 consonants ·{" "}
+                  <span className="font-semibold text-ember">{practiced.size}/44</span> covered
+                </p>
+              </div>
+              <div className="flex flex-col gap-3.5">
+                {SOUND_GROUPS.map((g) => (
+                  <div key={g.title} className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <span
+                      className="w-28 shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.12em]"
+                      style={{ color: g.hex }}
+                    >
+                      {g.title}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {g.items.map((p) => {
+                        const sel = p.id === selectedId;
+                        const done = practiced.has(p.id);
+                        return (
+                          <button
+                            key={p.id}
+                            onClick={() => selectPhoneme(p.id, true)}
+                            aria-pressed={sel}
+                            title={`${p.keyword} — open in the practice bench`}
+                            className={`relative min-w-[2.3rem] rounded-md border px-2 py-1 font-ipa text-[15px] font-semibold leading-tight transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md ${
+                              sel ? "text-chalk shadow-md" : "bg-chalk hover:border-ink/60"
+                            }`}
+                            style={{
+                              borderColor: sel ? g.hex : "var(--color-line)",
+                              backgroundColor: sel ? g.hex : undefined,
+                              color: sel ? "var(--color-chalk)" : g.hex,
+                            }}
+                          >
+                            {p.ipa}
+                            {done && (
+                              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-card bg-ember" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </Reveal>
         </section>
@@ -382,7 +440,7 @@ export default function App() {
                 </div>
                 <p className="font-mono text-[11.5px] tabular-nums text-fog">
                   {Object.keys(checks).filter((k) => k.startsWith(selected.id + ":") && checks[k]).length}{" "}
-                  / {selected.syllables.length + selected.words.length + selected.sentences.length} drills practised for this sound
+                  / {selected.words.length + selected.sentences.length} drills practised for this sound
                 </p>
               </div>
             </Reveal>
