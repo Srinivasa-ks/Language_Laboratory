@@ -44,8 +44,8 @@ export default function AuthGate({ onAuthed }: Props) {
   };
 
   return (
-    <main className="relative z-10 flex min-h-screen items-center px-4 py-10 sm:px-6">
-      <div className="mx-auto grid w-full max-w-5xl items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
+    <main className="relative z-10 flex min-h-screen flex-col px-4 py-10 sm:px-6">
+      <div className="mx-auto my-auto grid w-full max-w-5xl items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
         {/* ── left · the lab's calling card ── */}
         <div className="reveal is-in">
           <div className="flex items-center gap-3">
@@ -212,6 +212,28 @@ export default function AuthGate({ onAuthed }: Props) {
           </p>
         </div>
       </div>
+
+      {/* ── academic attribution ── */}
+      <footer className="mx-auto mt-12 w-full max-w-5xl border-t border-pine-3 pt-6">
+        <address className="flex flex-col items-center gap-2 text-center not-italic">
+          <span className="mb-2.5 h-px w-14 bg-honey/80" aria-hidden="true" />
+          <span className="font-mono text-[13px] font-semibold tracking-wide text-chalk/80">
+            © 2026{" "}
+            <span className="font-display text-[19px] font-extrabold tracking-tight text-chalk">
+              Srinivasa K S
+            </span>
+          </span>
+          <span className="font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-chalk/80">
+            Assistant Professor
+          </span>
+          <span className="font-mono text-[12px] font-semibold leading-relaxed text-chalk/70">
+            R.V. Teachers College, Jayanagar, Bengaluru – 560011
+          </span>
+          <span className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-chalk/55">
+            All Rights Reserved.
+          </span>
+        </address>
+      </footer>
     </main>
   );
 }
