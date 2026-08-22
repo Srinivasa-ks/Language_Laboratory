@@ -3,6 +3,7 @@ import ConsonantTable from "./components/ConsonantTable";
 import LearnerGate from "./components/LearnerGate";
 import HomeScreen from "./components/HomeScreen";
 import PracticeBench from "./components/PracticeBench";
+import SkillsLab from "./components/SkillsLab";
 import VowelChart from "./components/VowelChart";
 import {
   IconArrow,
@@ -17,6 +18,7 @@ import {
 import {
   DIPHTHONGS,
   PHONEMES,
+  PHONEME_MAP,
   SOUND_GROUPS,
   TOTAL_DRILLS,
   TRIPHTHONGS,
@@ -251,7 +253,13 @@ export default function App() {
   const selected = useMemo(() => PHONEMES.find((p) => p.id === selectedId) ?? PHONEMES[0], [selectedId]);
 
   const practiced = useMemo(
-    () => new Set(Object.keys(checks).filter((k) => checks[k]).map((k) => k.split(":")[0])),
+    () =>
+      new Set(
+        Object.keys(checks)
+          .filter((k) => checks[k])
+          .map((k) => k.split(":")[0])
+          .filter((seg) => PHONEME_MAP.has(seg)) // skill-module keys never count as phonemes
+      ),
     [checks]
   );
   const doneCount = useMemo(() => Object.values(checks).filter(Boolean).length, [checks]);
@@ -660,6 +668,38 @@ export default function App() {
                 speak={speech.speak}
                 speaking={speech.speaking}
                 onRandom={surprise}
+              />
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ════════════════ STATION 04 · SKILLS LAB ════════════════ */}
+        <section className="scroll-mt-36 border-t border-line bg-chalk/60">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+            <Reveal>
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.28em] text-ember">
+                    Station 04 · The skills lab
+                  </p>
+                  <h2 className="mt-3 font-display text-[clamp(1.7rem,3.6vw,2.5rem)] font-extrabold tracking-tight text-ink">
+                    Beyond single sounds.
+                  </h2>
+                </div>
+                <p className="max-w-xl text-[13.5px] leading-relaxed text-fog">
+                  Clusters, word stress, sentence stress, connected speech and real conversations —
+                  each built on the same loop: <strong className="font-semibold text-ink">learn → listen → identify → repeat → record → feedback → retry → score</strong>.
+                  Progress is saved to {isGuest ? "this device" : `${userName}'s profile`}.
+                </p>
+              </div>
+            </Reveal>
+            <Reveal delay={120} className="mt-8">
+              <SkillsLab
+                checks={checks}
+                onToggle={toggleCheck}
+                speak={speech.speak}
+                speaking={speech.speaking}
+                onJumpToBench={() => benchRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
               />
             </Reveal>
           </div>
