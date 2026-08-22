@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   IconArrow,
   IconCheck,
@@ -98,13 +98,18 @@ interface RecordBlockProps {
 
 function RecordBlock({ recKey, doneKey, idKey, label, modelText, modelIpa, checks, onToggle, rec, speak, retryHint }: RecordBlockProps) {
   const [selfCheck, setSelfCheck] = useState([false, false, false]);
-  const recorded = !!checks[recKey];
+  const hasTake = !!rec.recording || !!checks[recKey];
   const done = !!checks[doneKey];
   const identifyOk = idKey ? !!checks[idKey] : true;
-  const recBusy = rec.status === "recording" || rec.status === "requesting" || rec.status === "processing";
+
+  /* fresh take → reset the self-check list */
+  const takeUrl = rec.recording?.url;
+  useEffect(() => {
+    setSelfCheck([false, false, false]);
+  }, [takeUrl]);
 
   const allChecked = selfCheck.every(Boolean);
-  const feedback = !recorded
+  const feedback = !hasTake
     ? null
     : allChecked
       ? { tone: "good", text: "Strong work — your rhythm tracks the model. Score the item, or re-record for a cleaner take." }
@@ -135,28 +140,28 @@ function RecordBlock({ recKey, doneKey, idKey, label, modelText, modelIpa, check
             </button>
           ) : (
             <button
-              onClick={() => (recorded ? (rec.reset(), onToggle(doneKey)) : rec.start())}
-              disabled={rec.status === "processing"}
+              onClick={() => (hasTake ? (rec.reset(), checks[doneKey] && onToggle(doneKey), rec.start()) : rec.start())}
+              disabled={rec.status === "processing" || rec.status === "requesting"}
               className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[11.5px] font-bold transition-all active:scale-95 ${
-                recorded
+                hasTake
                   ? "border border-line bg-chalk text-ink hover:border-ember hover:text-ember"
                   : "bg-ink text-chalk hover:bg-ember"
               }`}
-              title={recorded ? "Re-record this item" : "Record your attempt"}
+              title={hasTake ? "Re-record this item" : "Record your attempt"}
             >
-              <IconMic className="h-3.5 w-3.5" /> {recorded ? "Re-record" : "Record"}
+              <IconMic className="h-3.5 w-3.5" /> {hasTake ? "Re-record" : "Record"}
             </button>
           )}
         </div>
       </div>
 
       {rec.status === "recording" && <RecLive rec={rec} />}
-      {recorded && rec.recording && rec.status !== "recording" && (
+      {rec.recording && rec.status !== "recording" && (
         <RecPlayback rec={rec} label={label} />
       )}
 
       {/* feedback checklist + score */}
-      {recorded && !done && (
+      {hasTake && !done && (
         <div className="mt-3 border-t border-line/70 pt-3">
           <p className={`${mono} mb-2`}>feedback · compare with the model</p>
           <div className="grid gap-1.5 sm:grid-cols-3">
@@ -781,6 +786,59 @@ function ConnectedCard({ item, idx, checks, onToggle, rec, speak }: { item: Conn
 
 function ConversationView({ conv, onBack, checks, onToggle, rec, speak }: { conv: Conversation; onBack: () => void; checks: Props["checks"]; onToggle: Props["onToggle"]; rec: ReturnType<typeof useRecorder>; speak: Props["speak"] }) {
   const [role, setRole] = useState<0 | 1>(0);
+
+  /* ── full-scene sample audio (Web Speech, one voice per role) ── */
+  const [sceneOn, setSceneOn] = useState(false);
+  const sceneToken = useRef(0);
+
+  const roleVoices = useMemo(() => {
+    const gb = window.speechSynthesis?.getVoices().filter((v) => /^en[-_]gb/i.test(v.lang)) ?? [];
+    return [gb[0] ?? null, gb[1] ?? gb[0] ?? null];
+  }, []);
+
+  const stopScene = () => {
+    sceneToken.current++;
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {
+      /* nothing playing */
+    }
+    setSceneOn(false);
+  };
+
+  const playScene = () => {
+    sceneToken.current++;
+    const token = sceneToken.current;
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {
+      /* carry on */
+    }
+    setSceneOn(true);
+    const step = (i: number) => {
+      if (token !== sceneToken.current) return;
+      if (i >= conv.lines.length) {
+        setSceneOn(false);
+        return;
+      }
+      const line = conv.lines[i];
+      const u = new SpeechSynthesisUtterance(line.t);
+      u.lang = "en-GB";
+      u.rate = 0.95;
+      u.pitch = line.role === 0 ? 1 : 1.3;
+      const v = roleVoices[line.role];
+      if (v) {
+        u.voice = v;
+        u.lang = v.lang;
+      }
+      u.onend = () => step(i + 1);
+      u.onerror = () => step(i + 1);
+      window.speechSynthesis.speak(u);
+    };
+    step(0);
+  };
+
+  useEffect(() => stopScene, []);
   const myLines = conv.lines.map((l, i) => ({ l, i })).filter((x) => x.l.role === role);
   const doneCount = myLines.filter((x) => checks[`cv:${conv.id}:L${x.i}`]).length;
   const complete = doneCount === myLines.length && myLines.length > 0;
@@ -793,9 +851,27 @@ function ConversationView({ conv, onBack, checks, onToggle, rec, speak }: { conv
         </button>
         <h4 className="font-display text-[22px] font-extrabold text-ink">{conv.title}</h4>
         <span className="font-mono text-[10.5px] text-fog">{conv.setting}</span>
-        <span className={`ml-auto rounded-md px-2.5 py-1 font-mono text-[10.5px] font-bold tabular-nums ${complete ? "bg-moss text-chalk" : "bg-line text-fog"}`}>
-          {doneCount}/{myLines.length} lines
-        </span>
+        <div className="ml-auto flex items-center gap-2">
+          {sceneOn ? (
+            <button
+              onClick={stopScene}
+              className="flex items-center gap-1.5 rounded-md bg-ember px-3.5 py-2 text-[12px] font-bold text-chalk shadow-md shadow-ember/30 transition-all hover:brightness-110 active:scale-95"
+            >
+              <IconStop className="h-3.5 w-3.5" /> Stop scene
+            </button>
+          ) : (
+            <button
+              onClick={playScene}
+              className="flex items-center gap-1.5 rounded-md bg-ink px-3.5 py-2 text-[12px] font-bold text-chalk transition-all hover:bg-lagoon active:scale-95"
+              title="Play the whole conversation — one voice per role"
+            >
+              <IconPlay className="h-3.5 w-3.5" /> Play sample scene
+            </button>
+          )}
+          <span className={`rounded-md px-2.5 py-1 font-mono text-[10.5px] font-bold tabular-nums ${complete ? "bg-moss text-chalk" : "bg-line text-fog"}`}>
+            {doneCount}/{myLines.length} lines
+          </span>
+        </div>
       </div>
 
       <div className="mt-3 grid gap-3 lg:grid-cols-[240px_1fr]">
@@ -888,12 +964,23 @@ function ConversationView({ conv, onBack, checks, onToggle, rec, speak }: { conv
                   <div className="mt-2 flex items-center gap-2.5">
                     <RecLive rec={rec} />
                     <button onClick={rec.stop} className="shrink-0 rounded-md bg-ember px-3 py-2 text-[11px] font-bold text-chalk active:scale-95">
-                      Done — mark line
+                      ■ Stop
+                    </button>
+                  </div>
+                )}
+                {mine && !recDone && rec.recording && rec.status !== "recording" && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <RecPlayback rec={rec} label={`${conv.title} line ${i + 1}`} />
+                    <button
+                      onClick={() => onToggle(`cv:${conv.id}:L${i}`)}
+                      className="flex items-center gap-1.5 rounded-md bg-moss px-3 py-2 text-[11px] font-bold text-chalk shadow-md shadow-moss/25 transition-all hover:brightness-110 active:scale-95"
+                    >
+                      <IconCheck className="h-3.5 w-3.5" /> Mark line recorded ✓
                     </button>
                   </div>
                 )}
                 {mine && recDone && (
-                  <p className="mt-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-moss">✓ recorded & marked</p>
+                  <p className="mt-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-moss">✓ recorded & marked — click “done” on the record button to re-record</p>
                 )}
               </div>
             );
@@ -914,6 +1001,49 @@ export default function SkillsLab({ checks, onToggle, speak, speaking, onJumpToB
   const rec = useRecorder();
   const [active, setActive] = useState<ModuleId>("clusters");
   const [convId, setConvId] = useState<string | null>(null);
+
+  /* ── hub-card scene previews (first exchange of each conversation) ── */
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const previewToken = useRef(0);
+
+  const stopPreview = () => {
+    previewToken.current++;
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {
+      /* nothing playing */
+    }
+    setPreviewId(null);
+  };
+
+  const playPreview = (c: Conversation) => {
+    previewToken.current++;
+    const token = previewToken.current;
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {
+      /* carry on */
+    }
+    setPreviewId(c.id);
+    const lines = c.lines.slice(0, 4);
+    const step = (i: number) => {
+      if (token !== previewToken.current) return;
+      if (i >= lines.length) {
+        setPreviewId(null);
+        return;
+      }
+      const u = new SpeechSynthesisUtterance(lines[i].t);
+      u.lang = "en-GB";
+      u.rate = 0.95;
+      u.pitch = lines[i].role === 0 ? 1 : 1.3;
+      u.onend = () => step(i + 1);
+      u.onerror = () => step(i + 1);
+      window.speechSynthesis.speak(u);
+    };
+    step(0);
+  };
+
+  useEffect(() => stopPreview, []);
 
   const moduleDone = (pre: string, total: number) => {
     let n = 0;
@@ -1055,11 +1185,15 @@ export default function SkillsLab({ checks, onToggle, speak, speaking, onJumpToB
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {CONVERSATIONS.map((c) => {
                 const d = convDoneCount(c);
+                const previewing = previewId === c.id;
                 return (
-                  <button
+                  <div
                     key={c.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setConvId(c.id)}
-                    className="group relative overflow-hidden rounded-lg border border-line bg-card p-4 text-left shadow-[0_2px_0_rgba(20,48,42,0.06)] transition-all hover:-translate-y-1 hover:border-moss hover:shadow-lg"
+                    onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setConvId(c.id)}
+                    className="group relative cursor-pointer overflow-hidden rounded-lg border border-line bg-card p-4 text-left shadow-[0_2px_0_rgba(20,48,42,0.06)] transition-all hover:-translate-y-1 hover:border-moss hover:shadow-lg"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-display text-[16.5px] font-bold text-ink group-hover:text-moss">{c.title}</span>
@@ -1070,14 +1204,30 @@ export default function SkillsLab({ checks, onToggle, speak, speaking, onJumpToB
                       <span className="rounded-sm bg-line px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-fog">
                         {c.roles[0]} ↔ {c.roles[1]}
                       </span>
-                      <span className={`ml-auto font-mono text-[10px] font-bold tabular-nums ${d === c.lines.length ? "text-moss" : "text-fog"}`}>
-                        {d}/{c.lines.length} lines
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (previewing) stopPreview();
+                          else playPreview(c);
+                        }}
+                        className={`ml-auto flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[9.5px] font-bold uppercase tracking-wider transition-all active:scale-95 ${
+                          previewing
+                            ? "bg-ember text-chalk shadow-md shadow-ember/30"
+                            : "border border-line bg-chalk text-fog hover:border-moss hover:text-moss"
+                        }`}
+                        title={previewing ? "Stop the preview" : "Play the first exchange"}
+                      >
+                        {previewing ? <IconStop className="h-3 w-3" /> : <IconPlay className="h-3 w-3" />}
+                        {previewing ? "stop" : "sample"}
+                      </button>
+                      <span className={`font-mono text-[10px] font-bold tabular-nums ${d === c.lines.length ? "text-moss" : "text-fog"}`}>
+                        {d}/{c.lines.length}
                       </span>
                     </div>
                     <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-line">
                       <div className="h-full rounded-full bg-moss transition-all duration-700" style={{ width: `${(d / c.lines.length) * 100}%` }} />
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
