@@ -2,7 +2,7 @@
    Skills-lab datasets: consonant clusters, word stress, sentence stress,
    connected speech and daily conversations. Purely additive — the phoneme
    bench in data/phonemes.ts is untouched.
-   ═══════════════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 export interface Tw {
   t: string;
@@ -507,6 +507,127 @@ export const CONVERSATIONS: Conversation[] = [
       { role: 1, t: "Your lab-based approach matches how I believe language is learned." },
       { role: 0, t: "And where do you see yourself in five years?" },
       { role: 1, t: "Leading a full speech laboratory — exactly like this one." },
+    ],
+  },
+  /* ── 10 new school / college conversations ─────────────────────────────── */
+  {
+    id: "lab", title: "Lab Session", setting: "A student asks the lab assistant about a titration experiment.", roles: ["Student", "Lab Assistant"],
+    phrases: [{ t: "Could you walk me through the procedure?", ipa: "/kʊd juː wɔːk miː θruː ðə prəˈsiːdʒə/" }, { t: "What safety gear do I need?", ipa: "/wɒt ˈseɪfti ɡɪə duː aɪ niːd/" }],
+    lines: [
+      { role: 0, t: "Excuse me — could you walk me through the titration procedure?", tip: "Stress TITra-tion, proCE-dure." },
+      { role: 1, t: "Of course. First, rinse the burette with the solution, then fill to the zero mark." },
+      { role: 0, t: "Rinse, then fill. What safety gear do I need?" },
+      { role: 1, t: "Goggles and gloves — the acid is concentrated." },
+      { role: 0, t: "Understood. And how many readings do we take?" },
+      { role: 1, t: "Three concordant readings, within half a division of each other.", tip: "'concordant' — beat conCORDant." },
+    ],
+  },
+  {
+    id: "exam", title: "Exam Results", setting: "A student asks the professor about pending results.", roles: ["Student", "Professor"],
+    phrases: [{ t: "Have the results been declared yet?", ipa: "/həv ðə rɪˈzʌlts bɪn dɪˈklɑːd jet/" }, { t: "Is there a re-evaluation option?", ipa: "/ɪz ðeər ə ˌriːɪːvəˈleɪʃn ˈɒpʃn/" }],
+    lines: [
+      { role: 0, t: "Professor, have the results for the mid-term been declared yet?" },
+      { role: 1, t: "They're with the department head. I expect them by Thursday.", tip: "'expect them' links: /ɪkˈspekt ðəm/." },
+      { role: 0, t: "Thursday. If I'm below the pass mark, is there a re-evaluation option?" },
+      { role: 1, t: "Yes — you can apply within five working days of the announcement." },
+      { role: 0, t: "Five days. And the supplementary exam — when is that scheduled?" },
+      { role: 1, t: "The first week of next month. I'll send the timetable by email.", tip: "'timetable' — beat TIMEtable." },
+    ],
+  },
+  {
+    id: "drama", title: "Drama Club", setting: "A student asks about joining the college drama club.", roles: ["Student", "Club President"],
+    phrases: [{ t: "Do I need any prior experience?", ipa: "/duː aɪ niːd ˈeni ˈpraɪər ɪkˈspɪəriəns/" }, { t: "When are the auditions?", ipa: "/wen ə ði ˈɔːdɪʃnz/" }],
+    lines: [
+      { role: 0, t: "Hi — I'd like to join the drama club. Do I need any prior experience?" },
+      { role: 1, t: "Not at all. We value enthusiasm over technique.", tip: "'over' weakens to /əvə/." },
+      { role: 0, t: "That's encouraging. When are the auditions?" },
+      { role: 1, t: "Next Saturday, two o'clock, in the auditorium." },
+      { role: 0, t: "Saturday at two. Do I prepare a monologue or a group scene?" },
+      { role: 1, t: "Either works — just two minutes, and bring a friend for the group option.", tip: "'bring a friend' — beat BRING a FRIEND." },
+    ],
+  },
+  {
+    id: "cafeteria", title: "College Cafeteria", setting: "A student orders lunch at the college mess.", roles: ["Student", "Canteen Staff"],
+    phrases: [{ t: "What's on the menu today?", ipa: "/wɒts ɒn ðə ˈmenju təˈdeɪ/" }, { t: "Can I get it without onion?", ipa: "/kən aɪ ɡet ɪt wɪˈðaʊt ˈʌnjən/" }],
+    lines: [
+      { role: 0, t: "Good afternoon. What's on the menu today?" },
+      { role: 1, t: "Rice with chicken curry, or the vegetable thali." },
+      { role: 0, t: "I'll take the thali. Can I get it without onion?", tip: "'without' — beat withOUT." },
+      { role: 1, t: "No problem. Extra rice or dal?" },
+      { role: 0, t: "Extra dal, please. And a glass of buttermilk on the side." },
+      { role: 1, t: "Coming right up. That's forty rupees.", tip: "'right up' links: /raɪt ʌp/." },
+    ],
+  },
+  {
+    id: "sports", title: "Sports Day", setting: "A student asks the coach about the inter-college match.", roles: ["Student", "Coach"],
+    phrases: [{ t: "What time does the match start?", ipa: "/wɒt taɪm dʌz ðə mætʃ stɑːt/" }, { t: "Do I need to bring my own kit?", ipa: "/duː aɪ niːd tə brɪŋ maɪ əʊn kɪt/" }],
+    lines: [
+      { role: 0, t: "Coach — what time does the inter-college match start?" },
+      { role: 1, t: "Nine sharp, on the main ground. Be here by eight for warm-ups.", tip: "'warm-ups' — beat WARMups." },
+      { role: 0, t: "Eight for warm-ups. Do I need to bring my own kit?" },
+      { role: 1, t: "Just your spikes and a water bottle. The rest is provided." },
+      { role: 0, t: "Got it. And if it rains, does the match get postponed?" },
+      { role: 1, t: "Only if the pitch is unplayable. Light rain, we still go out.", tip: "'unplayable' — beat unPLAYable." },
+    ],
+  },
+  {
+    id: "seminar", title: "Seminar", setting: "A student presents a research paper and field questions.", roles: ["Presenter", "Panelist"],
+    phrases: [{ t: "Thank you for that presentation.", ipa: "/θæŋk juː fə ðæt ˌprezənˈteɪʃn/" }, { t: "Could you elaborate on that point?", ipa: "/kʊd juː ɪˈlæbəreɪt ɒn ðæt pɔɪnt/" }],
+    lines: [
+      { role: 0, t: "Thank you for that presentation. Could you elaborate on your methodology?" },
+      { role: 1, t: "Certainly. We used a mixed-methods design — surveys followed by interviews.", tip: "'mixed-methods' — beat MIXED-methods." },
+      { role: 0, t: "And how did you ensure the reliability of the survey instrument?" },
+      { role: 1, t: "Cronbach's alpha was above zero-point-eight on both pilot rounds." },
+      { role: 0, t: "Impressive. One final question — what would you change if you repeated the study?" },
+      { role: 1, t: "A larger sample, and a longitudinal follow-up at the six-month mark.", tip: "'longitudinal' — beat lon-JITyoo-din-əl." },
+    ],
+  },
+  {
+    id: "dorm", title: "Dormitory", setting: "A first-year student checks into the college hostel.", roles: ["Student", "Warden"],
+    phrases: [{ t: "What are the visiting hours?", ipa: "/wɒt ə ðə ˈvɪzɪtɪŋ ˈaʊəz/" }, { t: "Is there a laundry facility?", ipa: "/ɪz ðeər ə ˈlɔːndri fəˈsɪləti/" }],
+    lines: [
+      { role: 0, t: "Good morning, sir. I'm checking in — room 214, first floor." },
+      { role: 1, t: "Welcome. Here's your key. What are the visiting hours you'd like to know?", tip: "'visiting' — beat VISiting." },
+      { role: 0, t: "Yes — what are the visiting hours, and is there a laundry facility?" },
+      { role: 1, t: "Visitors from four to eight, weekdays only. Laundry is on the ground floor." },
+      { role: 0, t: "Four to eight. And what's the curfew on weekends?" },
+      { role: 1, t: "Ten on Saturday, midnight on Sunday. Please respect the quiet hours after ten.", tip: "'quiet hours' — beat QUIet HOURS." },
+    ],
+  },
+  {
+    id: "career", title: "Career Fair", setting: "A final-year student asks about internship openings.", roles: ["Student", "Recruiter"],
+    phrases: [{ t: "What does the internship involve?", ipa: "/wɒt dʌz ði ˈɪntəʃnʃn ɪnˈvɒlv/" }, { t: "Is there a stipend?", ipa: "/ɪz ðeər ə ˈstɪpend/" }],
+    lines: [
+      { role: 0, t: "Hello — I'm a final-year computer science student. What does the internship involve?" },
+      { role: 1, t: "Six months, working on our data pipeline team. You'd build and test ETL jobs.", tip: "'pipeline' — beat PIPEline." },
+      { role: 0, t: "That sounds great. Is there a stipend, and does it convert to a full-time role?" },
+      { role: 1, t: "Yes to both — the stipend is competitive, and we offer pre-placement offers to top performers." },
+      { role: 0, t: "Excellent. When would the cohort start, and how do I apply?" },
+      { role: 1, t: "First of next month. Drop your résumé at this desk or email the link on our banner.", tip: "'résumé' — beat rə-ZYU-may." },
+    ],
+  },
+  {
+    id: "studygroup", title: "Study Group", setting: "Students plan a group revision session before finals.", roles: ["Organiser", "Teammate"],
+    phrases: [{ t: "Can we split the syllabus evenly?", ipa: "/kən wi splɪt ðə ˈsɪləbəs ˈiːvnli/" }, { t: "Let's meet in the library after six.", ipa: "/lets miːt ɪn ðə ˈlaɪbrəri ˈɑːftə sɪks/" }],
+    lines: [
+      { role: 0, t: "Finals are in two weeks — can we split the syllabus evenly?" },
+      { role: 1, t: "Sure. I'll take thermodynamics, you take fluid mechanics, and Priya handles the lab manual." },
+      { role: 0, t: "Fair enough. Let's meet in the library after six.", tip: "'after six' — beat AFter SIX." },
+      { role: 1, t: "Six works. Should we bring printed notes or use the projector?" },
+      { role: 0, t: "Printed notes — the projector's been broken all semester." },
+      { role: 1, t: "Classic. I'll email the chapter list tonight so everyone knows their section.", tip: "'chapter list' — beat CHAPter LIST." },
+    ],
+  },
+  {
+    id: "convocation", title: "Convocation", setting: "A graduating student asks about the ceremony details.", roles: ["Student", "Registrar"],
+    phrases: [{ t: "What should I wear to the ceremony?", ipa: "/wɒt ʃəd aɪ weə tə ðə ˈserəməni/" }, { t: "When will the degrees be distributed?", ipa: "/wen wɪl ðə dɪˈɡriːz biː ˌdɪstrɪˈbjuːtɪd/" }],
+    lines: [
+      { role: 0, t: "Good morning. I'm graduating this month — what should I wear to the ceremony?" },
+      { role: 1, t: "The gown and hood are provided. Just wear formal trousers or a skirt underneath.", tip: "'provided' — beat proVIDed." },
+      { role: 0, t: "Formal underneath. And when will the degrees be distributed?" },
+      { role: 1, t: "Three months after the final results are published. You'll get a courier slip." },
+      { role: 0, t: "Three months. Is there a rehearsal before the actual convocation?" },
+      { role: 1, t: "Yes — the Friday before, in the main hall. Attendance is mandatory.", tip: "'mandatory' — beat manDATory." },
     ],
   },
 ];
