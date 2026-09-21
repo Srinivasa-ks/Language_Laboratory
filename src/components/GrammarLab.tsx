@@ -4,7 +4,6 @@ import {
   grammarDone,
   grammarKey,
   type GrammarExerciseType,
-  type GrammarLevel,
   type GrammarQuestion,
 } from "../data/grammar";
 import type { ChecksMap } from "../lib/progress";
@@ -33,17 +32,20 @@ export default function GrammarLab({ checks, onComplete }: Props) {
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
   const [matches, setMatches] = useState<Record<string, string>>({});
+  const [activeLeft, setActiveLeft] = useState<string | null>(null);
+  const [selectedErrorPart, setSelectedErrorPart] = useState<string | null>(null);
 
   const level = GRAMMAR_LEVELS.find((item) => item.id === levelId) ?? GRAMMAR_LEVELS[0];
   const question = level.questions[questionIndex];
   const key = grammarKey(level.id, question.id);
-  const levelDone = level.questions.filter((item) => checks[grammarKey(level.id, item.id)]).length;
   const totalDone = grammarDone(checks);
   const isMarked = Boolean(checks[key]);
 
   const resetQuestion = () => {
     setAnswer("");
     setMatches({});
+    setActiveLeft(null);
+    setSelectedErrorPart(null);
     setFeedback(null);
   };
 
@@ -65,6 +67,9 @@ export default function GrammarLab({ checks, onComplete }: Props) {
     if (question.type === "rearrange") {
       return normalise(answer.split("|").join(" ")) === normalise(question.answer);
     }
+    if (question.type === "error") {
+      return Boolean(selectedErrorPart) && normalise(answer) === normalise(question.answer);
+    }
     return normalise(answer) === normalise(question.answer);
   };
 
@@ -79,8 +84,11 @@ export default function GrammarLab({ checks, onComplete }: Props) {
     resetQuestion();
   };
 
+  const errorSentence = question.type === "error" ? question.prompt.split(":").slice(1).join(":").trim() : "";
+  const errorWords = errorSentence.replace(/[.?!]$/, "").split(/\s+/).filter(Boolean);
+
   const renderInput = (item: GrammarQuestion) => {
-    if (item.type === "mcq" || item.type === "identify") {
+    if (item.type === "mcq") {
       return (
         <div className="grid gap-2 sm:grid-cols-3">
           {(item.options ?? []).map((option) => (
@@ -95,6 +103,59 @@ export default function GrammarLab({ checks, onComplete }: Props) {
               {option}
             </button>
           ))}
+        </div>
+      );
+    }
+    if (item.type === "identify") {
+      return (
+        <div className="grid gap-2 sm:grid-cols-3">
+          {(item.options ?? []).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setAnswer(option)}
+              disabled={feedback !== null}
+              aria-pressed={answer === option}
+              className={`rounded-md border px-3 py-3 text-left text-[14px] font-semibold transition-all ${
+                answer === option ? "border-ink bg-ink text-chalk" : "border-line bg-card text-ink hover:border-ember"
+              }`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      );
+    }
+    if (item.type === "error") {
+      return (
+        <div>
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-fog">
+            Select the incorrect part
+          </p>
+          <div className="flex flex-wrap gap-2 rounded-md border border-dashed border-line bg-card p-3">
+            {errorWords.map((word) => (
+              <button
+                key={word}
+                type="button"
+                onClick={() => setSelectedErrorPart(word)}
+                disabled={feedback !== null}
+                aria-pressed={selectedErrorPart === word}
+                className={`rounded-md border px-2.5 py-1.5 font-mono text-[12px] transition-colors ${
+                  selectedErrorPart === word ? "border-ember bg-ember text-chalk" : "border-line bg-paper text-ink hover:border-ember"
+                }`}
+              >
+                {word}
+              </button>
+            ))}
+          </div>
+          <input
+            value={answer}
+            onChange={(event) => setAnswer(event.target.value)}
+            disabled={feedback !== null}
+            placeholder="Type the corrected sentence…"
+            aria-label="Corrected sentence"
+            className="mt-3 w-full rounded-md border border-line bg-card px-3.5 py-3 text-[14px] text-ink outline-none transition-colors placeholder:text-fog/60 focus:border-ember"
+          />
         </div>
       );
     }
@@ -132,21 +193,42 @@ export default function GrammarLab({ checks, onComplete }: Props) {
     if (item.type === "matching") {
       const choices = item.pairs?.map((pair) => pair.right) ?? [];
       return (
-        <div className="grid gap-2 sm:grid-cols-3">
-          {(item.pairs ?? []).map((pair) => (
-            <label key={pair.left} className="rounded-md border border-line bg-card p-3">
-              <span className="block font-semibold text-ink">{pair.left}</span>
-              <select
-                value={matches[pair.left] ?? ""}
-                onChange={(event) => setMatches((current) => ({ ...current, [pair.left]: event.target.value }))}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-fog">Choose a left item</p>
+            {(item.pairs ?? []).map((pair) => (
+              <button
+                key={pair.left}
+                type="button"
+                onClick={() => setActiveLeft(pair.left)}
                 disabled={feedback !== null}
-                className="mt-2 w-full rounded border border-line bg-paper px-2 py-1.5 text-[12px] text-ink"
+                aria-pressed={activeLeft === pair.left}
+                className={`block w-full rounded-md border px-3 py-2.5 text-left text-[13px] font-semibold transition-colors ${
+                  activeLeft === pair.left ? "border-ink bg-ink text-chalk" : "border-line bg-card text-ink hover:border-ember"
+                }`}
               >
-                <option value="">Choose…</option>
-                {choices.map((choice) => <option key={choice}>{choice}</option>)}
-              </select>
-            </label>
-          ))}
+                {pair.left}{matches[pair.left] && <span className="ml-2 text-[11px] opacity-70">→ {matches[pair.left]}</span>}
+              </button>
+            ))}
+          </div>
+          <div className="space-y-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-fog">Choose its match</p>
+            {choices.map((choice) => (
+              <button
+                key={choice}
+                type="button"
+                onClick={() => {
+                  if (!activeLeft) return;
+                  setMatches((current) => ({ ...current, [activeLeft]: choice }));
+                  setActiveLeft(null);
+                }}
+                disabled={feedback !== null || !activeLeft}
+                className="block w-full rounded-md border border-line bg-card px-3 py-2.5 text-left text-[13px] text-ink transition-colors hover:border-ember disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {choice}
+              </button>
+            ))}
+          </div>
         </div>
       );
     }
@@ -155,7 +237,8 @@ export default function GrammarLab({ checks, onComplete }: Props) {
         value={answer}
         onChange={(event) => setAnswer(event.target.value)}
         disabled={feedback !== null}
-        placeholder={item.type === "error" || item.type === "transform" ? "Type the complete sentence…" : "Type your answer…"}
+        placeholder={item.type === "transform" ? "Type the transformed sentence…" : "Type your answer…"}
+        aria-label={item.type === "transform" ? "Transformed sentence" : "Answer"}
         className="w-full rounded-md border border-line bg-card px-3.5 py-3 text-[14px] text-ink outline-none transition-colors placeholder:text-fog/60 focus:border-ember"
       />
     );
@@ -220,7 +303,19 @@ export default function GrammarLab({ checks, onComplete }: Props) {
 
         <div className="mt-6 flex flex-wrap gap-2">
           {!feedback ? (
-            <button onClick={submit} disabled={question.type === "matching" ? Object.keys(matches).length !== (question.pairs?.length ?? 0) : !answer} className="rounded-md bg-ink px-5 py-2.5 font-display text-[13.5px] font-bold text-chalk transition-all hover:bg-ember disabled:cursor-not-allowed disabled:opacity-40">Check answer</button>
+            <button
+              onClick={submit}
+              disabled={
+                question.type === "matching"
+                  ? Object.keys(matches).length !== (question.pairs?.length ?? 0)
+                  : question.type === "error"
+                    ? !selectedErrorPart || !answer
+                    : !answer
+              }
+              className="rounded-md bg-ink px-5 py-2.5 font-display text-[13.5px] font-bold text-chalk transition-all hover:bg-ember disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Check answer
+            </button>
           ) : feedback === "incorrect" ? (
             <button onClick={resetQuestion} className="flex items-center gap-2 rounded-md border border-line bg-card px-5 py-2.5 font-display text-[13.5px] font-bold text-ink transition-all hover:border-ember"><IconRedo className="h-4 w-4" /> Retry</button>
           ) : null}
