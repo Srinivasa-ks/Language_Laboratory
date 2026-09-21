@@ -830,6 +830,93 @@ type SecondaryExpansionSpec = {
   activities: SecondaryExpansionActivity[];
 };
 
+const SECONDARY_FIGURES_OF_SPEECH_SPECS: SecondaryExpansionSpec[] = [
+  { concept: "Figures of Speech", topic: "Simile", activities: [
+    { type: "mcq", title: "Recognise a simile", prompt: "Which sentence makes an explicit comparison using like or as?", answer: "The moon hung like a silver lantern.", explanation: "Like directly compares the moon with a silver lantern, making this a simile.", options: ["The moon lit the courtyard.", "The moon hung like a silver lantern.", "The moon was bright tonight."] },
+    { type: "identify", title: "Find the compared images", prompt: "In “Her patience was as steady as a lighthouse beam,” identify the two things compared.", answer: "Her patience and a lighthouse beam", explanation: "The phrase as steady as links patience to the steady beam of a lighthouse.", options: ["her patience and a lighthouse beam", "her patience and the sea", "a beam and a harbour"] },
+    { type: "fill", title: "Complete a vivid simile", prompt: "The old gate creaked ___ a tired violin.", answer: "like", explanation: "Like introduces the comparison between the gate's sound and a tired violin.", },
+    { type: "transform", title: "Create a simile", prompt: "Rewrite vividly using as...as: The river was very calm.", answer: "The river was as calm as a sheet of glass.", explanation: "The comparison with a sheet of glass turns the plain description into a simile.", },
+    { type: "matching", title: "Match similes to effects", prompt: "Match each simile with the quality it suggests.", answer: "as quick as a sparrow=swift|like a furnace=very hot|as quiet as snowfall=silent", explanation: "Each image supplies a clear quality: speed, heat or silence.", pairs: [{ left: "as quick as a sparrow", right: "swift" }, { left: "like a furnace", right: "very hot" }, { left: "as quiet as snowfall", right: "silent" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Metaphor", activities: [
+    { type: "mcq", title: "Recognise a metaphor", prompt: "Which sentence presents one thing as another without like or as?", answer: "The classroom was a furnace by noon.", explanation: "The classroom is directly called a furnace to suggest overwhelming heat.", options: ["The classroom was hot.", "The classroom was like a furnace.", "The classroom was a furnace by noon."] },
+    { type: "identify", title: "Interpret a metaphor", prompt: "In “A flood of memories returned,” what does flood suggest?", answer: "Many memories arriving suddenly and forcefully", explanation: "Flood transfers the force and abundance of rushing water to the speaker's memories.", options: ["Memories caused a real flood", "Many memories arriving suddenly and forcefully", "The memories were about rain"] },
+    { type: "fill", title: "Complete a metaphor", prompt: "After the debate, her argument was a sharp ___ that exposed the weakness.", answer: "sword", explanation: "Sword metaphorically presents the argument as powerful and cutting.", },
+    { type: "transform", title: "Turn description into metaphor", prompt: "Rewrite as a metaphor: The city was busy and noisy at dawn.", answer: "At dawn, the city was a restless drum.", explanation: "A restless drum conveys the city's constant movement and noise in one image.", },
+    { type: "matching", title: "Match metaphors to meanings", prompt: "Match each metaphor with its intended meaning.", answer: "the backbone of the team=main support|a curtain of rain=heavy falling rain|her words were ice=emotionally cold words", explanation: "Metaphors invite readers to transfer a concrete image to an abstract quality.", pairs: [{ left: "the backbone of the team", right: "main support" }, { left: "a curtain of rain", right: "heavy falling rain" }, { left: "her words were ice", right: "emotionally cold words" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Personification", activities: [
+    { type: "mcq", title: "Spot personification", prompt: "Which sentence gives a human action to something non-human?", answer: "The shy wind tiptoed through the reeds.", explanation: "Tiptoeing and shyness are human qualities attributed to the wind.", options: ["The wind moved through the reeds.", "The shy wind tiptoed through the reeds.", "The reeds bent in the wind."] },
+    { type: "identify", title: "Identify the human quality", prompt: "In “The ancient stairs groaned beneath our feet,” what human quality is given to the stairs?", answer: "The ability to groan in discomfort", explanation: "Groaning is a human or animal expression of pain, used to make the stairs seem alive.", options: ["The ability to grow", "The ability to groan in discomfort", "The ability to climb"] },
+    { type: "fill", title: "Complete personification", prompt: "The jealous clouds ___ the sun from the village.", answer: "hid", explanation: "Jealous clouds that hide the sun are imagined as having human motives and actions.", },
+    { type: "transform", title: "Personify nature", prompt: "Rewrite with personification: The leaves fell across the path.", answer: "The leaves danced across the path.", explanation: "Danced gives the falling leaves a lively human action and creates movement.", },
+    { type: "matching", title: "Match personification effects", prompt: "Match each image to the feeling it creates.", answer: "the moon watched us=comforting presence|the angry sea=threatening storm|the flowers nodded gently=peaceful breeze", explanation: "Human actions make natural scenes feel watchful, threatening or calm.", pairs: [{ left: "the moon watched us", right: "comforting presence" }, { left: "the angry sea", right: "threatening storm" }, { left: "the flowers nodded gently", right: "peaceful breeze" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Alliteration", activities: [
+    { type: "mcq", title: "Recognise alliteration", prompt: "Which phrase repeats an initial consonant sound?", answer: "silver streams softly singing", explanation: "The repeated s sound at the beginnings of the words creates alliteration.", options: ["bright and beautiful", "silver streams softly singing", "a stream in the valley"] },
+    { type: "identify", title: "Find the repeated sound", prompt: "In “Wild winds whipped the window,” which sound is repeated?", answer: "w", explanation: "Wild, winds, whipped and window begin with the consonant sound w.", options: ["d", "w", "t"] },
+    { type: "fill", title: "Complete an alliterative line", prompt: "The ___ moon made the marsh mysterious.", answer: "misty", explanation: "Misty moon repeats the initial m sound and suits the mysterious atmosphere.", },
+    { type: "transform", title: "Add alliteration", prompt: "Rewrite poetically with repeated initial sounds: The small boat crossed the blue bay.", answer: "The small sailboat slipped across the blue bay.", explanation: "Small, sailboat and slipped repeat s, while blue bay adds a second soft sound pattern.", },
+    { type: "matching", title: "Match alliteration to purpose", prompt: "Match each alliterative phrase with its likely effect.", answer: "busy bees buzzing=cheerful activity|dark, distant drums=ominous tension|crisp, clean corners=careful neatness", explanation: "Repeated sounds can reinforce mood and make a phrase memorable.", pairs: [{ left: "busy bees buzzing", right: "cheerful activity" }, { left: "dark, distant drums", right: "ominous tension" }, { left: "crisp, clean corners", right: "careful neatness" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Onomatopoeia", activities: [
+    { type: "mcq", title: "Recognise onomatopoeia", prompt: "Which word imitates the sound it describes?", answer: "The saucepan hissed on the stove.", explanation: "Hissed echoes the sharp sound made by steam or hot liquid.", options: ["The saucepan rested on the stove.", "The saucepan hissed on the stove.", "The saucepan was very hot."] },
+    { type: "identify", title: "Interpret a sound word", prompt: "In “The shutters banged in the storm,” what does banged contribute?", answer: "A loud, abrupt sound", explanation: "Banged imitates and emphasises the sudden noise of the shutters.", options: ["A soft colour", "A loud, abrupt sound", "A slow movement"] },
+    { type: "fill", title: "Complete a sound image", prompt: "The little stream went ___ over the stones.", answer: "babble", explanation: "Babble imitates the lively, continuous sound of running water.", },
+    { type: "transform", title: "Add onomatopoeia", prompt: "Rewrite with a sound word: The old door closed loudly.", answer: "The old door slammed shut.", explanation: "Slammed gives the closing action a forceful, recognisable sound.", },
+    { type: "matching", title: "Match sound words", prompt: "Match each onomatopoeic word to its source.", answer: "buzz=bee|clang=metal|drip=water", explanation: "These words echo characteristic sounds made by insects, metal and drops of water.", pairs: [{ left: "buzz", right: "bee" }, { left: "clang", right: "metal" }, { left: "drip", right: "water" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Hyperbole", activities: [
+    { type: "mcq", title: "Recognise hyperbole", prompt: "Which sentence deliberately exaggerates for emphasis?", answer: "I have a mountain of homework tonight.", explanation: "A mountain of homework is an impossible exaggeration that stresses the amount.", options: ["I have three assignments tonight.", "I have a mountain of homework tonight.", "I will finish my homework tonight."] },
+    { type: "identify", title: "Interpret exaggeration", prompt: "In “The queue stretched to the edge of the universe,” what is implied?", answer: "The queue felt extremely long", explanation: "The universe is used impossibly to intensify the speaker's frustration with the queue.", options: ["The queue left Earth", "The queue felt extremely long", "The queue was carefully measured"] },
+    { type: "fill", title: "Complete a hyperbole", prompt: "That tiny backpack weighs a ___!", answer: "ton", explanation: "Calling a light backpack a ton exaggerates its weight for humorous emphasis.", },
+    { type: "transform", title: "Strengthen a plain statement", prompt: "Rewrite with hyperbole: The runner was very tired after the race.", answer: "After the race, the runner was so tired he could sleep for a century.", explanation: "A century of sleep is an impossible duration that highlights extreme tiredness.", },
+    { type: "matching", title: "Match hyperboles to meanings", prompt: "Match each exaggeration with its intended meaning.", answer: "I am drowning in paperwork=I have too much paperwork|she cried an ocean=her tears were plentiful|this bag weighs a planet=the bag feels extremely heavy", explanation: "Hyperbole is not literal; it magnifies a real feeling or condition.", pairs: [{ left: "I am drowning in paperwork", right: "I have too much paperwork" }, { left: "she cried an ocean", right: "her tears were plentiful" }, { left: "this bag weighs a planet", right: "the bag feels extremely heavy" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Oxymoron", activities: [
+    { type: "mcq", title: "Recognise an oxymoron", prompt: "Which phrase combines apparently contradictory words?", answer: "deafening silence", explanation: "Deafening and silence conflict literally, but together they suggest an overwhelming quiet.", options: ["quiet library", "deafening silence", "silent reading"] },
+    { type: "identify", title: "Interpret an oxymoron", prompt: "What does “bittersweet victory” suggest?", answer: "A success mixed with sadness or loss", explanation: "Bitter and sweet combine to show that the victory brings both pleasure and pain.", options: ["A victory involving sweets", "A success mixed with sadness or loss", "A victory that was easy"] },
+    { type: "fill", title: "Complete a contrasting phrase", prompt: "The abandoned station held a strange ___ calm.", answer: "restless", explanation: "Restless calm combines unease with stillness to create an oxymoron.", },
+    { type: "transform", title: "Create an oxymoron", prompt: "Rewrite to show a noisy crowd that suddenly feels quiet: The crowd was silent.", answer: "The crowd fell into a noisy silence.", explanation: "Noisy silence captures the tension of a crowd that is quiet but still full of suppressed sound.", },
+    { type: "matching", title: "Match oxymorons to meanings", prompt: "Match each oxymoron with its likely meaning.", answer: "open secret=widely known secret|living death=joyless existence|seriously funny=humorous but important", explanation: "The contradiction makes a nuanced meaning more vivid than a plain description.", pairs: [{ left: "open secret", right: "widely known secret" }, { left: "living death", right: "joyless existence" }, { left: "seriously funny", right: "humorous but important" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Irony", activities: [
+    { type: "mcq", title: "Recognise situational irony", prompt: "Which event is ironic?", answer: "A fire station burns down.", explanation: "A place devoted to preventing fires suffering a fire creates an unexpected reversal.", options: ["A fire station answers an alarm.", "A fire station burns down.", "A firefighter checks a hose."] },
+    { type: "identify", title: "Interpret spoken irony", prompt: "After missing the bus, Ravi says, “Perfect timing!” What does he really mean?", answer: "The timing was very poor", explanation: "The praise contradicts the situation, signalling criticism rather than genuine approval.", options: ["The timing was excellent", "The timing was very poor", "He arrived early"] },
+    { type: "fill", title: "Complete an ironic response", prompt: "When the power failed during the electricity lecture, the teacher said, “How ___.”", answer: "convenient", explanation: "Convenient is deliberately opposite to the inconvenient event, creating verbal irony.", },
+    { type: "transform", title: "Write verbal irony", prompt: "Write an ironic two-word response to a disastrously messy desk.", answer: "Immaculately organised.", explanation: "The overly positive description clearly conflicts with the messy desk and therefore becomes ironic.", },
+    { type: "matching", title: "Match irony to meaning", prompt: "Match each ironic comment with what it really conveys.", answer: "What a lovely storm=the storm is unpleasant|A genius move=the move was foolish|Just what I needed=the event is unwelcome", explanation: "Irony depends on readers recognising the gap between words and intended meaning.", pairs: [{ left: "What a lovely storm", right: "the storm is unpleasant" }, { left: "A genius move", right: "the move was foolish" }, { left: "Just what I needed", right: "the event is unwelcome" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Repetition", activities: [
+    { type: "mcq", title: "Recognise purposeful repetition", prompt: "Which line repeats a word to build urgency?", answer: "Run, run, before the gates close!", explanation: "Repeating run makes the command urgent and energetic.", options: ["Run before the gates close.", "Run, run, before the gates close!", "The gates close at six."] },
+    { type: "identify", title: "Explain repeated wording", prompt: "In “Never, never give up,” what does repetition emphasise?", answer: "The speaker's absolute determination", explanation: "Repeating never strengthens the command and leaves no room for surrender.", options: ["A precise time", "The speaker's absolute determination", "A quiet description"] },
+    { type: "fill", title: "Complete a refrain", prompt: "“We shall rise, we shall ___, we shall rebuild.”", answer: "rise", explanation: "Repeating rise creates a refrain that reinforces resilience and hope.", },
+    { type: "transform", title: "Add emphatic repetition", prompt: "Rewrite for dramatic emphasis: The bell rang across the valley.", answer: "The bell rang and rang across the valley.", explanation: "Repeating rang suggests the sound continued and makes the moment more dramatic.", },
+    { type: "matching", title: "Match repetition to effect", prompt: "Match each repeated pattern with its effect.", answer: "again and again=persistence|gone, gone, gone=irreversible loss|who will listen? who will listen?=desperation", explanation: "Repeated words can stress duration, finality or emotional urgency.", pairs: [{ left: "again and again", right: "persistence" }, { left: "gone, gone, gone", right: "irreversible loss" }, { left: "who will listen? who will listen?", right: "desperation" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Apostrophe", activities: [
+    { type: "mcq", title: "Recognise apostrophe", prompt: "Which line directly addresses something absent or non-human?", answer: "O moon, guide my lonely journey.", explanation: "The speaker addresses the moon as if it could hear and respond.", options: ["The moon guided my journey.", "O moon, guide my lonely journey.", "I watched the moon rise."] },
+    { type: "identify", title: "Identify the addressee", prompt: "In “Time, why do you hurry?” who is being addressed?", answer: "Time", explanation: "The speaker directly calls on the abstract idea of time as though it were a listener.", options: ["the speaker", "Time", "the listener's friend"] },
+    { type: "fill", title: "Complete an apostrophe", prompt: "___, dear Hope, stay with me through the night.", answer: "O", explanation: "O is a conventional vocative opening when a speaker addresses an absent idea or being.", },
+    { type: "transform", title: "Address an absent idea", prompt: "Rewrite as apostrophe: I wish courage would return to me.", answer: "O Courage, return to me.", explanation: "Addressing Courage directly turns the abstract quality into an imagined listener.", },
+    { type: "matching", title: "Match apostrophes to purpose", prompt: "Match each direct address with the feeling it conveys.", answer: "O Justice, hear us=appeal for fairness|Sleep, come gently=longing for rest|Dear Memory, do not fade=wish to preserve the past", explanation: "Apostrophe gives an absent or abstract addressee a voice in the speaker's thought.", pairs: [{ left: "O Justice, hear us", right: "appeal for fairness" }, { left: "Sleep, come gently", right: "longing for rest" }, { left: "Dear Memory, do not fade", right: "wish to preserve the past" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Pun", activities: [
+    { type: "mcq", title: "Recognise a pun", prompt: "Which sentence uses a word with two related meanings for humour?", answer: "The maths teacher has too many problems.", explanation: "Problems means both maths questions and difficulties, creating the joke.", options: ["The maths teacher explains fractions.", "The maths teacher has too many problems.", "The maths teacher marks our work."] },
+    { type: "identify", title: "Interpret a pun", prompt: "Why is “The bicycle could not stand on its own because it was two-tired” a pun?", answer: "Tired sounds like two-tired and means exhausted, while two wheels support the bicycle", explanation: "The joke plays on the sound of tired and the bicycle's two tyres.", options: ["It compares a bicycle with a person", "Tired sounds like two-tired and means exhausted, while two wheels support the bicycle", "It repeats the word bicycle"] },
+    { type: "fill", title: "Complete a wordplay joke", prompt: "The calendar was nervous because its days were ___.", answer: "numbered", explanation: "Numbered means labelled with numbers and hints that the calendar's days are under pressure.", },
+    { type: "transform", title: "Make a pun", prompt: "Write a short pun about a book that is difficult to put down.", answer: "That gripping novel really has me hooked.", explanation: "Hooked means fascinated and caught, allowing the sentence to play with physical and figurative meanings.", },
+    { type: "matching", title: "Match puns to double meanings", prompt: "Match each pun with the two meanings it plays on.", answer: "The baker kneaded a break=needed and kneaded dough|The gardener had a growing concern=plant growth and increasing worry|The musician was in treble=trouble and musical treble", explanation: "Puns create humour by bringing two meanings or similar sounds together.", pairs: [{ left: "The baker kneaded a break", right: "needed and kneaded dough" }, { left: "The gardener had a growing concern", right: "plant growth and increasing worry" }, { left: "The musician was in treble", right: "trouble and musical treble" }] },
+  ] },
+  { concept: "Figures of Speech", topic: "Antithesis", activities: [
+    { type: "mcq", title: "Recognise antithesis", prompt: "Which sentence balances sharply contrasting ideas?", answer: "We must learn to live, not live to learn.", explanation: "The balanced structure contrasts live to learn with learn to live for emphasis.", options: ["We learn many things at school.", "We must learn to live, not live to learn.", "Learning takes patience and practice."] },
+    { type: "identify", title: "Find the contrasted ideas", prompt: "In “Small in size, great in courage,” which ideas are set against each other?", answer: "small in size and great in courage", explanation: "The parallel phrases contrast physical smallness with moral greatness.", options: ["size and courage as similar qualities", "small in size and great in courage", "the speaker and the audience"] },
+    { type: "fill", title: "Complete a balanced contrast", prompt: "The speech urged us to choose cooperation over ___ and service over pride.", answer: "conflict", explanation: "Conflict contrasts with cooperation, creating a balanced antithetical pair.", },
+    { type: "transform", title: "Build antithesis", prompt: "Rewrite with a balanced contrast: The night was dark, but the stars were bright.", answer: "The night was dark, yet the stars were bright.", explanation: "The paired clauses place dark and bright in a concise, balanced contrast.", },
+    { type: "matching", title: "Match antitheses to their contrasts", prompt: "Match each balanced phrase with the idea it sets against.", answer: "speech is silver, silence is golden=speaking versus silence|many are called, few are chosen=large number versus small number|to err is human, to forgive divine=human weakness versus divine mercy", explanation: "Antithesis places opposites or strongly contrasting ideas in parallel form.", pairs: [{ left: "speech is silver, silence is golden", right: "speaking versus silence" }, { left: "many are called, few are chosen", right: "large number versus small number" }, { left: "to err is human, to forgive divine", right: "human weakness versus divine mercy" }] },
+  ] },
+];
+
 const SECONDARY_EXPANSION_SPECS: SecondaryExpansionSpec[] = [
   {
     concept: "Active and passive voice",
@@ -1227,6 +1314,7 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
       "Error correction and editing",
       "Punctuation",
       "Subject–verb agreement",
+      "Figures of Speech",
     ],
     questions: [
       q("mc-1", "mcq", "Conditionals", "If I had known, I ___ you.", "would have told", "This third conditional refers to an unreal past condition and result.", { options: ["tell", "would tell", "would have told"] }),
@@ -2256,8 +2344,23 @@ const buildSecondaryFocusedQuestions = (): GrammarQuestion[] =>
     )
   );
 
+const buildSecondaryFiguresOfSpeechQuestions = (): GrammarQuestion[] =>
+  SECONDARY_FIGURES_OF_SPEECH_SPECS.flatMap(({ concept, topic, activities }) =>
+    activities.map((activity, index) =>
+      q(
+        `secondary-figures-${middleRemainingSlug(topic)}-${index + 1}`,
+        activity.type,
+        `${topic}: ${activity.title}`,
+        activity.prompt,
+        activity.answer,
+        activity.explanation,
+        { concept, topic, options: activity.options, tokens: activity.tokens, pairs: activity.pairs },
+      )
+    )
+  );
+
 GRAMMAR_LEVELS.find((level) => level.id === "middle")?.questions.push(...buildMiddleRemainingQuestions());
-GRAMMAR_LEVELS.find((level) => level.id === "secondary")?.questions.push(...buildSecondaryPhrasesClausesQuestions(), ...buildSecondaryAdditionalQuestions(), ...buildSecondaryFocusedQuestions());
+GRAMMAR_LEVELS.find((level) => level.id === "secondary")?.questions.push(...buildSecondaryPhrasesClausesQuestions(), ...buildSecondaryAdditionalQuestions(), ...buildSecondaryFocusedQuestions(), ...buildSecondaryFiguresOfSpeechQuestions());
 
 export const GRAMMAR_TOTAL = GRAMMAR_LEVELS.reduce((sum, level) => sum + level.questions.length, 0);
 
