@@ -813,6 +813,261 @@ const buildMiddleTenseQuestions = (): GrammarQuestion[] =>
     activities.map((activity, index) => tenseActivity(topic, index + 1, activity))
   );
 
+type SecondaryExpansionActivity = {
+  type: GrammarExerciseType;
+  title: string;
+  prompt: string;
+  answer: string;
+  explanation: string;
+  options?: string[];
+  tokens?: string[];
+  pairs?: { left: string; right: string }[];
+};
+
+type SecondaryExpansionSpec = {
+  topic: string;
+  concept: string;
+  activities: SecondaryExpansionActivity[];
+};
+
+const SECONDARY_EXPANSION_SPECS: SecondaryExpansionSpec[] = [
+  {
+    concept: "Active and passive voice",
+    topic: "Present and past passive",
+    activities: [
+      { type: "mcq", title: "Present passive in a notice", prompt: "The school garden ___ by the eco-club every Friday.", answer: "is watered", explanation: "A regular passive action uses is plus the past participle watered.", options: ["waters", "is watered", "was watering"] },
+      { type: "fill", title: "Past passive report", prompt: "The winning design ___ (choose) by the judges yesterday.", answer: "was chosen", explanation: "Yesterday sets a past time, so the passive form is was chosen.", },
+      { type: "error", title: "Fix the passive auxiliary", prompt: "Correct this sentence: The invitations is printed by the office.", answer: "The invitations are printed by the office.", explanation: "Invitations is plural, so the present passive auxiliary must be are.", },
+      { type: "transform", title: "Make a present passive", prompt: "Change to passive: Volunteers collect the library books.", answer: "The library books are collected by volunteers.", explanation: "The object becomes the subject and present passive uses are collected.", },
+      { type: "rearrange", title: "Order a past passive sentence", prompt: "Arrange the words to describe the damaged footbridge.", answer: "The footbridge was repaired by the council.", explanation: "Past passive follows subject + was/were + past participle, with the agent after by.", tokens: ["council.", "repaired", "was", "The", "by", "footbridge", "the"] },
+    ],
+  },
+  {
+    concept: "Active and passive voice",
+    topic: "Future passive",
+    activities: [
+      { type: "mcq", title: "Future passive announcement", prompt: "The final timetable ___ online next Monday.", answer: "will be published", explanation: "Future passive uses will be followed by the past participle published.", options: ["will publish", "will be published", "is publishing"] },
+      { type: "fill", title: "Future passive prediction", prompt: "The old bridge ___ (replace) before the monsoon.", answer: "will be replaced", explanation: "A future event received by the bridge takes will be replaced.", },
+      { type: "error", title: "Correct future passive form", prompt: "Correct this sentence: The results will announced after lunch.", answer: "The results will be announced after lunch.", explanation: "The future passive needs be between will and the past participle announced.", },
+      { type: "transform", title: "Report a planned action", prompt: "Change to passive: The committee will review every application.", answer: "Every application will be reviewed by the committee.", explanation: "Every application becomes the passive subject; will be reviewed keeps the future meaning.", },
+      { type: "rearrange", title: "Order a future notice", prompt: "Arrange the words for a school announcement.", answer: "The winners will be announced at assembly.", explanation: "Will be announced is the future passive verb phrase.", tokens: ["assembly.", "be", "winners", "at", "will", "announced", "The"] },
+    ],
+  },
+  {
+    concept: "Active and passive voice",
+    topic: "Continuous passive",
+    activities: [
+      { type: "mcq", title: "Action in progress", prompt: "At noon, the stage ___ for the annual play.", answer: "was being decorated", explanation: "A past action in progress in passive voice uses was being plus the participle.", options: ["decorated", "was being decorated", "has decorated"] },
+      { type: "fill", title: "Present continuous passive", prompt: "The new sports hall ___ (build) beside the school.", answer: "is being built", explanation: "An action happening now uses is being built in the passive voice.", },
+      { type: "error", title: "Repair a continuous passive", prompt: "Correct this sentence: The road is being repair this week.", answer: "The road is being repaired this week.", explanation: "After being, passive voice requires the past participle repaired.", },
+      { type: "transform", title: "Change an ongoing action", prompt: "Change to passive: Workers are painting the corridor.", answer: "The corridor is being painted by workers.", explanation: "The present continuous passive is is being plus painted.", },
+      { type: "rearrange", title: "Order a continuous passive", prompt: "Arrange the words to describe work during the storm.", answer: "The damaged roof was being inspected by engineers.", explanation: "Was being inspected shows an inspection in progress in the past.", tokens: ["engineers.", "being", "roof", "was", "by", "inspected", "The", "damaged"] },
+    ],
+  },
+  {
+    concept: "Active and passive voice",
+    topic: "Perfect passive",
+    activities: [
+      { type: "mcq", title: "Completed work with a present result", prompt: "The safety checks ___ before the laboratory opened.", answer: "had been completed", explanation: "Past perfect passive shows completion before another past event.", options: ["had completed", "had been completed", "were completing"] },
+      { type: "fill", title: "Present perfect passive", prompt: "The missing files ___ (recover) from the backup.", answer: "have been recovered", explanation: "The plural subject files takes have been recovered.", },
+      { type: "error", title: "Correct a perfect passive", prompt: "Correct this sentence: The report has submit to the principal.", answer: "The report has been submitted to the principal.", explanation: "Present perfect passive needs has been plus the past participle submitted.", },
+      { type: "transform", title: "Use past perfect passive", prompt: "Change to passive: The technician had tested the alarm before the inspection.", answer: "The alarm had been tested by the technician before the inspection.", explanation: "Had been tested marks the earlier completed action in passive voice.", },
+      { type: "rearrange", title: "Order a perfect passive", prompt: "Arrange the words about completed preparations.", answer: "All the seats have been reserved for guests.", explanation: "Have been reserved is the present perfect passive for plural seats.", tokens: ["reserved", "guests.", "have", "for", "All", "been", "the", "seats"] },
+    ],
+  },
+  {
+    concept: "Active and passive voice",
+    topic: "Modal passive",
+    activities: [
+      { type: "mcq", title: "Rule with a modal", prompt: "Mobile phones ___ switched off during the examination.", answer: "must be", explanation: "Modal passive uses must be plus the past participle; switched is understood from the sentence.", options: ["must", "must be", "must being"] },
+      { type: "fill", title: "Advice in passive voice", prompt: "The seedlings ___ (should / plant) in shallow trays.", answer: "should be planted", explanation: "Should be planted expresses advice about an action received by seedlings.", },
+      { type: "error", title: "Fix a modal passive", prompt: "Correct this sentence: The form can be fill in blue ink.", answer: "The form can be filled in blue ink.", explanation: "After can be, use the past participle filled.", },
+      { type: "transform", title: "Make a modal passive", prompt: "Change to passive: Students must submit the consent form.", answer: "The consent form must be submitted by students.", explanation: "The modal stays unchanged and the passive pattern is must be submitted.", },
+      { type: "rearrange", title: "Order a modal passive", prompt: "Arrange the words to state a safety rule.", answer: "Protective glasses should be worn in the workshop.", explanation: "Should be worn expresses advice in modal passive voice.", tokens: ["workshop.", "be", "Protective", "in", "worn", "should", "glasses", "the"] },
+    ],
+  },
+  {
+    concept: "Reported speech",
+    topic: "Reported statements",
+    activities: [
+      { type: "mcq", title: "Backshift a statement", prompt: "Maya said, “I need the atlas.” Choose the report.", answer: "Maya said that she needed the atlas.", explanation: "In a past reporting frame, need changes to needed and I changes to she.", options: ["Maya said that I need the atlas.", "Maya said that she needed the atlas.", "Maya says that she needed the atlas."] },
+      { type: "fill", title: "Report a past statement", prompt: "Kabir said, “We finished the model.” Kabir said that they ___ the model.", answer: "had finished", explanation: "Past simple commonly backshifts to past perfect after said in reported speech.", },
+      { type: "error", title: "Correct a reported statement", prompt: "Correct this: Anu said that she is feeling tired after the hike.", answer: "Anu said that she was feeling tired after the hike.", explanation: "Was feeling backshifts the original present continuous in a past report.", },
+      { type: "transform", title: "Report a direct statement", prompt: "Report this: “The river is rising,” the guide said.", answer: "The guide said that the river was rising.", explanation: "Is rising changes to was rising after the past reporting verb said.", },
+      { type: "rearrange", title: "Order a reported statement", prompt: "Arrange the words to report Leena's words.", answer: "Leena said that she had lost her notebook.", explanation: "The pronoun changes to she and past simple lost backshifts to had lost.", tokens: ["notebook.", "said", "had", "Leena", "that", "her", "she", "lost"] },
+    ],
+  },
+  {
+    concept: "Reported speech",
+    topic: "Reported questions",
+    activities: [
+      { type: "mcq", title: "Report a yes-no question", prompt: "Ravi asked, “Are you joining the quiz?” Choose the report.", answer: "Ravi asked whether I was joining the quiz.", explanation: "Whether introduces a reported yes-no question, with statement word order and backshift.", options: ["Ravi asked was I joining the quiz.", "Ravi asked whether I was joining the quiz.", "Ravi asked whether was I joining the quiz."] },
+      { type: "fill", title: "Report a wh-question", prompt: "The visitor asked, “Where does the bus stop?” The visitor asked where the bus ___.", answer: "stopped", explanation: "Reported questions use statement order and the present verb can backshift to stopped.", },
+      { type: "error", title: "Fix reported question order", prompt: "Correct this: She asked me where was the auditorium.", answer: "She asked me where the auditorium was.", explanation: "A reported question uses subject before verb: where the auditorium was.", },
+      { type: "transform", title: "Report a question", prompt: "Report this: “Have you completed the survey?” the teacher asked Neel.", answer: "The teacher asked Neel whether he had completed the survey.", explanation: "Whether reports the yes-no question; have completed backshifts to had completed.", },
+      { type: "rearrange", title: "Order a reported wh-question", prompt: "Arrange the words to report the librarian's question.", answer: "The librarian asked why I was whispering.", explanation: "Why introduces the report and the clause keeps statement order.", tokens: ["whispering.", "asked", "was", "why", "I", "The", "librarian"] },
+    ],
+  },
+  {
+    concept: "Reported speech",
+    topic: "Reported commands",
+    activities: [
+      { type: "mcq", title: "Report a command", prompt: "The coach said, “Run two laps.” Choose the report.", answer: "The coach told us to run two laps.", explanation: "Commands are reported with told + object + to-infinitive.", options: ["The coach told us running two laps.", "The coach told us to run two laps.", "The coach said us run two laps."] },
+      { type: "fill", title: "Report a negative command", prompt: "The guard said, “Do not touch the display.” The guard warned us ___ touch the display.", answer: "not to", explanation: "A negative command uses object + not to-infinitive.", },
+      { type: "error", title: "Correct a reported command", prompt: "Correct this: The captain told the players practise quietly.", answer: "The captain told the players to practise quietly.", explanation: "Told needs an object followed by to and the base verb.", },
+      { type: "transform", title: "Report an instruction", prompt: "Report this command: “Close the windows before the storm,” Dad said to us.", answer: "Dad told us to close the windows before the storm.", explanation: "Told us to close accurately reports the instruction.", },
+      { type: "rearrange", title: "Order a reported command", prompt: "Arrange the words to report the nurse's instruction.", answer: "The nurse told him to wash his hands.", explanation: "The pattern is told + object + to-infinitive.", tokens: ["hands.", "him", "to", "The", "wash", "nurse", "told", "his"] },
+    ],
+  },
+  {
+    concept: "Reported speech",
+    topic: "Reported requests",
+    activities: [
+      { type: "mcq", title: "Report a polite request", prompt: "Nila said, “Please lend me your ruler.” Choose the report.", answer: "Nila asked me to lend her my ruler.", explanation: "Asked + object + to-infinitive reports a polite request, with pronouns adjusted.", options: ["Nila asked me lend her my ruler.", "Nila asked me to lend her my ruler.", "Nila told me lending her my ruler."] },
+      { type: "fill", title: "Report a request for help", prompt: "“Please help me with this map,” Arjun said to Priya. Arjun asked Priya ___ him with the map.", answer: "to help", explanation: "A request is reported with asked plus the object and to help.", },
+      { type: "error", title: "Fix a reported request", prompt: "Correct this: The student requested the librarian giving her another book.", answer: "The student requested the librarian to give her another book.", explanation: "Request takes an object followed by to and the base verb.", },
+      { type: "transform", title: "Report a courteous request", prompt: "Report this: “Could you check my answer, please?” Meera said to the tutor.", answer: "Meera asked the tutor to check her answer.", explanation: "A polite could request becomes asked + object + to-infinitive.", },
+      { type: "rearrange", title: "Order a reported request", prompt: "Arrange the words to report the visitor's request.", answer: "The visitor asked us to show our tickets.", explanation: "Asked us to show reports the requested action and its receiver.", tokens: ["tickets.", "asked", "visitor", "to", "our", "The", "show", "us"] },
+    ],
+  },
+  {
+    concept: "Reported speech",
+    topic: "Tense, pronoun and time-expression changes",
+    activities: [
+      { type: "mcq", title: "Change a time expression", prompt: "On Monday, Isha said, “I will finish this tomorrow.” Which report is correct?", answer: "Isha said that she would finish it the next day.", explanation: "Will changes to would, I to she, this to it and tomorrow to the next day.", options: ["Isha said that I will finish this tomorrow.", "Isha said that she would finish it the next day.", "Isha said that she will finish this yesterday."] },
+      { type: "fill", title: "Backshift with a pronoun change", prompt: "Rohan said, “I saw your cousin yesterday.” Rohan said that he ___ my cousin the day before.", answer: "had seen", explanation: "I changes to he, your to my, yesterday to the day before, and saw backshifts to had seen.", },
+      { type: "error", title: "Correct several reported changes", prompt: "Correct this: Tara said that I am leaving here tomorrow.", answer: "Tara said that she was leaving there the next day.", explanation: "The report changes I to she, am to was, here to there and tomorrow to the next day.", },
+      { type: "transform", title: "Apply reported-speech changes", prompt: "Report this said on Friday: “We are meeting here next week,” the players said.", answer: "The players said that they were meeting there the following week.", explanation: "We, are, here and next week change to they, were, there and the following week.", },
+      { type: "rearrange", title: "Order a time-shifted report", prompt: "Arrange the words to report the message accurately.", answer: "Sita said that she had submitted the form the day before.", explanation: "The past report changes I to she, submitted to had submitted and yesterday to the day before.", tokens: ["before.", "said", "the", "had", "Sita", "form", "she", "submitted", "day", "that", "the"] },
+    ],
+  },
+  {
+    concept: "Sentence transformation and combining",
+    topic: "Simple, compound and complex sentence conversion",
+    activities: [
+      { type: "mcq", title: "Identify a compound sentence", prompt: "Which sentence is compound?", answer: "The bell rang, and the pupils left.", explanation: "Two independent clauses are joined by the coordinating conjunction and.", options: ["Because the bell rang, the pupils left.", "The bell rang, and the pupils left.", "Ringing loudly, the bell startled us."] },
+      { type: "fill", title: "Make a complex sentence", prompt: "Join with because: The match was postponed. It rained heavily.", answer: "The match was postponed because it rained heavily.", explanation: "Because introduces the dependent reason clause.", },
+      { type: "error", title: "Repair a sentence conversion", prompt: "Correct this run-on compound sentence: The lights failed we used torches.", answer: "The lights failed, so we used torches.", explanation: "A coordinating conjunction and comma are needed to join the two independent clauses.", },
+      { type: "transform", title: "Convert complex to compound", prompt: "Change to a compound sentence: Although the road was steep, the cyclists continued.", answer: "The road was steep, but the cyclists continued.", explanation: "But joins the two independent clauses while preserving the contrast.", },
+      { type: "rearrange", title: "Order a sentence conversion", prompt: "Arrange the words as a complex sentence.", answer: "Although the recipe was long, Mina followed it.", explanation: "Although introduces the dependent clause, followed by a comma and the main clause.", tokens: ["followed", "long,", "it.", "the", "Although", "was", "Mina", "recipe"] },
+    ],
+  },
+  {
+    concept: "Sentence transformation and combining",
+    topic: "Combining with conjunctions",
+    activities: [
+      { type: "mcq", title: "Choose a cause conjunction", prompt: "The plants wilted ___ nobody watered them.", answer: "because", explanation: "Because introduces the reason the plants wilted.", options: ["because", "or", "although"] },
+      { type: "fill", title: "Join alternatives", prompt: "Combine with or: You can submit the essay online. You can hand it in.", answer: "You can submit the essay online or hand it in.", explanation: "Or joins two alternative actions without unnecessarily repeating the subject.", },
+      { type: "error", title: "Correct a conjunction choice", prompt: "Correct this: Although the box was heavy, but we carried it upstairs.", answer: "Although the box was heavy, we carried it upstairs.", explanation: "Although already marks contrast, so the extra but must be removed.", },
+      { type: "transform", title: "Combine with so", prompt: "Join the sentences using so: The path was flooded. We took a different route.", answer: "The path was flooded, so we took a different route.", explanation: "So introduces the result of the flooded path.", },
+      { type: "rearrange", title: "Order a conjunction sentence", prompt: "Arrange the words to combine two ideas with while.", answer: "While Asha cooked, her brother set the table.", explanation: "While introduces the simultaneous dependent action and a comma separates the clauses.", tokens: ["table.", "cooked,", "brother", "While", "set", "her", "Asha", "the"] },
+    ],
+  },
+  {
+    concept: "Sentence transformation and combining",
+    topic: "Combining with participles and infinitives",
+    activities: [
+      { type: "mcq", title: "Use an infinitive for purpose", prompt: "The class visited the museum ___ ancient coins.", answer: "to study", explanation: "To study is an infinitive phrase expressing purpose.", options: ["studying", "to study", "studied"] },
+      { type: "fill", title: "Combine with a participle", prompt: "Combine: The boy saw the signal. He stopped the bicycle. ___ the signal, the boy stopped the bicycle.", answer: "Seeing", explanation: "The -ing participle Seeing makes the first action an introductory phrase.", },
+      { type: "error", title: "Fix a dangling participle", prompt: "Correct this sentence: Walking through the park, the rain began to fall.", answer: "Walking through the park, I felt the rain begin to fall.", explanation: "The person walking, not the rain, must be the subject of the main clause.", },
+      { type: "transform", title: "Reduce with an infinitive", prompt: "Combine using to: Neha went to the library. She wanted to research volcanoes.", answer: "Neha went to the library to research volcanoes.", explanation: "The infinitive to research expresses Neha's purpose for going.", },
+      { type: "rearrange", title: "Order a participial phrase", prompt: "Arrange the words to combine the actions.", answer: "Having finished the experiment, the students cleaned the bench.", explanation: "Having finished shows the experiment ended before the cleaning action.", tokens: ["bench.", "students", "the", "Having", "cleaned", "finished", "the", "experiment,", "the"] },
+    ],
+  },
+  {
+    concept: "Sentence transformation and combining",
+    topic: "Active/passive transformation",
+    activities: [
+      { type: "mcq", title: "Choose the passive equivalent", prompt: "Which is the passive form of “The storm damaged the roof”?", answer: "The roof was damaged by the storm.", explanation: "The object roof becomes the subject of the past passive was damaged.", options: ["The roof damaged the storm.", "The roof was damaged by the storm.", "The storm was damaged by the roof."] },
+      { type: "fill", title: "Transform a passive clause", prompt: "Change to active: The winning goal was scored by Kavya.", answer: "Kavya scored the winning goal.", explanation: "The agent Kavya becomes the active subject and was scored becomes scored.", },
+      { type: "error", title: "Correct a voice transformation", prompt: "Correct this: The poem was wrote by the student.", answer: "The poem was written by the student.", explanation: "Passive voice requires the past participle written, not the simple past wrote.", },
+      { type: "transform", title: "Change active to passive", prompt: "Change to passive: The volunteers will distribute the food packets.", answer: "The food packets will be distributed by the volunteers.", explanation: "The future passive is will be distributed, with the object promoted to subject.", },
+      { type: "rearrange", title: "Order an active transformation", prompt: "Arrange the words as an active sentence.", answer: "The mechanic repaired the bicycle before sunset.", explanation: "The agent mechanic is the active subject performing repaired on bicycle.", tokens: ["bicycle", "the", "sunset.", "repaired", "before", "The", "mechanic", "the"] },
+    ],
+  },
+  {
+    concept: "Sentence transformation and combining",
+    topic: "Direct/indirect speech transformation",
+    activities: [
+      { type: "mcq", title: "Choose the indirect form", prompt: "“I am busy,” Noor said. Which indirect sentence is correct?", answer: "Noor said that she was busy.", explanation: "Indirect speech changes I to she and am to was after said.", options: ["Noor said that I am busy.", "Noor said that she was busy.", "Noor said she is busy yesterday."] },
+      { type: "fill", title: "Turn direct into indirect speech", prompt: "“We have finished,” the players said. The players said that they ___ finished.", answer: "had", explanation: "Have finished backshifts to had finished in a past report.", },
+      { type: "error", title: "Correct an indirect question", prompt: "Correct this transformation: He asked me where did I live.", answer: "He asked me where I lived.", explanation: "Indirect questions use statement order, so the subject comes before lived.", },
+      { type: "transform", title: "Turn indirect into direct speech", prompt: "Change to direct speech: Asha said that she was reading a novel.", answer: "Asha said, “I am reading a novel.”", explanation: "The reported pronoun and backshift are restored to the speaker's original words.", },
+      { type: "rearrange", title: "Order an indirect command", prompt: "Arrange the words to report the direct command “Wait outside.”", answer: "The officer told us to wait outside.", explanation: "An indirect command uses told + object + to-infinitive.", tokens: ["outside.", "told", "us", "to", "officer", "The", "wait"] },
+    ],
+  },
+  {
+    concept: "Error correction and editing",
+    topic: "Tense errors",
+    activities: [
+      { type: "mcq", title: "Choose the correct tense", prompt: "By the time we reached the station, the train ___.", answer: "had left", explanation: "Past perfect shows the train left before the later past action reached.", options: ["has left", "had left", "leaves"] },
+      { type: "fill", title: "Repair a past-tense error", prompt: "Yesterday, Leela ___ (write) a letter to her cousin.", answer: "wrote", explanation: "Yesterday requires the past simple; the past form of write is wrote.", },
+      { type: "error", title: "Correct a tense shift", prompt: "Correct this: The guide explained the route and points to the bridge.", answer: "The guide explained the route and pointed to the bridge.", explanation: "The two completed actions in the past should use explained and pointed.", },
+      { type: "transform", title: "Make the time frame future", prompt: "Rewrite in the future: The team tests the new software tomorrow.", answer: "The team will test the new software tomorrow.", explanation: "Will plus the base verb expresses the planned future action.", },
+      { type: "rearrange", title: "Order a consistent narrative", prompt: "Arrange the words as a clear past account.", answer: "After she had packed her bag, Rina caught the bus.", explanation: "Had packed marks the earlier past action before caught.", tokens: ["caught", "bag,", "the", "After", "bus.", "Rina", "had", "packed", "she", "her"] },
+    ],
+  },
+  {
+    concept: "Error correction and editing",
+    topic: "Agreement errors",
+    activities: [
+      { type: "mcq", title: "Choose the agreeing verb", prompt: "The list of ingredients ___ on the noticeboard.", answer: "is", explanation: "The head noun list is singular; the phrase of ingredients does not change the verb.", options: ["are", "is", "were"] },
+      { type: "fill", title: "Plural subject agreement", prompt: "The players ___ ( practise) after school each day.", answer: "practise", explanation: "The plural subject players takes the base-form verb practise.", },
+      { type: "error", title: "Correct subject-verb agreement", prompt: "Correct this: Neither of the explanations are convincing.", answer: "Neither of the explanations is convincing.", explanation: "Neither is treated as singular in formal agreement.", },
+      { type: "transform", title: "Change singular to plural", prompt: "Rewrite in the plural: The child carries a heavy box.", answer: "The children carry heavy boxes.", explanation: "The plural subject children takes carry, and the nouns change to boxes.", },
+      { type: "rearrange", title: "Order an agreement sentence", prompt: "Arrange the words with the correct verb.", answer: "The results of the survey show a clear trend.", explanation: "Results is the plural head noun and therefore takes show.", tokens: ["trend.", "show", "of", "The", "a", "survey", "clear", "results", "the"] },
+    ],
+  },
+  {
+    concept: "Error correction and editing",
+    topic: "Modifier errors",
+    activities: [
+      { type: "mcq", title: "Choose the clear modifier", prompt: "Which sentence clearly shows who was carrying the microscope?", answer: "Carrying the microscope, I walked carefully.", explanation: "The introductory participle must modify the subject I, the person carrying it.", options: ["Carrying the microscope, the corridor seemed narrow.", "Carrying the microscope, I walked carefully.", "The microscope, carrying me, walked carefully."] },
+      { type: "fill", title: "Place the adverb correctly", prompt: "Rewrite with usually: The library is quiet after lunch.", answer: "The library is usually quiet after lunch.", explanation: "Usually comes before the adjective quiet after the linking verb is.", },
+      { type: "error", title: "Fix a misplaced modifier", prompt: "Correct this: She almost drove her friends to school every day.", answer: "She drove her friends to school almost every day.", explanation: "Almost should modify the frequency phrase, not the action drove.", },
+      { type: "transform", title: "Clarify a modifier", prompt: "Rewrite clearly: Covered in paint, the teacher praised the mural.", answer: "The teacher praised the mural covered in paint.", explanation: "The revised sentence makes the mural, not the teacher, the thing covered in paint.", },
+      { type: "rearrange", title: "Order a clear modifier", prompt: "Arrange the words so the participial phrase has the right subject.", answer: "Excited by the result, the researchers repeated the test.", explanation: "The researchers are excited, so they must follow the introductory modifier.", tokens: ["the", "repeated", "Excited", "test.", "by", "researchers", "the", "result,"] },
+    ],
+  },
+  {
+    concept: "Error correction and editing",
+    topic: "Article and determiner errors",
+    activities: [
+      { type: "mcq", title: "Choose the article", prompt: "We watched ___ eagle circle above the valley.", answer: "an", explanation: "Eagle begins with a vowel sound, so it takes an.", options: ["a", "an", "the"] },
+      { type: "fill", title: "Use a specific determiner", prompt: "Please return ___ book I lent you yesterday.", answer: "the", explanation: "The identifies a particular book already specified by the relative clause.", },
+      { type: "error", title: "Correct an article error", prompt: "Correct this: She is a honest representative of our class.", answer: "She is an honest representative of our class.", explanation: "Honest begins with a vowel sound because the h is silent, so use an.", },
+      { type: "transform", title: "Change an indefinite reference", prompt: "Rewrite with a suitable article: I saw unusual bird near the lake.", answer: "I saw an unusual bird near the lake.", explanation: "An comes before unusual because it begins with a vowel sound.", },
+      { type: "rearrange", title: "Order a determiner sentence", prompt: "Arrange the words with the correct article.", answer: "Those three paintings belong in the gallery.", explanation: "Those identifies the paintings and three gives their number.", tokens: ["gallery.", "three", "belong", "Those", "paintings", "in", "the"] },
+    ],
+  },
+  {
+    concept: "Error correction and editing",
+    topic: "Preposition errors",
+    activities: [
+      { type: "mcq", title: "Choose the time preposition", prompt: "The science fair begins ___ Monday morning.", answer: "on", explanation: "On is used with a particular day or date.", options: ["at", "on", "in"] },
+      { type: "fill", title: "Choose the correct place preposition", prompt: "The keys are ___ the drawer beside the desk.", answer: "in", explanation: "In shows that the keys are inside the drawer.", },
+      { type: "error", title: "Correct a preposition error", prompt: "Correct this: We arrived to the auditorium before noon.", answer: "We arrived at the auditorium before noon.", explanation: "Arrive takes at for a specific place, not to.", },
+      { type: "transform", title: "Add a precise preposition", prompt: "Rewrite using beneath: The cat slept under the wooden bench.", answer: "The cat slept beneath the wooden bench.", explanation: "Beneath is a precise preposition meaning under.", },
+      { type: "rearrange", title: "Order a prepositional phrase", prompt: "Arrange the words to make a clear location sentence.", answer: "The notice is pinned beside the main entrance.", explanation: "Beside introduces the location phrase modifying pinned.", tokens: ["entrance.", "pinned", "main", "The", "beside", "is", "notice", "the"] },
+    ],
+  },
+];
+
+const buildSecondaryExpansionQuestions = (): GrammarQuestion[] =>
+  SECONDARY_EXPANSION_SPECS.flatMap(({ concept, topic, activities }) =>
+    activities.map((activity, index) =>
+      q(
+        `secondary-expansion-${middleNounPronounSlug(topic)}-${index + 1}`,
+        activity.type,
+        `${topic}: ${activity.title}`,
+        activity.prompt,
+        activity.answer,
+        activity.explanation,
+        { concept, topic, options: activity.options, tokens: activity.tokens, pairs: activity.pairs }
+      )
+    )
+  );
+
 export const GRAMMAR_LEVELS: GrammarLevel[] = [
   {
     id: "pre-primary",
@@ -1045,6 +1300,7 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
       q("secondary-conditionals-mixed-3", "error", "Correct a mixed conditional", "Correct this connection between past and present: If Omar had accepted the scholarship, he would study abroad now.", "If Omar had accepted the scholarship, he would be studying abroad now.", "The past condition had accepted leads to a present ongoing result, would be studying.", { concept: "Conditionals and modals", topic: "Mixed conditionals" }),
       q("secondary-conditionals-mixed-4", "transform", "Combine different time frames", "Combine with if: I am not patient, so I interrupted the speaker yesterday.", "If I were patient, I would not have interrupted the speaker yesterday.", "The present trait were patient explains the unreal past consequence would not have interrupted.", { concept: "Conditionals and modals", topic: "Mixed conditionals" }),
       q("secondary-conditionals-mixed-5", "rearrange", "Order a mixed conditional", "Put the words in order to connect a past choice with today’s situation.", "If Priya had practised more, she would be ready for the audition now.", "Had practised refers to the past choice; would be ready gives its present result.", { concept: "Conditionals and modals", topic: "Mixed conditionals", tokens: ["now.", "audition", "the", "for", "ready", "be", "would", "she", "more,", "practised", "had", "Priya", "If"] }),
+      ...buildSecondaryExpansionQuestions(),
       q("secondary-modals-1", "mcq", "Modals of obligation", "Which sentence expresses a school rule?", "Students must wear their identity cards.", "Must expresses strong obligation imposed by a rule.", { concept: "Conditionals and modals", topic: "Modals of obligation, permission, possibility and deduction", options: ["Students might wear their identity cards.", "Students must wear their identity cards.", "Students could wear their identity cards."] }),
       q("secondary-modals-2", "fill", "Modals of permission", "You ___ (may/can) use the reference atlas during the test; the teacher has allowed it.", "may", "May is a formal modal of permission, suitable for an explicit classroom allowance.", { concept: "Conditionals and modals", topic: "Modals of obligation, permission, possibility and deduction" }),
       q("secondary-modals-3", "error", "Correct a modal of deduction", "Correct this conclusion from the evidence: The lights are on, so the caretaker must be left.", "The lights are on, so the caretaker must have left.", "Must have plus a past participle expresses a strong deduction about an earlier action; must be left changes the meaning.", { concept: "Conditionals and modals", topic: "Modals of obligation, permission, possibility and deduction" }),
