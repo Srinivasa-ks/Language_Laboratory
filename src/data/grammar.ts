@@ -453,6 +453,146 @@ const buildMiddleNounPronounQuestions = (): GrammarQuestion[] =>
     )
   );
 
+type MiddleDeterminerActivity = Omit<MiddleNounPronounActivity, "title"> & { title: string };
+
+const MIDDLE_DETERMINER_TOPICS: { topic: string; activities: MiddleDeterminerActivity[] }[] = [
+  {
+    topic: "Articles",
+    activities: [
+      { type: "mcq", title: "Choose a before a consonant sound", prompt: "Mira borrowed ___ history book from the library.", answer: "a", explanation: "History begins with a consonant sound, so use a.", options: ["a", "an", "the"] },
+      { type: "fill", title: "Choose an before a vowel sound", prompt: "The science club built ___ electric car.", answer: "an", explanation: "Electric begins with a vowel sound, so an is needed." },
+      { type: "error", title: "Correct the article", prompt: "Correct this sentence: We watched a eclipse after sunset.", answer: "We watched an eclipse after sunset.", explanation: "Eclipse begins with a vowel sound; use an." },
+      { type: "transform", title: "Make the noun specific", prompt: "Rewrite with the definite article: I returned a novel you recommended.", answer: "I returned the novel you recommended.", explanation: "The relative clause identifies one particular novel, so the is appropriate." },
+      { type: "rearrange", title: "Place the articles correctly", prompt: "Arrange the words into a sentence about an experiment.", answer: "The student recorded an unusual result.", explanation: "Use the for the identified student and an before unusual.", tokens: ["unusual", "recorded", "The", "result.", "an", "student"] },
+      { type: "matching", title: "Match article contexts", prompt: "Match each noun phrase to the article that fits.", answer: "___ honest answer=an|___ principal=the|___ uniform=a", explanation: "Article choice follows sound or whether the noun is specific.", pairs: [{ left: "___ honest answer", right: "an" }, { left: "___ principal", right: "the" }, { left: "___ uniform", right: "a" }] },
+      { type: "identify", title: "Identify the zero article", prompt: "Which phrase uses no article for a general uncountable noun?", answer: "Water is essential for life.", explanation: "Water is used generally here, so no article is needed.", options: ["Water is essential for life.", "The water in this bottle is cold.", "A water bottle is on the desk."] },
+      { type: "mcq", title: "Choose the article by sound", prompt: "Our class invited ___ university professor to speak.", answer: "a", explanation: "University begins with the /y/ consonant sound, so use a.", options: ["a", "an", "the"] },
+      { type: "fill", title: "Use the for a unique noun", prompt: "___ Earth moves around the Sun.", answer: "The", explanation: "The names a unique planet in this context." },
+      { type: "transform", title: "Change general to specific", prompt: "Make the noun phrase specific: I need a calculator. The calculator is on the desk.", answer: "I need a calculator; the calculator is on the desk.", explanation: "The second mention refers to the already identified calculator." },
+    ],
+  },
+  {
+    topic: "Demonstratives",
+    activities: [
+      { type: "mcq", title: "Choose this for one nearby item", prompt: "Hold up the model beside you: ___ is our volcano model.", answer: "This", explanation: "This points to one thing that is near the speaker.", options: ["This", "That", "These"] },
+      { type: "fill", title: "Choose those for distant plural items", prompt: "Can you see ___ hills beyond the river?", answer: "those", explanation: "Those points to more than one thing at a distance." },
+      { type: "error", title: "Correct number agreement", prompt: "Correct this sentence: This pencils belong to the art group.", answer: "These pencils belong to the art group.", explanation: "Pencils is plural, so use these, not this." },
+      { type: "transform", title: "Change near to far", prompt: "Rewrite to show the bicycle is far away: This bicycle needs repair.", answer: "That bicycle needs repair.", explanation: "That replaces this when one item is farther from the speaker." },
+      { type: "rearrange", title: "Arrange a demonstrative sentence", prompt: "Put the words in order to point to nearby objects.", answer: "These charts explain the water cycle.", explanation: "These agrees with plural charts and points to nearby items.", tokens: ["explain", "These", "cycle.", "the", "charts", "water"] },
+      { type: "matching", title: "Match demonstratives to meanings", prompt: "Match each demonstrative to its use.", answer: "this=one near|that=one far|these=several near", explanation: "Demonstratives show both number and distance.", pairs: [{ left: "this", right: "one near" }, { left: "that", right: "one far" }, { left: "these", right: "several near" }] },
+      { type: "identify", title: "Identify the demonstrative", prompt: "Which word points to objects far from the speaker? “Those stars are bright.”", answer: "Those", explanation: "Those is the demonstrative determiner for plural distant objects.", options: ["Those", "stars", "bright"] },
+      { type: "mcq", title: "Choose these for plural nearby items", prompt: "___ two maps on my desk show the hiking route.", answer: "These", explanation: "These is used with plural nouns that are near.", options: ["This", "That", "These"] },
+      { type: "fill", title: "Choose that for one distant item", prompt: "Look at ___ lighthouse across the bay.", answer: "that", explanation: "That points to one noun at a distance." },
+      { type: "transform", title: "Change singular to plural", prompt: "Rewrite the sentence for several nearby objects: This seed is ready to plant.", answer: "These seeds are ready to plant.", explanation: "Change this/is/seed to these/are/seeds for a nearby plural subject." },
+    ],
+  },
+  {
+    topic: "Some and any",
+    activities: [
+      { type: "mcq", title: "Use some in an affirmative sentence", prompt: "The lab has ___ spare batteries for the microphones.", answer: "some", explanation: "Some commonly introduces an indefinite amount in an affirmative sentence.", options: ["some", "any", "much"] },
+      { type: "fill", title: "Use any in a negative sentence", prompt: "There aren't ___ clean beakers in the cupboard.", answer: "any", explanation: "Any is used with plural countable nouns in negative sentences." },
+      { type: "error", title: "Correct the negative determiner", prompt: "Correct this sentence: We do not have some glue left.", answer: "We do not have any glue left.", explanation: "Use any, not some, after a negative do not have." },
+      { type: "transform", title: "Turn a statement into a question", prompt: "Ask whether there are some seats near the window.", answer: "Are there any seats near the window?", explanation: "Any is usual in a neutral yes/no question about plural countable nouns." },
+      { type: "rearrange", title: "Arrange a quantity question", prompt: "Put the words in order to ask about notebooks.", answer: "Do you have any spare notebooks?", explanation: "Any fits a neutral question about an unspecified number.", tokens: ["spare", "Do", "notebooks?", "any", "you", "have"] },
+      { type: "matching", title: "Match some and any contexts", prompt: "Match each sentence beginning to the determiner that completes it.", answer: "I bought ___ apples=some|Did you find ___ errors?=any|She has not made ___ notes=any", explanation: "Some suits affirmative statements; any suits questions and negatives.", pairs: [{ left: "I bought ___ apples", right: "some" }, { left: "Did you find ___ errors?", right: "any" }, { left: "She has not made ___ notes", right: "any" }] },
+      { type: "identify", title: "Identify the indefinite quantity", prompt: "In “Could I have some more paper?”, which word is the determiner?", answer: "some", explanation: "Some introduces an unspecified amount of paper.", options: ["Could", "some", "more"] },
+      { type: "mcq", title: "Use some in a polite offer", prompt: "Would you like ___ orange juice?", answer: "some", explanation: "Offers commonly use some when the speaker expects the answer may be yes.", options: ["some", "any", "many"] },
+      { type: "fill", title: "Use any after hardly", prompt: "Hardly ___ students had finished the optional puzzle.", answer: "any", explanation: "Hardly has a negative meaning, so any is appropriate." },
+      { type: "transform", title: "Make the amount indefinite", prompt: "Rewrite using any: We have zero questions about the instructions.", answer: "We do not have any questions about the instructions.", explanation: "A negative sentence with plural questions uses any." },
+    ],
+  },
+  {
+    topic: "Much and many",
+    activities: [
+      { type: "mcq", title: "Choose many with a countable noun", prompt: "How ___ experiments did the group complete?", answer: "many", explanation: "Experiments are countable plural nouns, so use many.", options: ["much", "many", "little"] },
+      { type: "fill", title: "Choose much with an uncountable noun", prompt: "There is not ___ information in the old file.", answer: "much", explanation: "Information is uncountable, so use much in this negative sentence." },
+      { type: "error", title: "Correct the countable determiner", prompt: "Correct this sentence: How much students joined the quiz?", answer: "How many students joined the quiz?", explanation: "Students can be counted, so the question needs many." },
+      { type: "transform", title: "Replace a number with many", prompt: "Rewrite using many: A large number of visitors saw the exhibition.", answer: "Many visitors saw the exhibition.", explanation: "Many can replace a large number of with a plural countable noun." },
+      { type: "rearrange", title: "Arrange a much question", prompt: "Put the words in order to ask about time.", answer: "How much time do we have?", explanation: "Time is uncountable, so the question uses how much.", tokens: ["do", "How", "we", "time", "have?", "much"] },
+      { type: "matching", title: "Match nouns to much or many", prompt: "Match each noun phrase to the determiner it takes.", answer: "___ homework=much|___ questions=many|___ advice=much", explanation: "Homework and advice are uncountable; questions are countable.", pairs: [{ left: "___ homework", right: "much" }, { left: "___ questions", right: "many" }, { left: "___ advice", right: "much" }] },
+      { type: "identify", title: "Identify the quantity determiner", prompt: "Which word shows a large number in “Many teams entered the tournament”?", answer: "Many", explanation: "Many quantifies the plural countable noun teams.", options: ["Many", "teams", "entered"] },
+      { type: "mcq", title: "Choose much in a negative", prompt: "We do not need ___ equipment for this simple demonstration.", answer: "much", explanation: "Equipment is uncountable, so much is correct.", options: ["much", "many", "few"] },
+      { type: "fill", title: "Use many with plural count nouns", prompt: "The museum displays ___ ancient coins.", answer: "many", explanation: "Coins are plural countable objects, so many fits." },
+      { type: "transform", title: "Turn a positive quantity into a question", prompt: "Ask about the amount of water: The tank contains much water.", answer: "How much water does the tank contain?", explanation: "Use how much for a question about an uncountable amount." },
+    ],
+  },
+  {
+    topic: "Few and a few",
+    activities: [
+      { type: "mcq", title: "Choose a few for a small useful number", prompt: "I have ___ ideas for improving our class noticeboard.", answer: "a few", explanation: "A few means a small number, but enough to be useful.", options: ["few", "a few", "little"] },
+      { type: "fill", title: "Use few for an almost empty group", prompt: "Few students understood the difficult riddle, so the teacher explained it again.", answer: "few", explanation: "Few emphasises that almost none of the students understood." },
+      { type: "error", title: "Correct the intended meaning", prompt: "Correct this sentence to mean that some volunteers can help: Few volunteers can help us today.", answer: "A few volunteers can help us today.", explanation: "A few gives the positive meaning of a small but sufficient number." },
+      { type: "transform", title: "Change negative shortage to a positive small number", prompt: "Rewrite with a few: Almost no teams submitted entries.", answer: "A few teams submitted entries.", explanation: "A few changes the meaning to some, though not many." },
+      { type: "rearrange", title: "Arrange a few sentence", prompt: "Put the words in order about available seats.", answer: "A few seats remain near the stage.", explanation: "A few shows that some seats, but not many, are still available.", tokens: ["near", "remain", "A", "stage.", "seats", "few", "the"] },
+      { type: "matching", title: "Match meaning and phrase", prompt: "Match each phrase with its meaning.", answer: "few questions=almost none|a few questions=some|few errors=not many, disappointing", explanation: "The article a changes the tone from shortage to a small positive amount.", pairs: [{ left: "few questions", right: "almost none" }, { left: "a few questions", right: "some" }, { left: "few errors", right: "not many, disappointing" }] },
+      { type: "identify", title: "Identify the positive small quantity", prompt: "In “A few parents attended the meeting,” which phrase means some but not many?", answer: "A few", explanation: "A few expresses a small positive number of countable parents.", options: ["A few", "parents", "attended"] },
+      { type: "mcq", title: "Choose few for a shortage", prompt: "___ buses ran during the strike, so many people walked.", answer: "Few", explanation: "Few means not many and highlights the shortage.", options: ["Few", "A few", "Much"] },
+      { type: "fill", title: "Use a few with plural nouns", prompt: "Please give me ___ minutes to finish the diagram.", answer: "a few", explanation: "Minutes are countable, and a few means a small amount of time that is available." },
+      { type: "transform", title: "Show an insufficient number", prompt: "Rewrite using few: Some clues were available, and they were enough to solve it.", answer: "Few clues were available, so they were not enough to solve it.", explanation: "Few presents the number as too small, unlike a few." },
+    ],
+  },
+  {
+    topic: "Little and a little",
+    activities: [
+      { type: "mcq", title: "Choose a little for a small amount", prompt: "There is ___ milk left, enough for one cup of tea.", answer: "a little", explanation: "A little means a small but usable amount of an uncountable noun.", options: ["little", "a little", "a few"] },
+      { type: "fill", title: "Use little for an insufficient amount", prompt: "We had ___ time to revise, so we could not cover every chapter.", answer: "little", explanation: "Little emphasises that the uncountable amount was hardly enough." },
+      { type: "error", title: "Correct the intended amount", prompt: "Correct this sentence to mean that some paint remains: There is little paint left, so we can finish the poster.", answer: "There is a little paint left, so we can finish the poster.", explanation: "A little gives a positive meaning: a small usable amount remains." },
+      { type: "transform", title: "Show almost no amount", prompt: "Rewrite with little: We have a small amount of evidence, but it is not enough.", answer: "We have little evidence, so it is not enough.", explanation: "Little means not much and signals an insufficient amount." },
+      { type: "rearrange", title: "Arrange a little sentence", prompt: "Put the words in order about remaining water.", answer: "A little water remains in the bottle.", explanation: "A little modifies the uncountable noun water and means some remains.", tokens: ["bottle.", "A", "remains", "water", "little", "the", "in"] },
+      { type: "matching", title: "Match little expressions", prompt: "Match each quantity phrase with its meaning.", answer: "little hope=almost none|a little hope=some hope|little information=not enough", explanation: "The article a changes a negative shortage into a small positive amount.", pairs: [{ left: "little hope", right: "almost none" }, { left: "a little hope", right: "some hope" }, { left: "little information", right: "not enough" }] },
+      { type: "identify", title: "Identify the small amount", prompt: "In “A little practice will improve your score,” which phrase quantifies practice?", answer: "A little", explanation: "A little modifies the uncountable noun practice.", options: ["A little", "practice", "improve"] },
+      { type: "mcq", title: "Choose little for a lack", prompt: "There is ___ chance of rain today, according to the forecast.", answer: "little", explanation: "Little means the chance is very small or almost absent.", options: ["little", "a little", "few"] },
+      { type: "fill", title: "Use a little with an uncountable noun", prompt: "Add ___ salt to the soup, but do not add too much.", answer: "a little", explanation: "Salt is uncountable, and a little means a small amount." },
+      { type: "transform", title: "Change shortage to possibility", prompt: "Rewrite using a little: There is hardly any light in the room.", answer: "There is a little light in the room.", explanation: "A little states positively that a small amount of light exists." },
+    ],
+  },
+  {
+    topic: "Each and every",
+    activities: [
+      { type: "mcq", title: "Choose each for individual focus", prompt: "The coach spoke to ___ player about the practice plan.", answer: "each", explanation: "Each highlights the players one by one.", options: ["each", "every", "many"] },
+      { type: "fill", title: "Use every for a repeated routine", prompt: "Our class checks the weather ___ morning.", answer: "every", explanation: "Every refers to all mornings as a repeated series." },
+      { type: "error", title: "Correct singular agreement", prompt: "Correct this sentence: Every student have a library card.", answer: "Every student has a library card.", explanation: "Every takes a singular noun and singular verb." },
+      { type: "transform", title: "Replace every with each", prompt: "Rewrite to focus on the members individually: Every team received a certificate.", answer: "Each team received a certificate.", explanation: "Each can replace every when referring to the members individually." },
+      { type: "rearrange", title: "Arrange each with a singular noun", prompt: "Put the words in order about lab safety.", answer: "Each student wears a safety badge.", explanation: "Each takes a singular countable noun and a singular verb.", tokens: ["a", "wears", "Each", "badge.", "student", "safety"] },
+      { type: "matching", title: "Match determiner and use", prompt: "Match each phrase to its best description.", answer: "each child=one at a time|every Friday=all Fridays|each of the books=individual books", explanation: "Each focuses on individuals; every covers a complete repeated set.", pairs: [{ left: "each child", right: "one at a time" }, { left: "every Friday", right: "all Fridays" }, { left: "each of the books", right: "individual books" }] },
+      { type: "identify", title: "Identify the distributive determiner", prompt: "Which word distributes the action in “Each diagram has a clear label”?", answer: "Each", explanation: "Each refers separately to every individual diagram.", options: ["Each", "diagram", "clear"] },
+      { type: "mcq", title: "Choose every for a complete series", prompt: "The school bus arrives ___ ten minutes during the morning rush.", answer: "every", explanation: "Every is used for the repeated interval as a whole.", options: ["each", "every", "either"] },
+      { type: "fill", title: "Use each of with a plural group", prompt: "___ the two solutions has a different advantage.", answer: "Each of", explanation: "Each of is followed by a plural noun phrase but takes a singular verb." },
+      { type: "transform", title: "Change a plural generalisation", prompt: "Rewrite with each: All the runners received a numbered bib.", answer: "Each runner received a numbered bib.", explanation: "Each changes the focus to the runners individually and uses a singular noun." },
+    ],
+  },
+  {
+    topic: "Either and neither",
+    activities: [
+      { type: "mcq", title: "Choose one of two", prompt: "You may choose ___ route to reach the museum.", answer: "either", explanation: "Either means one or the other of two choices.", options: ["either", "neither", "every"] },
+      { type: "fill", title: "Choose neither for zero of two", prompt: "___ answer matches the clues; both contain a mistake.", answer: "Neither", explanation: "Neither means not one and not the other of two answers." },
+      { type: "error", title: "Correct neither agreement", prompt: "Correct this sentence: Neither of the engines are working.", answer: "Neither of the engines is working.", explanation: "In formal school grammar, neither is singular and takes is." },
+      { type: "transform", title: "Join two negative choices", prompt: "Rewrite using neither...nor: The blue key does not open the lock. The red key does not open it.", answer: "Neither the blue key nor the red key opens the lock.", explanation: "Neither...nor joins two negative alternatives; the singular subject takes opens." },
+      { type: "rearrange", title: "Arrange either...or", prompt: "Put the words in order to show two possible presenters.", answer: "Either Sana or Vikram will present the project.", explanation: "Either...or introduces two alternatives in a balanced structure.", tokens: ["will", "or", "Sana", "project.", "Either", "present", "Vikram", "the"] },
+      { type: "matching", title: "Match choice determiners", prompt: "Match each expression to its meaning.", answer: "either option=one of two|neither option=not one of two|either...or=two alternatives", explanation: "Either selects one possibility; neither rejects both.", pairs: [{ left: "either option", right: "one of two" }, { left: "neither option", right: "not one of two" }, { left: "either...or", right: "two alternatives" }] },
+      { type: "identify", title: "Identify the negative determiner", prompt: "Which word means not one of two in “Neither answer is complete”?", answer: "Neither", explanation: "Neither rejects both answers.", options: ["Neither", "answer", "complete"] },
+      { type: "mcq", title: "Choose neither for both rejected", prompt: "___ of the two batteries has enough charge.", answer: "Neither", explanation: "Neither is used when both members of a pair are excluded.", options: ["Either", "Neither", "Each"] },
+      { type: "fill", title: "Complete an either...or choice", prompt: "We can meet ___ on Tuesday or Wednesday.", answer: "either", explanation: "Either introduces one of two possible meeting days." },
+      { type: "transform", title: "Turn a positive pair into a choice", prompt: "Rewrite with either...or: We can use the red marker. We can use the blue marker.", answer: "We can use either the red marker or the blue marker.", explanation: "Either...or presents the two markers as alternative choices." },
+    ],
+  },
+];
+
+const buildMiddleDeterminerQuestions = (): GrammarQuestion[] =>
+  MIDDLE_DETERMINER_TOPICS.flatMap(({ topic, activities }) =>
+    activities.map((activity, index) =>
+      q(
+        `middle-determiners-${middleNounPronounSlug(topic)}-${index + 1}`,
+        activity.type,
+        `${topic}: ${activity.title}`,
+        activity.prompt,
+        activity.answer,
+        activity.explanation,
+        { concept: "Determiners", topic, options: activity.options, tokens: activity.tokens, pairs: activity.pairs }
+      )
+    )
+  );
+
 export const GRAMMAR_LEVELS: GrammarLevel[] = [
   {
     id: "pre-primary",
@@ -590,6 +730,7 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
       q("tense-3", "fill", "Future simple: prediction", "I think our team ___ (win) the match.", "will win", "Future simple formula: will + base verb. I think introduces a prediction about the future.", { topic: "Future Simple" }),
       q("tense-4", "fill", "Future continuous: action in progress", "At 8 p.m. tomorrow, we ___ (travel) home.", "will be travelling", "Future continuous formula: will be + verb-ing. At 8 p.m. tomorrow gives a specific future moment.", { topic: "Future Continuous" }),
       ...buildMiddleNounPronounQuestions(),
+      ...buildMiddleDeterminerQuestions(),
     ],
   },
   {
