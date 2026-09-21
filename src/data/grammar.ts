@@ -1094,6 +1094,468 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
   },
 ];
 
+type MiddleRemainingSpec = {
+  concept: string;
+  topic: string;
+  rule: string;
+  items: [string, string][];
+};
+
+const MIDDLE_REMAINING_SPECS: MiddleRemainingSpec[] = [
+  { concept: "Modals", topic: "Can / Could", rule: "Can expresses present ability or permission; could commonly expresses past ability or a polite request.", items: [
+    ["___ you solve this equation without a calculator?", "Could",],
+    ["When I was seven, I ___ swim across the pool.", "could",],
+    ["Correct this: She can to solve the puzzle.", "She can solve the puzzle.",],
+    ["Make the request more polite: Pass me the atlas.", "Could you pass me the atlas, please?",],
+    ["Arrange: can / our / We / recycle / bottles.", "We can recycle our bottles.",],
+  ]},
+  { concept: "Modals", topic: "May / Might", rule: "May and might express possibility; may is also used for formal permission.", items: [
+    ["The dark clouds suggest that it ___ rain this evening.", "might",],
+    ["___ I borrow your ruler for a moment?", "May",],
+    ["Correct this: It may rains after lunch.", "It may rain after lunch.",],
+    ["Show less certainty: The team will win.", "The team might win.",],
+    ["Arrange: may / The / be / answer / correct.", "The answer may be correct.",],
+  ]},
+  { concept: "Modals", topic: "Must", rule: "Must expresses strong obligation or a logical conclusion based on evidence.", items: [
+    ["Visitors ___ wear safety goggles in the laboratory.", "must",],
+    ["The lights are off and the door is locked; they ___ be away.", "must",],
+    ["Correct this: You must to return the library book.", "You must return the library book.",],
+    ["Express a rule: Students keep their phones switched off.", "Students must keep their phones switched off.",],
+    ["Arrange: must / We / the / follow / instructions.", "We must follow the instructions.",],
+  ]},
+  { concept: "Modals", topic: "Should", rule: "Should gives advice or describes what is expected to happen.", items: [
+    ["You ___ label each beaker before the experiment.", "should",],
+    ["Which sentence gives sensible advice?", "You should save your work often.",],
+    ["Correct this: We should to check the answer.", "We should check the answer.",],
+    ["Give advice about the wet floor: Walk carefully.", "You should walk carefully on the wet floor.",],
+    ["Arrange: should / She / revise / tonight.", "She should revise tonight.",],
+  ]},
+  { concept: "Modals", topic: "Ought to", rule: "Ought to gives advice or expresses a duty, and is followed by the base verb.", items: [
+    ["We ___ to thank the volunteers who helped us.", "ought",],
+    ["Complete: You ought ___ apologise for the mistake.", "to",],
+    ["Correct this: He ought study before the test.", "He ought to study before the test.",],
+    ["Replace should with a similar expression: We should protect the wetland.", "We ought to protect the wetland.",],
+    ["Arrange: ought / to / They / arrive / early.", "They ought to arrive early.",],
+  ]},
+  { concept: "Modals", topic: "Have to", rule: "Have to expresses an obligation imposed by a rule, timetable or outside circumstance.", items: [
+    ["Because the bus leaves at six, I ___ have to wake up early.", "have to",],
+    ["Complete: Mira ___ to wear a uniform at school.", "has",],
+    ["Correct this: We has to submit the form today.", "We have to submit the form today.",],
+    ["Express an external rule: Visitors show their passes.", "Visitors have to show their passes.",],
+    ["Arrange: has / He / to / practise / daily.", "He has to practise daily.",],
+  ]},
+  { concept: "Modals", topic: "Need / Needn't", rule: "Need can express necessity; needn't means that an action is not necessary.", items: [
+    ["You ___ bring a pencil; the museum provides one.", "needn't",],
+    ["___ we book seats before the performance?", "Need",],
+    ["Correct this: You needn't to wait outside.", "You needn't wait outside.",],
+    ["Say that carrying an umbrella is unnecessary: It is sunny.", "You needn't carry an umbrella.",],
+    ["Arrange: needn't / We / hurry / today.", "We needn't hurry today.",],
+  ]},
+  { concept: "Subject–verb agreement", topic: "Compound subjects", rule: "A subject joined by and is usually plural and takes a plural verb.", items: [
+    ["Riya and Kabir ___ presenting the model.", "are",],
+    ["Choose the correct sentence.", "The coach and the captain agree.",],
+    ["Correct this: The map and compass is missing.", "The map and compass are missing.",],
+    ["Join with and: The bell rang. The students left.", "The bell and the students were ready when the bell rang.",],
+    ["Arrange: and / are / Maya / Arun / prepared.", "Maya and Arun are prepared.",],
+  ]},
+  { concept: "Subject–verb agreement", topic: "Collective nouns", rule: "A collective noun such as team or committee is normally singular when the group acts as one unit.", items: [
+    ["The committee ___ meeting this afternoon.", "is",],
+    ["Choose the sentence with formal agreement.", "The team has won the match.",],
+    ["Correct this: The jury have reached its decision.", "The jury has reached its decision.",],
+    ["Change the subject to a collective noun: A group of musicians performed.", "The band performed.",],
+    ["Arrange: a / of / flock / birds / landed.", "A flock of birds landed.",],
+  ]},
+  { concept: "Subject–verb agreement", topic: "Either / Neither", rule: "Either and neither are singular when they are followed by of plus a plural noun.", items: [
+    ["Neither of the explanations ___ clear.", "is",],
+    ["___ of the two routes is shorter?", "Which",],
+    ["Correct this: Either of these plans are possible.", "Either of these plans is possible.",],
+    ["Rewrite formally: Neither answer is correct.", "Neither of the answers is correct.",],
+    ["Arrange: either / is / answer / correct / Neither.", "Neither answer is correct.",],
+  ]},
+  { concept: "Subject–verb agreement", topic: "Indefinite pronouns", rule: "Everyone, someone, each and nobody are singular and take singular verbs.", items: [
+    ["Everyone in the class ___ a copy.", "has",],
+    ["Nobody ___ the hidden key.", "found",],
+    ["Correct this: Each of the players have a medal.", "Each of the players has a medal.",],
+    ["Replace the plural subject with an indefinite pronoun: All people enjoyed the show.", "Everyone enjoyed the show.",],
+    ["Arrange: has / Someone / left / a / message.", "Someone has left a message.",],
+  ]},
+  { concept: "Subject–verb agreement", topic: "Complex subjects", rule: "The verb agrees with the head noun, not with a nearby phrase beginning with of, with or together with.", items: [
+    ["The box of old photographs ___ in the attic.", "is",],
+    ["A list of required materials ___ on the noticeboard.", "is",],
+    ["Correct this: The quality of these apples are excellent.", "The quality of these apples is excellent.",],
+    ["Choose the head noun: The basket of oranges was heavy.", "basket",],
+    ["Arrange: of / the / is / The / full / jar / marbles.", "The jar is full of marbles.",],
+  ]},
+  { concept: "Degrees of comparison", topic: "Positive degree", rule: "The positive degree describes one person or thing without comparing it with another.", items: [
+    ["The lake is ___ on a windless morning.", "calm",],
+    ["Choose the positive-degree adjective.", "bright",],
+    ["Correct this: This puzzle is as harder as the last one.", "This puzzle is as hard as the last one.",],
+    ["Use the positive degree: The two routes are equally long.", "Both routes are long.",],
+    ["Arrange: is / The / narrow / path.", "The path is narrow.",],
+  ]},
+  { concept: "Degrees of comparison", topic: "Comparative degree", rule: "The comparative degree compares two people or things and usually takes than.", items: [
+    ["This route is ___ than the old road.", "shorter",],
+    ["Which comparative form is correct for careful?", "more careful",],
+    ["Correct this: The blue whale is more heavier than the elephant.", "The blue whale is heavier than the elephant.",],
+    ["Compare the two books: Book A is interesting; Book B is more interesting.", "Book B is more interesting than Book A.",],
+    ["Arrange: than / faster / The / train / is / bus / the.", "The train is faster than the bus.",],
+  ]},
+  { concept: "Degrees of comparison", topic: "Superlative degree", rule: "The superlative degree identifies the highest or lowest member of a group and normally takes the.", items: [
+    ["June is the ___ month in this region.", "hottest",],
+    ["Choose the superlative form of exciting.", "most exciting",],
+    ["Correct this: That was the more difficult question.", "That was the most difficult question.",],
+    ["Show the highest result: Neel scored 98; no one scored more.", "Neel scored the highest mark.",],
+    ["Arrange: the / highest / She / received / score.", "She received the highest score.",],
+  ]},
+  { concept: "Degrees of comparison", topic: "Irregular comparison", rule: "Good, bad, far, little and many have irregular comparative and superlative forms.", items: [
+    ["This solution is ___ than the first one.", "better",],
+    ["The final chapter was the ___ of all.", "best",],
+    ["Correct this: My result is gooder than yours.", "My result is better than yours.",],
+    ["Change bad to its superlative form: This was a bad mistake.", "This was the worst mistake.",],
+    ["Arrange: is / better / today / The / weather.", "The weather is better today.",],
+  ]},
+  { concept: "Adverbs", topic: "Adverbs of manner", rule: "Adverbs of manner explain how an action happens and often end in -ly.", items: [
+    ["The nurse spoke ___ to the frightened child.", "gently",],
+    ["Which word tells how the eagle flew?", "smoothly",],
+    ["Correct this: He completed the task careful.", "He completed the task carefully.",],
+    ["Turn the adjective into an adverb: The drummer was quick.", "The drummer played quickly.",],
+    ["Arrange: carefully / She / the / glass / carried.", "She carried the glass carefully.",],
+  ]},
+  { concept: "Adverbs", topic: "Adverbs of time", rule: "Adverbs of time tell when an action happens, such as now, soon, yesterday or later.", items: [
+    ["We will discuss the results ___.", "tomorrow",],
+    ["Which adverb refers to the past?", "recently",],
+    ["Correct this: I have finished already the project.", "I have already finished the project.",],
+    ["Add a time adverb to show a future action: The bus arrives.", "The bus will arrive soon.",],
+    ["Arrange: yesterday / visited / We / the / museum.", "We visited the museum yesterday.",],
+  ]},
+  { concept: "Adverbs", topic: "Adverbs of place", rule: "Adverbs of place show where an action happens or where something is located.", items: [
+    ["The children searched ___ for the missing puppy.", "everywhere",],
+    ["Which adverb shows place?", "nearby",],
+    ["Correct this: Come here to quickly.", "Come here quickly.",],
+    ["Replace the phrase with an adverb: The bird flew to a higher place.", "The bird flew upwards.",],
+    ["Arrange: outside / are / The / waiting / visitors.", "The visitors are waiting outside.",],
+  ]},
+  { concept: "Adverbs", topic: "Adverbs of frequency", rule: "Frequency adverbs show how often an action occurs; they usually come before a main verb but after be.", items: [
+    ["I ___ check the weather before cycling.", "usually",],
+    ["She is ___ late for practice.", "never",],
+    ["Correct this: They go often to the library.", "They often go to the library.",],
+    ["Show a regular habit: Arun reads science magazines.", "Arun often reads science magazines.",],
+    ["Arrange: always / is / Our / punctual / teacher.", "Our teacher is always punctual.",],
+  ]},
+  { concept: "Adverbs", topic: "Adverbs of degree", rule: "Adverbs of degree modify the strength of an adjective or adverb, as in very, quite, too and almost.", items: [
+    ["The water is ___ cold to swim in.", "too",],
+    ["Which word strengthens the adjective interesting?", "very",],
+    ["Correct this: The answer is enough clear.", "The answer is clear enough.",],
+    ["Soften the claim: The instructions are confusing.", "The instructions are rather confusing.",],
+    ["Arrange: extremely / The / was / experiment / successful.", "The experiment was extremely successful.",],
+  ]},
+  { concept: "Adverbs", topic: "Position of adverbs", rule: "Adverb position depends on meaning; frequency adverbs usually precede the main verb, while manner often follows it.", items: [
+    ["Choose the natural position: She ___ understands the diagram.", "usually",],
+    ["Choose the clearest sentence.", "The runner crossed the line quickly.",],
+    ["Correct this: He speaks English fluent.", "He speaks English fluently.",],
+    ["Move the adverb to its usual position: They have completed already the survey.", "They have already completed the survey.",],
+    ["Arrange: quietly / The / students / worked / today.", "The students worked quietly today.",],
+  ]},
+  { concept: "Prepositions", topic: "Prepositions of time", rule: "Use at for clock times, on for days and dates, and in for months, years and longer periods.", items: [
+    ["The meeting begins ___ 9:30.", "at",],
+    ["Our exam is ___ Monday.", "on",],
+    ["Correct this: She was born at 2012.", "She was born in 2012.",],
+    ["Complete with the correct preposition: We travel ___ December.", "in",],
+    ["Arrange: on / starts / The / Friday / course.", "The course starts on Friday.",],
+  ]},
+  { concept: "Prepositions", topic: "Prepositions of place", rule: "Prepositions of place describe position, including in, on, under, beside, between and among.", items: [
+    ["The keys are ___ the drawer.", "in",],
+    ["The notice is pinned ___ the wall.", "on",],
+    ["Correct this: The cat is sitting in the table.", "The cat is sitting under the table.",],
+    ["Describe the position: The library is next to the laboratory.", "The library is beside the laboratory.",],
+    ["Arrange: between / stands / The / statue / two / trees.", "The statue stands between two trees.",],
+  ]},
+  { concept: "Prepositions", topic: "Prepositions of movement", rule: "Movement prepositions show direction or destination, such as to, into, across, through, along and towards.", items: [
+    ["The cyclist rode ___ the tunnel.", "through",],
+    ["The pupils walked ___ the river on the bridge.", "across",],
+    ["Correct this: She went in the room quietly.", "She went into the room quietly.",],
+    ["Show movement towards the station: The group walked the station.", "The group walked towards the station.",],
+    ["Arrange: into / The / poured / glass / water / the.", "The water poured into the glass.",],
+  ]},
+  { concept: "Prepositions", topic: "Prepositional phrases", rule: "A prepositional phrase begins with a preposition and includes its object; it can add detail about place, time or manner.", items: [
+    ["Identify the prepositional phrase: The players rested after the match.", "after the match",],
+    ["Complete: The map is ___ the noticeboard.", "beside",],
+    ["Correct this: We met in the evening at the park.", "We met at the park in the evening.",],
+    ["Add a place phrase: The owl waited.", "The owl waited on the branch.",],
+    ["Arrange: under / The / bridge / flowed / stream / the.", "The stream flowed under the bridge.",],
+  ]},
+  { concept: "Conjunctions", topic: "Coordinating conjunctions", rule: "Coordinating conjunctions such as and, but, or, so and yet join equal words, phrases or clauses.", items: [
+    ["The road was flooded, ___ we took another route.", "so",],
+    ["Choose the conjunction showing contrast.", "but",],
+    ["Correct this: I wanted to go, and it was raining heavily.", "I wanted to go, but it was raining heavily.",],
+    ["Join with or: We can walk. We can take the bus.", "We can walk or take the bus.",],
+    ["Arrange: but / was / The / difficult / task / interesting.", "The task was difficult but interesting.",],
+  ]},
+  { concept: "Conjunctions", topic: "Subordinating conjunctions", rule: "Subordinating conjunctions introduce dependent clauses and show relationships such as time, cause, condition or contrast.", items: [
+    ["___ the bell rang, the pupils packed their bags.", "When",],
+    ["We stayed inside ___ the storm passed.", "until",],
+    ["Correct this: Although it was late but we continued.", "Although it was late, we continued.",],
+    ["Join with because: The match was cancelled. It rained heavily.", "The match was cancelled because it rained heavily.",],
+    ["Arrange: if / will / practise / You / improve / you.", "You will improve if you practise.",],
+  ]},
+  { concept: "Conjunctions", topic: "Correlative conjunctions", rule: "Correlative pairs such as either...or, neither...nor, both...and and not only...but also work together.", items: [
+    ["___ the red pen nor the blue one works.", "Neither",],
+    ["___ the coach and the players attended the meeting.", "Both",],
+    ["Correct this: Either Rohan or Maya are presenting.", "Either Rohan or Maya is presenting.",],
+    ["Join with not only...but also: The project is useful. It is affordable.", "The project is not only useful but also affordable.",],
+    ["Arrange: both / are / The / reliable / cheap / and / buses.", "Both buses are cheap and reliable.",],
+  ]},
+  { concept: "Conjunctions", topic: "Conjunctions of cause and result", rule: "Because and since introduce causes, while so and therefore introduce results.", items: [
+    ["The path was closed ___ a tree had fallen.", "because",],
+    ["The battery was flat, ___ the torch did not work.", "so",],
+    ["Correct this: It was raining, because the match was postponed.", "It was raining, so the match was postponed.",],
+    ["Show the result: The alarm rang. Everyone left the building.", "The alarm rang, so everyone left the building.",],
+    ["Arrange: therefore / missed / The / bus / I / was / late.", "I missed the bus; therefore, I was late.",],
+  ]},
+  { concept: "Conjunctions", topic: "Conjunctions of condition and contrast", rule: "If and unless introduce conditions; although, though and whereas contrast two ideas.", items: [
+    ["You cannot enter ___ you show your identity card.", "unless",],
+    ["___ the device is small, it is powerful.", "Although",],
+    ["Correct this: Unless you do not hurry, you will miss the bus.", "Unless you hurry, you will miss the bus.",],
+    ["Join with whereas: Tea is hot. Juice is served cold.", "Tea is served hot, whereas juice is served cold.",],
+    ["Arrange: although / continued / It / raining / was / we.", "Although it was raining, we continued.",],
+  ]},
+  { concept: "Phrases", topic: "Noun phrases", rule: "A noun phrase is a noun and its modifiers; it functions as a subject, object or complement.", items: [
+    ["Identify the noun phrase: The small wooden boat crossed the lake.", "The small wooden boat",],
+    ["Complete the noun phrase: a ___ science project.", "challenging",],
+    ["Correct this: She bought a red beautiful scarf.", "She bought a beautiful red scarf.",],
+    ["Expand the noun: The bird sang.", "The colourful bird in the mango tree sang.",],
+    ["Arrange: a / ancient / found / They / coin.", "They found an ancient coin.",],
+  ]},
+  { concept: "Phrases", topic: "Verb phrases", rule: "A verb phrase contains a main verb and any helping verbs, modals or perfect and continuous auxiliaries.", items: [
+    ["Identify the verb phrase: The players have been practising daily.", "have been practising",],
+    ["Complete: She ___ finished her homework.", "has",],
+    ["Correct this: They is studying for the quiz.", "They are studying for the quiz.",],
+    ["Change to a future verb phrase: The team plays tomorrow.", "The team will play tomorrow.",],
+    ["Arrange: has / The / arrived / train / already.", "The train has already arrived.",],
+  ]},
+  { concept: "Phrases", topic: "Adjective phrases", rule: "An adjective phrase is headed by an adjective and gives more information about a noun or pronoun.", items: [
+    ["Identify the adjective phrase: The box full of old letters was locked.", "full of old letters",],
+    ["Complete: The sculpture is ___ to move.", "too heavy",],
+    ["Correct this: The river is dangerous extremely after rain.", "The river is extremely dangerous after rain.",],
+    ["Expand the adjective: The solution was useful.", "The solution was very useful for beginners.",],
+    ["Arrange: proud / was / of / She / her / team.", "She was proud of her team.",],
+  ]},
+  { concept: "Phrases", topic: "Adverb phrases", rule: "An adverb phrase acts like an adverb and modifies a verb, adjective or adverb by explaining how, when, where or why.", items: [
+    ["Identify the adverb phrase: The runner finished in great haste.", "in great haste",],
+    ["Complete: The team practised ___ before the final.", "with great focus",],
+    ["Correct this: He answered the question in confident.", "He answered the question with confidence.",],
+    ["Replace the adverb with a phrase: She spoke politely.", "She spoke in a polite manner.",],
+    ["Arrange: with / The / worked / great / care / artist.", "The artist worked with great care.",],
+  ]},
+  { concept: "Phrases", topic: "Prepositional phrases", rule: "A prepositional phrase begins with a preposition and can modify a noun or verb by adding precise detail.", items: [
+    ["Identify the phrase modifying desk: The books on the desk are new.", "on the desk",],
+    ["Complete: The hikers rested ___ the tall pine.", "beneath",],
+    ["Correct this: The note was attached at the door.", "The note was attached to the door.",],
+    ["Add a phrase of place: The cat slept.", "The cat slept under the sofa.",],
+    ["Arrange: across / walked / We / the / bridge.", "We walked across the bridge.",],
+  ]},
+  { concept: "Clauses", topic: "Main clauses", rule: "A main clause contains a subject and finite verb and can stand alone as a complete sentence.", items: [
+    ["Which is a main clause?", "The experiment succeeded.",],
+    ["Complete the main clause: The students ___ the results.", "recorded",],
+    ["Correct this fragment: Because the lights went out.", "The lesson stopped because the lights went out.",],
+    ["Turn the fragment into a main clause: When the rain stopped.", "When the rain stopped, we continued the match.",],
+    ["Arrange: finished / The / lesson / early.", "The lesson finished early.",],
+  ]},
+  { concept: "Clauses", topic: "Subordinate clauses", rule: "A subordinate clause has a subject and verb but cannot stand alone; it is introduced by a subordinating word.", items: [
+    ["Identify the subordinate clause: We left when the rain started.", "when the rain started",],
+    ["Complete: We will wait until the teacher ___.", "arrives",],
+    ["Correct this: Although the road was narrow. We continued.", "Although the road was narrow, we continued.",],
+    ["Add a subordinate clause: The plants grew well.", "The plants grew well because we watered them.",],
+    ["Arrange: because / stayed / We / inside / it / rained.", "We stayed inside because it rained.",],
+  ]},
+  { concept: "Clauses", topic: "Noun clauses", rule: "A noun clause acts as a noun and can be the subject or object of a verb, often beginning with that, what, why or whether.", items: [
+    ["Identify the noun clause: I know what the symbol means.", "what the symbol means",],
+    ["Complete: Nobody knows ___ the keys are.", "where",],
+    ["Correct this: She explained that why the machine stopped.", "She explained why the machine stopped.",],
+    ["Combine with a noun clause: The guide explained it. The bridge was built in 1890.", "The guide explained that the bridge was built in 1890.",],
+    ["Arrange: what / I / means / understand / this / do not.", "I do not understand what this means.",],
+  ]},
+  { concept: "Clauses", topic: "Relative/adjective clauses", rule: "A relative clause describes a noun and commonly begins with who, which, that, whose, where or when.", items: [
+    ["Identify the relative clause: The book that you lent me is fascinating.", "that you lent me",],
+    ["Complete: The scientist ___ won the prize visited our school.", "who",],
+    ["Correct this: The park who we visited was crowded.", "The park that we visited was crowded.",],
+    ["Join with which: I found a shell. It had a spiral pattern.", "I found a shell which had a spiral pattern.",],
+    ["Arrange: lives / The / where / village / my / aunt.", "The village where my aunt lives is peaceful.",],
+  ]},
+  { concept: "Clauses", topic: "Adverb clauses", rule: "An adverb clause modifies a verb or whole clause and expresses time, reason, condition, purpose or contrast.", items: [
+    ["Identify the adverb clause: We waited until the shop opened.", "until the shop opened",],
+    ["Complete: Take notes so that you ___ remember the steps.", "can",],
+    ["Correct this: We stayed home because of it was stormy.", "We stayed home because it was stormy.",],
+    ["Show purpose: She carried a torch. She could see the path.", "She carried a torch so that she could see the path.",],
+    ["Arrange: when / arrives / Call / the / bus / you.", "Call me when the bus arrives.",],
+  ]},
+  { concept: "Non-finite verbs", topic: "Infinitives", rule: "An infinitive is to plus the base verb, or a bare base verb after some modals; it does not show tense by itself.", items: [
+    ["The team met ___ the project.", "to discuss",],
+    ["Complete: You must ___ the safety notice.", "read",],
+    ["Correct this: She decided going home early.", "She decided to go home early.",],
+    ["Show purpose: He opened the window. He wanted fresh air.", "He opened the window to get fresh air.",],
+    ["Arrange: to / wants / learn / He / coding.", "He wants to learn coding.",],
+  ]},
+  { concept: "Non-finite verbs", topic: "Gerunds", rule: "A gerund is an -ing form that acts as a noun, often after a preposition or as a sentence subject.", items: [
+    ["___ regularly improves concentration.", "Reading",],
+    ["She is interested in ___ wildlife.", "studying",],
+    ["Correct this: Swimming are good exercise.", "Swimming is good exercise.",],
+    ["Use a gerund as the subject: To recycle saves resources.", "Recycling saves resources.",],
+    ["Arrange: enjoys / music / Listening / to / she.", "She enjoys listening to music.",],
+  ]},
+  { concept: "Non-finite verbs", topic: "Participles", rule: "Present participles end in -ing and past participles often end in -ed or have irregular forms; they can modify nouns or form verb phrases.", items: [
+    ["The ___ leaves covered the path.", "fallen",],
+    ["Which participle describes the noise?", "deafening",],
+    ["Correct this: The brokened chair was unsafe.", "The broken chair was unsafe.",],
+    ["Use a participial phrase: The boy was tired. He sat down.", "Tired from the race, the boy sat down.",],
+    ["Arrange: shining / The / stars / looked / beautiful.", "The shining stars looked beautiful.",],
+  ]},
+  { concept: "Non-finite verbs", topic: "Identifying non-finite forms", rule: "Non-finite forms do not carry tense or agree with a subject; infinitives, gerunds and participles are common examples.", items: [
+    ["Which is non-finite in “She hopes to win”?", "to win",],
+    ["Identify the gerund: “Drawing relaxes me.”", "Drawing",],
+    ["Correct this: He enjoys to read novels.", "He enjoys reading novels.",],
+    ["Label the form: “The glowing lamp lit the desk.”", "glowing is a present participle.",],
+    ["Arrange: to / decided / They / volunteer / locally.", "They decided to volunteer locally.",],
+  ]},
+  { concept: "Question tags", topic: "Positive statement → negative tag", rule: "A positive statement normally takes a negative question tag with the same auxiliary and subject.", items: [
+    ["You have finished, ___?", "haven't you",],
+    ["She is ready, ___?", "isn't she",],
+    ["Correct this: They enjoyed the trip, did they?", "They enjoyed the trip, didn't they?",],
+    ["Add a tag: The plan will work.", "The plan will work, won't it?",],
+    ["Arrange: coming / aren't / You / you /?", "You are coming, aren't you?",],
+  ]},
+  { concept: "Question tags", topic: "Negative statement → positive tag", rule: "A negative statement normally takes a positive tag, using the auxiliary from the statement.", items: [
+    ["You don't need help, ___?", "do you",],
+    ["They weren't late, ___?", "were they",],
+    ["Correct this: He hasn't called, hasn't he?", "He hasn't called, has he?",],
+    ["Add a tag: We cannot enter yet.", "We cannot enter yet, can we?",],
+    ["Arrange: did / She / not / forget / did / she /?", "She did not forget, did she?",],
+  ]},
+  { concept: "Question tags", topic: "Auxiliary-based tags", rule: "A tag repeats the statement's auxiliary; when there is no auxiliary in the simple present or past, use do, does or did.", items: [
+    ["Maya plays chess, ___?", "doesn't she",],
+    ["The boys visited us, ___?", "didn't they",],
+    ["Correct this: Ravi likes music, isn't he?", "Ravi likes music, doesn't he?",],
+    ["Add the tag: They have seen the notice.", "They have seen the notice, haven't they?",],
+    ["Arrange: doesn't / work / This / it / machine /?", "This machine works, doesn't it?",],
+  ]},
+  { concept: "Question tags", topic: "Special cases such as I am → aren't I?", rule: "The special tag for I am is aren't I?; imperatives often take will you?, and let's takes shall we?", items: [
+    ["I am early, ___?", "aren't I",],
+    ["Let's check the answer, ___?", "shall we",],
+    ["Correct this: Open the window, shall we?", "Open the window, will you?",],
+    ["Add the special tag: I am responsible for the keys.", "I am responsible for the keys, aren't I?",],
+    ["Arrange: shall / Let's / we / begin /?", "Let's begin, shall we?",],
+  ]},
+  { concept: "Active and passive voice", topic: "Present simple passive", rule: "The present simple passive uses am, is or are plus a past participle when the action happens regularly or generally.", items: [
+    ["The uniforms ___ at this factory.", "are made",],
+    ["Choose the passive sentence.", "The museum is visited by many tourists.",],
+    ["Correct this: Fresh bread is bake here.", "Fresh bread is baked here.",],
+    ["Change to passive: Workers recycle the bottles.", "The bottles are recycled by workers.",],
+    ["Arrange: are / by / grown / Farmers / vegetables.", "Vegetables are grown by farmers.",],
+  ]},
+  { concept: "Active and passive voice", topic: "Past simple passive", rule: "The past simple passive uses was or were plus a past participle for a completed past action.", items: [
+    ["The bridge ___ in 1920.", "was built",],
+    ["Choose the passive sentence.", "The trophy was presented by the principal.",],
+    ["Correct this: The letters were send yesterday.", "The letters were sent yesterday.",],
+    ["Change to passive: The storm damaged the roof.", "The roof was damaged by the storm.",],
+    ["Arrange: was / The / discovered / cave / in / 1901.", "The cave was discovered in 1901.",],
+  ]},
+  { concept: "Active and passive voice", topic: "Future passive", rule: "The future passive uses will be plus a past participle for an action expected to happen.", items: [
+    ["The results ___ tomorrow.", "will be announced",],
+    ["Choose the future passive.", "The new library will be opened in June.",],
+    ["Correct this: The prizes will awarded next week.", "The prizes will be awarded next week.",],
+    ["Change to passive: The school will publish the timetable.", "The timetable will be published by the school.",],
+    ["Arrange: will / be / The / repaired / road / soon.", "The road will be repaired soon.",],
+  ]},
+  { concept: "Active and passive voice", topic: "Continuous passive", rule: "A continuous passive uses be plus being and a past participle to show an action in progress.", items: [
+    ["The auditorium ___ being decorated for the concert.", "is",],
+    ["Choose the continuous passive.", "The road is being widened this month.",],
+    ["Correct this: The machine is being repair.", "The machine is being repaired.",],
+    ["Change to passive: Workers are painting the hall.", "The hall is being painted by workers.",],
+    ["Arrange: being / The / cleaned / is / pool.", "The pool is being cleaned.",],
+  ]},
+  { concept: "Active and passive voice", topic: "Perfect passive", rule: "A perfect passive uses has, have or had been plus a past participle to show a completed action.", items: [
+    ["The forms have ___ checked by the clerk.", "been",],
+    ["Choose the perfect passive.", "The parcel had been delivered before noon.",],
+    ["Correct this: The work has completed by the team.", "The work has been completed by the team.",],
+    ["Change to passive: They had repaired the engine.", "The engine had been repaired by them.",],
+    ["Arrange: has / The / been / message / sent.", "The message has been sent.",],
+  ]},
+  { concept: "Direct and indirect speech", topic: "Reported statements", rule: "Reported statements use a reporting verb and often backshift tense and pronouns when the reporting time is past.", items: [
+    ["Mina said, “I am tired.” Report it.", "Mina said that she was tired.",],
+    ["Ravi said, “I have finished.” Report it.", "Ravi said that he had finished.",],
+    ["Correct this: Anu said that I was ready. (Anu spoke about herself.)", "Anu said that she was ready.",],
+    ["Report: “We will return tomorrow,” the hikers said.", "The hikers said that they would return the next day.",],
+    ["Arrange: said / he / was / tired / that / Arun.", "Arun said that he was tired.",],
+  ]},
+  { concept: "Direct and indirect speech", topic: "Reported questions", rule: "Reported questions use statement word order and remove the question mark; yes/no questions use if or whether.", items: [
+    ["Report: “Where do you live?” she asked me.", "She asked me where I lived.",],
+    ["Report: “Are you ready?” he asked.", "He asked whether I was ready.",],
+    ["Correct this: She asked me where did I live.", "She asked me where I lived.",],
+    ["Report: “Have they arrived?” the teacher asked.", "The teacher asked if they had arrived.",],
+    ["Arrange: asked / why / was / He / late / I.", "He asked why I was late.",],
+  ]},
+  { concept: "Direct and indirect speech", topic: "Reported commands", rule: "Reported commands commonly use told or ordered plus an object and to-infinitive; negative commands use not to.", items: [
+    ["Report: “Close the gate,” the guard said.", "The guard told us to close the gate.",],
+    ["Report: “Do not touch the switch,” she said.", "She told me not to touch the switch.",],
+    ["Correct this: The coach told run faster.", "The coach told us to run faster.",],
+    ["Report the instruction: “Write your name at the top.”", "The teacher told us to write our names at the top.",],
+    ["Arrange: told / The / us / wait / to / guide.", "The guide told us to wait.",],
+  ]},
+  { concept: "Direct and indirect speech", topic: "Reported requests", rule: "Reported requests use ask or request plus an object and to-infinitive, often with please removed.", items: [
+    ["Report: “Please lend me your notes,” Tara said.", "Tara asked me to lend her my notes.",],
+    ["Report: “Please wait here,” the nurse said.", "The nurse asked us to wait there.",],
+    ["Correct this: He asked that I to help him.", "He asked me to help him.",],
+    ["Report politely: “Could you open the door, please?”", "She asked me to open the door.",],
+    ["Arrange: asked / the / librarian / to / speak / quietly / us.", "The librarian asked us to speak quietly.",],
+  ]},
+  { concept: "Direct and indirect speech", topic: "Changes in tense/pronouns/time expressions", rule: "Reported speech may change tense, pronouns and time or place words to match the new speaker and viewpoint.", items: [
+    ["Report: “I will finish this today,” Neha said.", "Neha said that she would finish that day.",],
+    ["Change today in reported speech: “I am leaving today,” he said.", "He said that he was leaving that day.",],
+    ["Correct this: Ravi said he would come tomorrow. (reported the next day)", "Ravi said he would come the next day.",],
+    ["Report: “These are my books,” Lata said.", "Lata said that those were her books.",],
+    ["Arrange: said / the / next / day / would / return / She / she.", "She said she would return the next day.",],
+  ]},
+];
+
+const middleRemainingSlug = (value: string) =>
+  value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+const buildMiddleRemainingQuestions = (): GrammarQuestion[] =>
+  MIDDLE_REMAINING_SPECS.flatMap((spec) =>
+    spec.items.map(([prompt, answer], index) => {
+      const type = (["mcq", "fill", "error", "transform", "rearrange"] as GrammarExerciseType[])[index];
+      const id = `middle-${middleRemainingSlug(spec.concept)}-${middleRemainingSlug(spec.topic)}-${index + 1}`;
+      const options = type === "mcq"
+        ? [answer, ...[...spec.items.filter((_, itemIndex) => itemIndex !== index).map((item) => item[1]), "might", "should", "are", "was", "were", "has", "have"]
+          .filter((option, optionIndex, all) => option !== answer && all.indexOf(option) === optionIndex)
+          .slice(0, 2)]
+        : undefined;
+      const tokens = type === "rearrange"
+        ? answer.split(/\s+/).reverse()
+        : undefined;
+      const instruction = type === "mcq"
+        ? `Choose the best answer for this ${spec.topic.toLowerCase()} example.`
+        : type === "fill"
+          ? `Complete this ${spec.topic.toLowerCase()} example.`
+          : type === "error"
+            ? `Correct the error in this ${spec.topic.toLowerCase()} example.`
+            : type === "transform"
+              ? `Rewrite this ${spec.topic.toLowerCase()} example as instructed.`
+              : `Arrange the words to make a ${spec.topic.toLowerCase()} sentence.`;
+      return q(
+        id,
+        type,
+        `${spec.topic}: activity ${index + 1}`,
+        `${instruction} ${prompt}`,
+        answer,
+        spec.rule,
+        { concept: spec.concept, topic: spec.topic, options, tokens },
+      );
+    }),
+  );
+
+GRAMMAR_LEVELS.find((level) => level.id === "middle")?.questions.push(...buildMiddleRemainingQuestions());
+
 export const GRAMMAR_TOTAL = GRAMMAR_LEVELS.reduce((sum, level) => sum + level.questions.length, 0);
 
 export const grammarKey = (levelId: string, questionId: string) => `grammar:${levelId}:${questionId}`;
