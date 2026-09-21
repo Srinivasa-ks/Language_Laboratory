@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   GRAMMAR_LEVELS,
+  GRAMMAR_CURRICULUM,
   grammarDone,
   grammarKey,
   type GrammarExerciseType,
@@ -28,7 +29,9 @@ const normalise = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCa
 
 export default function GrammarLab({ checks, onComplete }: Props) {
   const [levelId, setLevelId] = useState(GRAMMAR_LEVELS[0].id);
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [conceptName, setConceptName] = useState(GRAMMAR_CURRICULUM[0]?.concepts[0]?.concept ?? GRAMMAR_LEVELS[0].concepts[0]);
+  const [topicName, setTopicName] = useState("");
+  const [activityId, setActivityId] = useState("");
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
   const [matches, setMatches] = useState<Record<string, string>>({});
@@ -36,7 +39,12 @@ export default function GrammarLab({ checks, onComplete }: Props) {
   const [selectedErrorPart, setSelectedErrorPart] = useState<string | null>(null);
 
   const level = GRAMMAR_LEVELS.find((item) => item.id === levelId) ?? GRAMMAR_LEVELS[0];
-  const question = level.questions[questionIndex];
+  const curriculumLevel = GRAMMAR_CURRICULUM.find((item) => item.levelId === levelId);
+  const conceptNode = curriculumLevel?.concepts.find((item) => item.concept === conceptName) ?? curriculumLevel?.concepts[0];
+  const topicNode = conceptNode?.topics.find((item) => item.topic === topicName) ?? conceptNode?.topics[0];
+  const activityIds = topicNode?.questionIds ?? [];
+  const question = level.questions.find((item) => item.id === activityId) ?? level.questions.find((item) => activityIds.includes(item.id)) ?? level.questions[0];
+  const questionIndex = Math.max(0, activityIds.indexOf(question.id));
   const key = grammarKey(level.id, question.id);
   const totalDone = grammarDone(checks);
   const isMarked = Boolean(checks[key]);
@@ -50,8 +58,33 @@ export default function GrammarLab({ checks, onComplete }: Props) {
   };
 
   const chooseLevel = (id: string) => {
+    const nextLevel = GRAMMAR_LEVELS.find((item) => item.id === id) ?? GRAMMAR_LEVELS[0];
+    const nextCurriculum = GRAMMAR_CURRICULUM.find((item) => item.levelId === nextLevel.id);
+    const nextConcept = nextCurriculum?.concepts[0];
     setLevelId(id);
-    setQuestionIndex(0);
+    setConceptName(nextConcept?.concept ?? nextLevel.concepts[0]);
+    setTopicName(nextConcept?.topics[0]?.topic ?? "");
+    setActivityId(nextConcept?.topics[0]?.questionIds[0] ?? "");
+    resetQuestion();
+  };
+
+  const chooseConcept = (concept: string) => {
+    const nextConcept = curriculumLevel?.concepts.find((item) => item.concept === concept);
+    setConceptName(concept);
+    setTopicName(nextConcept?.topics[0]?.topic ?? "");
+    setActivityId(nextConcept?.topics[0]?.questionIds[0] ?? "");
+    resetQuestion();
+  };
+
+  const chooseTopic = (topic: string) => {
+    const nextTopic = conceptNode?.topics.find((item) => item.topic === topic);
+    setTopicName(topic);
+    setActivityId(nextTopic?.questionIds[0] ?? "");
+    resetQuestion();
+  };
+
+  const startActivity = (id: string) => {
+    setActivityId(id);
     resetQuestion();
   };
 
@@ -80,7 +113,8 @@ export default function GrammarLab({ checks, onComplete }: Props) {
   };
 
   const nextQuestion = () => {
-    setQuestionIndex((current) => (current + 1) % level.questions.length);
+    const current = Math.max(0, activityIds.indexOf(question.id));
+    setActivityId(activityIds[(current + 1) % Math.max(1, activityIds.length)] ?? question.id);
     resetQuestion();
   };
 
@@ -272,11 +306,88 @@ export default function GrammarLab({ checks, onComplete }: Props) {
       <div className="rounded-lg border border-line bg-paper p-5 shadow-[0_2px_0_rgba(20,48,42,0.07)] sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-5">
           <div>
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: level.color }}>{level.classes}</p>
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: level.color }}>Academic level · {level.classes}</p>
             <h3 className="mt-2 font-display text-2xl font-extrabold text-ink">{level.name}</h3>
             <p className="mt-1 max-w-xl text-[13.5px] leading-relaxed text-fog">{level.blurb}</p>
           </div>
-          <span className="rounded-md bg-card px-3 py-2 font-mono text-[11px] tabular-nums text-fog">Question {questionIndex + 1}/{level.questions.length}</span>
+          <span className="rounded-md bg-card px-3 py-2 font-mono text-[11px] tabular-nums text-fog">Activity {questionIndex + 1}/{activityIds.length}</span>
+        </div>
+
+        <div className="mt-6">
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ember">Grammar concepts</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {(curriculumLevel?.concepts ?? []).map((concept) => {
+              const count = concept.topics.reduce((sum, topic) => sum + topic.questionIds.length, 0);
+              const active = concept.concept === conceptNode?.concept;
+              return (
+                <button
+                  key={concept.concept}
+                  type="button"
+                  onClick={() => chooseConcept(concept.concept)}
+                  aria-pressed={active}
+                  className={`rounded-md border p-3 text-left transition-all ${active ? "border-ink bg-ink text-chalk shadow-sm" : "border-line bg-card text-ink hover:border-ember"}`}
+                >
+                  <span className="block font-display text-[14px] font-bold">{concept.concept}</span>
+                  <span className={`mt-1 block font-mono text-[10px] ${active ? "text-chalk/65" : "text-fog"}`}>{count} activities · {concept.topics.length} topics</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-6 border-t border-line pt-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ember">Topics · {conceptNode?.concept}</p>
+              <p className="mt-1 text-[13px] text-fog">Choose a topic to browse its activities.</p>
+            </div>
+            <span className="font-mono text-[10px] tabular-nums text-fog">{conceptNode?.topics.reduce((sum, topic) => sum + topic.questionIds.length, 0) ?? 0} concept activities</span>
+          </div>
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {(conceptNode?.topics ?? []).map((topic) => {
+              const active = topic.topic === topicNode?.topic;
+              return (
+                <button
+                  key={topic.topic}
+                  type="button"
+                  onClick={() => chooseTopic(topic.topic)}
+                  aria-pressed={active}
+                  className={`min-w-[150px] shrink-0 rounded-md border px-3 py-2 text-left transition-colors ${active ? "border-ember bg-ember text-chalk" : "border-line bg-card text-ink hover:border-ember"}`}
+                >
+                  <span className="block text-[12px] font-semibold">{topic.topic}</span>
+                  <span className={`mt-1 block font-mono text-[10px] ${active ? "text-chalk/70" : "text-fog"}`}>{topic.questionIds.length} activities</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-md border border-dashed border-line bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-fog">Activities · {topicNode?.topic}</p>
+            <span className="font-mono text-[10px] text-fog">{activityIds.length} available</span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {activityIds.map((id, index) => {
+              const activity = level.questions.find((item) => item.id === id);
+              if (!activity) return null;
+              const active = activity.id === question.id;
+              const complete = Boolean(checks[grammarKey(level.id, activity.id)]);
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => startActivity(id)}
+                  aria-pressed={active}
+                  className={`flex items-center gap-2 rounded-md border px-3 py-2 text-left transition-colors ${active ? "border-ink bg-ink text-chalk" : "border-line bg-paper text-ink hover:border-ember"}`}
+                >
+                  <span className="font-mono text-[10px] tabular-nums opacity-65">{index + 1}</span>
+                  <span className="max-w-[220px] truncate text-[12px] font-semibold">{activity.title}</span>
+                  {complete && <IconCheck className="h-3.5 w-3.5 text-moss" />}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="mt-7">
