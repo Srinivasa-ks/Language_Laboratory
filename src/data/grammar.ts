@@ -307,6 +307,152 @@ const buildPrimaryQuestions = (): GrammarQuestion[] =>
     })
   );
 
+type MiddleNounPronounActivity = {
+  type: GrammarExerciseType;
+  title: string;
+  prompt: string;
+  answer: string;
+  explanation: string;
+  options?: string[];
+  tokens?: string[];
+  pairs?: { left: string; right: string }[];
+};
+
+const MIDDLE_NOUN_PRONOUN_TOPICS: {
+  topic: string;
+  activities: MiddleNounPronounActivity[];
+}[] = [
+  {
+    topic: "Abstract nouns",
+    activities: [
+      { type: "mcq", title: "Name the abstract noun", prompt: "Which word names an idea rather than something that can be touched?", answer: "honesty", explanation: "Honesty is a quality or idea, so it is an abstract noun.", options: ["honesty", "helmet", "river"] },
+      { type: "fill", title: "Form an abstract noun", prompt: "Complete the sentence: The team's ___ impressed the judges. (brave)", answer: "bravery", explanation: "Bravery is the abstract noun formed from brave.", },
+      { type: "error", title: "Use the abstract noun", prompt: "Correct this sentence: Her kind impressed everyone.", answer: "Her kindness impressed everyone.", explanation: "Kindness is the noun naming the quality; kind is an adjective.", },
+      { type: "transform", title: "Noun from adjective", prompt: "Rewrite using an abstract noun: The scientist was patient during the long test.", answer: "The scientist showed patience during the long test.", explanation: "Patience names the quality shown by someone who is patient.", },
+      { type: "rearrange", title: "Place the abstract noun", prompt: "Arrange the words into a sentence about a quality.", answer: "Patience helps us solve difficult problems.", explanation: "Patience is the abstract subject, followed by the verb and its object.", tokens: ["difficult", "Patience", "problems.", "helps", "us", "solve"] },
+      { type: "matching", title: "Match qualities and nouns", prompt: "Match each adjective to its abstract noun.", answer: "honest=honesty|wise=wisdom|strong=strength", explanation: "Each noun names the quality expressed by its adjective.", pairs: [{ left: "honest", right: "honesty" }, { left: "wise", right: "wisdom" }, { left: "strong", right: "strength" }] },
+      { type: "identify", title: "Find the abstract noun", prompt: "In “Their friendship survived the disagreement,” which word is an abstract noun?", answer: "friendship", explanation: "Friendship names a relationship, not a physical object.", options: ["Their", "friendship", "survived"] },
+      { type: "mcq", title: "Abstract or concrete", prompt: "Which sentence contains an abstract noun?", answer: "Justice should be fair to everyone.", explanation: "Justice is an idea or principle, so it is abstract.", options: ["Justice should be fair to everyone.", "The judge lifted the book.", "The wooden desk is brown."] },
+      { type: "fill", title: "Complete with an abstract noun", prompt: "Complete the sentence: We admired Maya's ___ when she admitted the mistake. (honest)", answer: "honesty", explanation: "Honesty is the noun for the quality of being honest.", },
+      { type: "transform", title: "Nominalise a quality", prompt: "Replace the adjective with an abstract noun: The volunteers were generous to the shelter.", answer: "The volunteers showed generosity to the shelter.", explanation: "Generosity is the abstract noun corresponding to generous.", },
+    ],
+  },
+  {
+    topic: "Collective nouns",
+    activities: [
+      { type: "mcq", title: "Choose the collective noun", prompt: "Which collective noun best completes the sentence? A ___ of bees moved around the hive.", answer: "swarm", explanation: "A swarm is a group of bees.", options: ["swarm", "flock", "fleet"] },
+      { type: "fill", title: "Group of musicians", prompt: "Complete the sentence: The ___ performed three songs at the festival.", answer: "band", explanation: "Band is a collective noun for a group of musicians.", },
+      { type: "error", title: "Correct the group noun", prompt: "Correct this sentence: A pack of wolves are moving through the forest.", answer: "A pack of wolves is moving through the forest.", explanation: "The singular collective noun pack is the subject, so formal agreement uses is.", },
+      { type: "transform", title: "Use a collective noun", prompt: "Rewrite using one collective noun: Many ships waited in the harbour.", answer: "A fleet waited in the harbour.", explanation: "Fleet names a group of ships and replaces the plural noun phrase.", },
+      { type: "rearrange", title: "Build a collective-noun sentence", prompt: "Arrange the words into a sentence about birds.", answer: "A flock of birds crossed the valley.", explanation: "Flock is the collective noun for the birds.", tokens: ["valley.", "of", "A", "crossed", "birds", "flock", "the"] },
+      { type: "matching", title: "Match groups and collective nouns", prompt: "Match each group with its usual collective noun.", answer: "cattle=herd|players=team|stars=cluster", explanation: "These collective nouns identify the groups precisely.", pairs: [{ left: "cattle", right: "herd" }, { left: "players", right: "team" }, { left: "stars", right: "cluster" }] },
+      { type: "identify", title: "Find the collective noun", prompt: "In “The jury reached its decision,” which word names the group?", answer: "jury", explanation: "Jury names a group of people who make a decision together.", options: ["jury", "reached", "decision"] },
+      { type: "mcq", title: "Select the precise group", prompt: "Which sentence uses a collective noun correctly?", answer: "The committee has approved the plan.", explanation: "Committee is a collective noun for people making a decision together.", options: ["The committee has approved the plan.", "The committee are a plan.", "The committee approving plans."] },
+      { type: "fill", title: "Collective noun for soldiers", prompt: "Complete the sentence: A ___ of soldiers marched past the school.", answer: "regiment", explanation: "Regiment is a collective noun for a military unit of soldiers.", },
+      { type: "transform", title: "Replace a group phrase", prompt: "Rewrite with a collective noun: A group of dancers practised backstage.", answer: "A troupe of dancers practised backstage.", explanation: "Troupe is a collective noun for performers such as dancers.", },
+    ],
+  },
+  {
+    topic: "Compound nouns",
+    activities: [
+      { type: "mcq", title: "Recognise a compound noun", prompt: "Which word is a compound noun made from two smaller words?", answer: "raincoat", explanation: "Raincoat combines rain and coat to name one thing.", options: ["raincoat", "quickly", "blue"] },
+      { type: "fill", title: "Join two nouns", prompt: "Complete the sentence with one compound noun: We ate lunch in the ___ (school + room).", answer: "schoolroom", explanation: "Schoolroom combines school and room into one noun.", },
+      { type: "error", title: "Spell the compound noun", prompt: "Correct this sentence: Please put the books on the book shelf.", answer: "Please put the books on the bookshelf.", explanation: "Bookshelf is normally written as one closed compound noun.", },
+      { type: "transform", title: "Form a compound noun", prompt: "Combine the words to name the object: a board used for surfing.", answer: "surfboard", explanation: "Surfboard combines surf and board.", },
+      { type: "rearrange", title: "Use a compound noun", prompt: "Arrange the words into a sentence using a compound noun.", answer: "The firefighter carried a flashlight.", explanation: "Flashlight is the compound noun naming the portable light.", tokens: ["a", "carried", "The", "flashlight.", "firefighter"] },
+      { type: "matching", title: "Match compound parts", prompt: "Match the word parts to make common compound nouns.", answer: "tooth=brush|news=paper|foot=ball", explanation: "Each pair forms a familiar compound noun.", pairs: [{ left: "tooth", right: "brush" }, { left: "news", right: "paper" }, { left: "foot", right: "ball" }] },
+      { type: "identify", title: "Find the compound noun", prompt: "In “The sunflower turned towards the light,” which word is a compound noun?", answer: "sunflower", explanation: "Sunflower combines sun and flower.", options: ["sunflower", "turned", "towards"] },
+      { type: "mcq", title: "Choose the correct form", prompt: "Which spelling is correct for a case used to hold books?", answer: "bookcase", explanation: "Bookcase combines book and case into one closed compound noun.", options: ["bookcase", "book case", "book-case"] },
+      { type: "fill", title: "Complete with a compound noun", prompt: "Complete the sentence: Wear a ___ when you ride your bicycle. (head + gear)", answer: "headgear", explanation: "Headgear is the compound noun for protective items worn on the head.", },
+      { type: "transform", title: "Expand a compound noun", prompt: "Replace the description with a compound noun: The child watched the machine that washes dishes.", answer: "The child watched the dishwasher.", explanation: "Dishwasher combines dish and washer to name the machine.", },
+    ],
+  },
+  {
+    topic: "Personal pronouns",
+    activities: [
+      { type: "mcq", title: "Choose the subject pronoun", prompt: "___ and I will present our model to the class.", answer: "She", explanation: "She is the subject pronoun used with I in this compound subject.", options: ["Her", "She", "Hers"] },
+      { type: "fill", title: "Choose the object pronoun", prompt: "The coach congratulated ___ after the race. (we)", answer: "us", explanation: "Us is the object form of the personal pronoun we.", },
+      { type: "error", title: "Correct the pronoun case", prompt: "Correct this sentence: Me and Rohan finished the poster.", answer: "Rohan and I finished the poster.", explanation: "I is the subject form; placing Rohan first is the polite standard order.", },
+      { type: "transform", title: "Replace a repeated noun", prompt: "Rewrite with personal pronouns: Aisha told Aisha's brother that Aisha would help.", answer: "Aisha told her brother that she would help.", explanation: "Her shows possession and she replaces the repeated subject Aisha.", },
+      { type: "rearrange", title: "Place personal pronouns", prompt: "Arrange the words into a clear sentence.", answer: "They invited us to their science club.", explanation: "They is the subject, us the object, and their the possessive determiner.", tokens: ["science", "their", "They", "club.", "invited", "us", "to"] },
+      { type: "matching", title: "Match pronoun forms", prompt: "Match each subject pronoun to its object form.", answer: "I=me|he=him|they=them", explanation: "Object pronouns follow verbs or prepositions.", pairs: [{ left: "I", right: "me" }, { left: "he", right: "him" }, { left: "they", right: "them" }] },
+      { type: "identify", title: "Find the personal pronoun", prompt: "In “We sent her the photographs,” which word is a personal pronoun referring to the receiver?", answer: "her", explanation: "Her is the object pronoun receiving the photographs.", options: ["We", "sent", "her"] },
+      { type: "mcq", title: "Use personal pronouns clearly", prompt: "Which sentence uses personal pronouns with clear reference?", answer: "Priya thanked the teacher because Priya was grateful.", explanation: "Repeating Priya avoids an unclear she and makes the meaning precise.", options: ["Priya thanked the teacher because Priya was grateful.", "Priya thanked her because she was grateful.", "They thanked her because it was grateful."] },
+      { type: "fill", title: "Pronoun after a preposition", prompt: "The librarian spoke to Ravi and ___. (I)", answer: "me", explanation: "The preposition to requires the object pronoun me.", },
+      { type: "transform", title: "Use a subject pronoun", prompt: "Rewrite without repeating the nouns: The girls said the girls had finished the girls' project.", answer: "The girls said they had finished their project.", explanation: "They replaces the repeated subject and their shows possession.", },
+    ],
+  },
+  {
+    topic: "Possessive pronouns",
+    activities: [
+      { type: "mcq", title: "Choose the possessive pronoun", prompt: "This blue backpack is ___.", answer: "mine", explanation: "Mine stands alone and shows that the backpack belongs to the speaker.", options: ["my", "mine", "me"] },
+      { type: "fill", title: "Complete with a possessive pronoun", prompt: "That calculator belongs to Neha; it is ___.", answer: "hers", explanation: "Hers is the possessive pronoun referring to Neha.", },
+      { type: "error", title: "Separate the pronoun", prompt: "Correct this sentence: The winning idea was their's.", answer: "The winning idea was theirs.", explanation: "Possessive pronouns such as theirs never take an apostrophe.", },
+      { type: "transform", title: "Replace a possessive phrase", prompt: "Rewrite using a possessive pronoun: This notebook belongs to Arjun.", answer: "This notebook is his.", explanation: "His replaces the phrase belongs to Arjun.", },
+      { type: "rearrange", title: "Use a possessive pronoun", prompt: "Arrange the words into a sentence.", answer: "The seats near the window are ours.", explanation: "Ours stands alone after are and refers to the seats belonging to us.", tokens: ["ours.", "near", "The", "are", "window", "seats", "the"] },
+      { type: "matching", title: "Match possessive forms", prompt: "Match each possessive determiner to its independent pronoun.", answer: "my=mine|our=ours|their=theirs", explanation: "The first word comes before a noun; the second stands alone.", pairs: [{ left: "my", right: "mine" }, { left: "our", right: "ours" }, { left: "their", right: "theirs" }] },
+      { type: "identify", title: "Find the possessive pronoun", prompt: "In “The red umbrella is yours,” which word is the possessive pronoun?", answer: "yours", explanation: "Yours stands alone and identifies the owner's umbrella.", options: ["red", "umbrella", "yours"] },
+      { type: "mcq", title: "Choose the correct possessive form", prompt: "Which sentence uses a possessive pronoun correctly?", answer: "The final decision was theirs.", explanation: "Theirs is an independent possessive pronoun and needs no apostrophe.", options: ["The final decision was theirs.", "The final decision was their's.", "The final decision was their."] },
+      { type: "fill", title: "Complete with a possessive pronoun", prompt: "The responsibility for the display is ___. (they)", answer: "theirs", explanation: "Theirs stands alone and shows that the responsibility belongs to them.", },
+      { type: "transform", title: "Change determiner to pronoun", prompt: "Rewrite without repeating the noun: Our project is more detailed than your project.", answer: "Our project is more detailed than yours.", explanation: "Yours replaces your project and stands independently.", },
+    ],
+  },
+  {
+    topic: "Reflexive pronouns",
+    activities: [
+      { type: "mcq", title: "Choose the reflexive pronoun", prompt: "Riya taught ___ to play the keyboard.", answer: "herself", explanation: "Herself refers back to the subject Riya.", options: ["her", "herself", "hers"] },
+      { type: "fill", title: "Complete the reflexive sentence", prompt: "We organised the exhibition by ___.", answer: "ourselves", explanation: "Ourselves refers back to the subject we.", },
+      { type: "error", title: "Avoid an unnecessary reflexive", prompt: "Correct this sentence: Please send the form to myself.", answer: "Please send the form to me.", explanation: "Use the object pronoun me after to; myself is reflexive and needs an appropriate antecedent.", },
+      { type: "transform", title: "Add emphasis with a reflexive", prompt: "Rewrite to emphasise that the principal opened the exhibition: The principal opened the exhibition.", answer: "The principal herself opened the exhibition.", explanation: "Herself is an emphatic reflexive pronoun referring back to the principal.", },
+      { type: "rearrange", title: "Place the reflexive pronoun", prompt: "Arrange the words into a sentence about independent work.", answer: "The students prepared themselves for the debate.", explanation: "Themselves refers back to the plural subject students.", tokens: ["themselves", "for", "The", "debate.", "prepared", "students", "the"] },
+      { type: "matching", title: "Match subjects and reflexives", prompt: "Match each subject with its reflexive pronoun.", answer: "I=myself|you=yourself|they=themselves", explanation: "Reflexive forms agree with the person and number of the subject.", pairs: [{ left: "I", right: "myself" }, { left: "you", right: "yourself" }, { left: "they", right: "themselves" }] },
+      { type: "identify", title: "Find the reflexive pronoun", prompt: "In “The cat cleaned itself after the rain,” which word is reflexive?", answer: "itself", explanation: "Itself refers back to the subject cat.", options: ["cat", "cleaned", "itself"] },
+      { type: "mcq", title: "Use the correct number", prompt: "The two teams congratulated ___ after the match.", answer: "themselves", explanation: "The plural subject teams requires themselves.", options: ["itself", "himself", "themselves"] },
+      { type: "fill", title: "Reflexive after an action", prompt: "She reminded ___ to check the map before leaving.", answer: "herself", explanation: "Herself refers back to she as the person being reminded.", },
+      { type: "transform", title: "Add reflexive emphasis", prompt: "Rewrite to emphasise that I packed the equipment: I packed the equipment.", answer: "I myself packed the equipment.", explanation: "Myself can emphasise the subject I when it refers back to that subject.", },
+    ],
+  },
+  {
+    topic: "Relative pronouns",
+    activities: [
+      { type: "mcq", title: "Choose the relative pronoun", prompt: "The athlete ___ won the race trains every morning.", answer: "who", explanation: "Who introduces a relative clause about a person.", options: ["who", "which", "where"] },
+      { type: "fill", title: "Relative pronoun for a thing", prompt: "The telescope, ___ we borrowed, belongs to the science club.", answer: "which", explanation: "Which refers to the thing telescope in this non-defining clause.", },
+      { type: "error", title: "Correct the relative pronoun", prompt: "Correct this sentence: The village which I was born is near the coast.", answer: "The village where I was born is near the coast.", explanation: "Where refers to a place; which cannot directly replace the place relation here.", },
+      { type: "transform", title: "Join with a relative clause", prompt: "Combine the sentences using who: Asha designed the poster. Asha won the art prize.", answer: "Asha, who designed the poster, won the art prize.", explanation: "Who joins the extra information about Asha in a non-defining relative clause.", },
+      { type: "rearrange", title: "Build a relative clause", prompt: "Arrange the words into a sentence with a relative clause.", answer: "I thanked the neighbour who found my bicycle.", explanation: "Who introduces the clause describing the neighbour.", tokens: ["bicycle.", "who", "I", "found", "thanked", "my", "the", "neighbour"] },
+      { type: "matching", title: "Match relative pronouns and uses", prompt: "Match each relative word to the use it normally introduces.", answer: "who=people|which=things|where=places", explanation: "These relative words connect information to the appropriate noun.", pairs: [{ left: "who", right: "people" }, { left: "which", right: "things" }, { left: "where", right: "places" }] },
+      { type: "identify", title: "Find the relative pronoun", prompt: "In “The book that you recommended was fascinating,” which word begins the relative clause?", answer: "that", explanation: "That introduces the clause describing the book.", options: ["book", "that", "recommended"] },
+      { type: "mcq", title: "Choose a defining relative", prompt: "Which sentence correctly identifies the one student who solved the puzzle?", answer: "The student who solved the puzzle explained the method.", explanation: "The defining clause who solved the puzzle identifies the student.", options: ["The student who solved the puzzle explained the method.", "The student which solved the puzzle explained the method.", "The student where solved the puzzle explained the method."] },
+      { type: "fill", title: "Relative pronoun for possession", prompt: "The inventor ___ machine won the award thanked her team.", answer: "whose", explanation: "Whose shows that the machine belongs to the inventor.", },
+      { type: "transform", title: "Join with which", prompt: "Combine the sentences using which: We visited the museum. It displays ancient coins.", answer: "We visited the museum, which displays ancient coins.", explanation: "Which adds information about the museum in a non-defining relative clause.", },
+    ],
+  },
+];
+
+const middleNounPronounSlug = (value: string) =>
+  value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+const buildMiddleNounPronounQuestions = (): GrammarQuestion[] =>
+  MIDDLE_NOUN_PRONOUN_TOPICS.flatMap(({ topic, activities }) =>
+    activities.map((activity, index) =>
+      q(
+        `middle-nouns-advanced-pronouns-${middleNounPronounSlug(topic)}-${index + 1}`,
+        activity.type,
+        `${topic}: ${activity.title}`,
+        activity.prompt,
+        activity.answer,
+        activity.explanation,
+        {
+          concept: "Nouns and advanced pronouns",
+          topic,
+          options: activity.options,
+          tokens: activity.tokens,
+          pairs: activity.pairs,
+        }
+      )
+    )
+  );
+
 export const GRAMMAR_LEVELS: GrammarLevel[] = [
   {
     id: "pre-primary",
@@ -443,6 +589,7 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
       q("tense-2", "identify", "Past perfect: earlier past", "In “The train had left before we arrived.”, identify the past perfect verb phrase.", "had left", "Past perfect formula: had + past participle. Before marks the action completed earlier in the past.", { topic: "Past Perfect", options: ["The train", "had left", "we arrived"] }),
       q("tense-3", "fill", "Future simple: prediction", "I think our team ___ (win) the match.", "will win", "Future simple formula: will + base verb. I think introduces a prediction about the future.", { topic: "Future Simple" }),
       q("tense-4", "fill", "Future continuous: action in progress", "At 8 p.m. tomorrow, we ___ (travel) home.", "will be travelling", "Future continuous formula: will be + verb-ing. At 8 p.m. tomorrow gives a specific future moment.", { topic: "Future Continuous" }),
+      ...buildMiddleNounPronounQuestions(),
     ],
   },
   {
