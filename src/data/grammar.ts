@@ -2117,8 +2117,147 @@ const buildSecondaryAdditionalQuestions = (): GrammarQuestion[] =>
     )
   );
 
+const SECONDARY_FOCUSED_SPECS: SecondaryExpansionSpec[] = [
+  {
+    concept: "Punctuation and capitalization",
+    topic: "Commas",
+    activities: [
+      { type: "mcq", title: "Comma after an introductory phrase", prompt: "Which sentence uses a comma correctly after its introductory phrase?", answer: "After the assembly, the students returned to class.", explanation: "A comma separates the introductory prepositional phrase from the main clause.", options: ["After the assembly the students returned to class.", "After the assembly, the students returned to class.", "After, the assembly the students returned to class."] },
+      { type: "fill", title: "Comma in a direct address", prompt: "Add the missing punctuation: Please check this calculation ___ Rohan.", answer: "Please check this calculation, Rohan.", explanation: "A comma sets off the name of the person being addressed.", },
+      { type: "error", title: "Comma in a compound sentence", prompt: "Correct this sentence: The bell rang the pupils packed their books.", answer: "The bell rang, and the pupils packed their books.", explanation: "Two independent clauses need a comma and a coordinating conjunction between them.", },
+      { type: "transform", title: "Set off a non-essential phrase", prompt: "Rewrite with commas around the extra information: My aunt who teaches biology visited our school.", answer: "My aunt, who teaches biology, visited our school.", explanation: "The non-defining relative clause adds extra information and must be enclosed by commas.", },
+      { type: "rearrange", title: "Order a comma sentence", prompt: "Arrange the words to punctuate an introductory time phrase.", answer: "In the evening, we reviewed the survey results.", explanation: "The comma follows the introductory time phrase.", tokens: ["reviewed", "results.", "the", "In", "we", "survey", "evening,", "the"] },
+    ],
+  },
+  {
+    concept: "Punctuation and capitalization",
+    topic: "Semicolons",
+    activities: [
+      { type: "mcq", title: "Join closely related clauses", prompt: "Which sentence correctly joins two independent clauses with a semicolon?", answer: "The road was flooded; the buses used another route.", explanation: "A semicolon can join two closely related independent clauses without a conjunction.", options: ["The road was flooded; because buses used another route.", "The road was flooded; the buses used another route.", "The road; was flooded, the buses used another route."] },
+      { type: "fill", title: "Separate complex list items", prompt: "Insert the punctuation: The delegates came from Pune, India ___ Nairobi, Kenya ___ and Lima, Peru.", answer: "The delegates came from Pune, India; Nairobi, Kenya; and Lima, Peru.", explanation: "Semicolons separate list items that already contain internal commas.", },
+      { type: "error", title: "Repair a semicolon splice", prompt: "Correct this sentence: Although the forecast changed; we continued the expedition.", answer: "Although the forecast changed, we continued the expedition.", explanation: "A semicolon cannot separate a dependent although-clause from its main clause; use a comma.", },
+      { type: "transform", title: "Replace a coordinating conjunction", prompt: "Join the independent clauses with a semicolon: The data were incomplete, but the pattern was clear.", answer: "The data were incomplete; the pattern was clear.", explanation: "The semicolon links the two closely related complete clauses while removing but.", },
+      { type: "rearrange", title: "Order a semicolon sentence", prompt: "Arrange the clauses and punctuation to show two related complete ideas.", answer: "The experiment ended; everyone recorded the results.", explanation: "A semicolon separates the two independent clauses.", tokens: ["recorded", "ended;", "results.", "everyone", "The", "the", "experiment"] },
+    ],
+  },
+  {
+    concept: "Punctuation and capitalization",
+    topic: "Colons",
+    activities: [
+      { type: "mcq", title: "Introduce a list", prompt: "Choose the sentence with the colon used correctly.", answer: "Bring three items: a ruler, a pencil and an eraser.", explanation: "A colon can introduce a list after a complete clause.", options: ["Bring: three items a ruler, a pencil and an eraser.", "Bring three items: a ruler, a pencil and an eraser.", "Bring three: items a ruler, a pencil and an eraser."] },
+      { type: "fill", title: "Colon before an explanation", prompt: "Complete the punctuation: The result was unexpected ___ the solution was colder than predicted.", answer: "The result was unexpected: the solution was colder than predicted.", explanation: "A colon can introduce an explanation of the preceding complete statement.", },
+      { type: "error", title: "Remove an unnecessary colon", prompt: "Correct this sentence: The main reason is: the battery was flat.", answer: "The main reason is that the battery was flat.", explanation: "A colon should not separate the linking verb is from its complement; that introduces the explanation.", },
+      { type: "transform", title: "Introduce examples with a colon", prompt: "Rewrite as one sentence using a colon: We studied three renewable sources. They were wind, solar and hydro power.", answer: "We studied three renewable sources: wind, solar and hydro power.", explanation: "The colon introduces the examples after a complete introductory clause.", },
+      { type: "rearrange", title: "Order a colon sentence", prompt: "Arrange the words into a sentence that introduces a list.", answer: "The kit contains four tools: a torch, a compass, a whistle and a map.", explanation: "The complete clause before the colon introduces the list.", tokens: ["a", "contains", "a", "map.", "four", "The", "compass,", "kit", "tools:", "a", "whistle", "torch,", "and"] },
+    ],
+  },
+  {
+    concept: "Punctuation and capitalization",
+    topic: "Quotation marks",
+    activities: [
+      { type: "mcq", title: "Punctuate direct speech", prompt: "Which direct-speech sentence has quotation marks and the speech tag punctuated correctly?", answer: "The guide said, “Stay with the group.”", explanation: "A comma introduces the spoken words, which begin with a capital letter inside quotation marks.", options: ["The guide said “Stay with the group”.", "The guide said, “Stay with the group.”", "The guide said, Stay with the group."] },
+      { type: "fill", title: "Quote a question", prompt: "Add quotation marks and punctuation: Mira asked ___ Are we ready to leave? ___", answer: "Mira asked, “Are we ready to leave?”", explanation: "The question mark belongs inside the quotation marks because the quoted words are the question.", },
+      { type: "error", title: "Correct a speech tag", prompt: "Correct this sentence: “I finished the model”, said Dev.", answer: "“I finished the model,” said Dev.", explanation: "A comma, not a full stop, separates a statement from a following speech tag.", },
+      { type: "transform", title: "Convert reported speech to direct speech", prompt: "Write as direct speech: Leela said that she needed a larger canvas.", answer: "Leela said, “I need a larger canvas.”", explanation: "Direct speech uses quotation marks and changes the reported she needed to the speaker's I need.", },
+      { type: "rearrange", title: "Order direct speech", prompt: "Arrange the words and punctuation so the imperative is quoted before its speech tag.", answer: "“Please label the samples,” said the technician.", explanation: "The quoted imperative comes before the comma and the reporting clause.", tokens: ["technician.", "the", "said", "samples,”", "“Please", "label", "the"] },
+    ],
+  },
+  {
+    concept: "Punctuation and capitalization",
+    topic: "Apostrophes",
+    activities: [
+      { type: "mcq", title: "Show singular possession", prompt: "Choose the correct possessive phrase: the ___ notebook (student).", answer: "student's notebook", explanation: "A singular owner takes apostrophe plus s before the noun owned.", options: ["students notebook", "student's notebook", "students' notebook"] },
+      { type: "fill", title: "Contract have not", prompt: "Write the contraction: The instruments ___ been calibrated.", answer: "haven't", explanation: "Haven't is the contraction of have not and needs an apostrophe.", },
+      { type: "error", title: "Distinguish its and it's", prompt: "Correct this sentence: The machine lost it's power during the test.", answer: "The machine lost its power during the test.", explanation: "Its is the possessive determiner; it's means it is or it has.", },
+      { type: "transform", title: "Show plural possession", prompt: "Rewrite with a possessive apostrophe: The projects of the three teams were displayed.", answer: "The three teams' projects were displayed.", explanation: "A plural owner ending in s takes an apostrophe after the s.", },
+      { type: "rearrange", title: "Order an apostrophe sentence", prompt: "Arrange the words to show an irregular plural possessive.", answer: "The children's costumes were ready for the play.", explanation: "Children is an irregular plural, so its possessive form is children's.", tokens: ["ready", "play.", "children's", "for", "were", "costumes", "The", "the"] },
+    ],
+  },
+  {
+    concept: "Punctuation and capitalization",
+    topic: "Punctuation in complex and reported sentences",
+    activities: [
+      { type: "mcq", title: "Comma after a dependent clause", prompt: "Choose the correctly punctuated complex sentence.", answer: "Because the path was icy, the hikers walked slowly.", explanation: "A comma follows an introductory dependent because-clause.", options: ["Because the path was icy the hikers walked slowly.", "Because the path was icy, the hikers walked slowly.", "Because, the path was icy the hikers walked slowly."] },
+      { type: "fill", title: "Punctuate an embedded question", prompt: "Add the missing comma: The teacher asked whether we had finished the map ___ but nobody answered.", answer: "The teacher asked whether we had finished the map, but nobody answered.", explanation: "A comma separates the two independent clauses joined by but.", },
+      { type: "error", title: "Correct reported speech punctuation", prompt: "Correct this sentence: Rina said, that the library was closed.", answer: "Rina said that the library was closed.", explanation: "A that-clause in reported speech is not placed inside quotation marks and does not need a comma after said.", },
+      { type: "transform", title: "Combine a report and a reason", prompt: "Combine with because: Arjun explained that he was late. The bus had broken down.", answer: "Arjun explained that he was late because the bus had broken down.", explanation: "Because introduces the reason clause inside the reported statement without breaking the sentence incorrectly.", },
+      { type: "rearrange", title: "Order a complex reported sentence", prompt: "Arrange the words and punctuation into a correctly punctuated report.", answer: "After she checked the figures, Nisha said that the total was correct.", explanation: "The introductory after-clause takes a comma before the main reported clause.", tokens: ["correct.", "figures,", "that", "Nisha", "the", "After", "said", "was", "she", "total", "checked"] },
+    ],
+  },
+  {
+    concept: "Subject–verb agreement",
+    topic: "Compound subjects",
+    activities: [
+      { type: "mcq", title: "Agreement with and", prompt: "The captain and the goalkeeper ___ the same training schedule.", answer: "follow", explanation: "Two subjects joined by and normally form a plural subject and take follow.", options: ["follows", "follow", "following"] },
+      { type: "fill", title: "Compound subject with or", prompt: "Either the coach or the players ___ (know) the final arrangement.", answer: "know", explanation: "With either...or, the verb agrees with the nearer subject, players, which is plural.", },
+      { type: "error", title: "Correct a compound subject", prompt: "Correct this sentence: The map and the compass is in my bag.", answer: "The map and the compass are in my bag.", explanation: "The two nouns joined by and make a plural subject, so use are.", },
+      { type: "transform", title: "Join two subjects", prompt: "Combine with and: The microscope was clean. The balance was ready.", answer: "The microscope and the balance were ready.", explanation: "The joined compound subject takes the plural verb were.", },
+      { type: "rearrange", title: "Order a compound-subject sentence", prompt: "Arrange the words so the two subjects agree with their plural verb.", answer: "The librarian and the prefect organise the reading club.", explanation: "The two subjects joined by and take the plural verb organise.", tokens: ["reading", "organise", "The", "prefect", "club.", "and", "the", "librarian", "the"] },
+    ],
+  },
+  {
+    concept: "Subject–verb agreement",
+    topic: "Collective nouns",
+    activities: [
+      { type: "mcq", title: "A group acting as one unit", prompt: "The committee ___ its decision after a long meeting.", answer: "announced", explanation: "A collective noun is singular when the group acts together as one unit.", options: ["announce", "announced", "announcing"] },
+      { type: "fill", title: "Collective noun in the present", prompt: "The orchestra ___ (perform) a new piece tonight.", answer: "is performing", explanation: "The orchestra is treated as one performing group, so it takes the singular auxiliary is.", },
+      { type: "error", title: "Correct collective agreement", prompt: "Correct this sentence: The team are celebrating its victory.", answer: "The team is celebrating its victory.", explanation: "The singular team acts as one unit and takes is with the singular possessive its.", },
+      { type: "transform", title: "Show individual group members", prompt: "Rewrite to show separate actions: The jury is discussing the evidence.", answer: "The jury members are discussing the evidence separately.", explanation: "Jury members makes the individuals explicit and therefore takes the plural verb are.", },
+      { type: "rearrange", title: "Order a collective-noun sentence", prompt: "Arrange the words so the collective noun agrees with its singular verb.", answer: "The flock of birds was moving towards the lake.", explanation: "The head noun flock is singular, so the verb is was.", tokens: ["lake.", "birds", "The", "towards", "was", "flock", "moving", "of", "the"] },
+    ],
+  },
+  {
+    concept: "Subject–verb agreement",
+    topic: "Indefinite pronouns",
+    activities: [
+      { type: "mcq", title: "Singular indefinite pronoun", prompt: "Everyone in the debate club ___ a speaking turn.", answer: "has", explanation: "Everyone is grammatically singular and takes has.", options: ["have", "has", "having"] },
+      { type: "fill", title: "Nobody takes a singular verb", prompt: "Nobody ___ (understand) the last clue at first.", answer: "understood", explanation: "Nobody is singular; the past-tense verb is understood.", },
+      { type: "error", title: "Correct indefinite-pronoun agreement", prompt: "Correct this sentence: Each of the players have a numbered shirt.", answer: "Each of the players has a numbered shirt.", explanation: "Each is singular even though it is followed by the plural phrase of the players.", },
+      { type: "transform", title: "Replace a plural subject", prompt: "Rewrite with everyone: All the students completed the safety quiz.", answer: "Everyone completed the safety quiz.", explanation: "Everyone replaces the plural subject and takes a singular form, completed in the past.", },
+      { type: "rearrange", title: "Order an indefinite-pronoun sentence", prompt: "Arrange the words into a complete sentence.", answer: "Someone has left a message for the caretaker.", explanation: "Someone is singular, so the present perfect auxiliary is has.", tokens: ["message", "has", "the", "Someone", "caretaker.", "left", "a", "for"] },
+    ],
+  },
+  {
+    concept: "Subject–verb agreement",
+    topic: "Either/neither",
+    activities: [
+      { type: "mcq", title: "Neither with a singular verb", prompt: "Neither of the two explanations ___ convincing.", answer: "is", explanation: "In formal agreement, neither is singular and takes is.", options: ["are", "is", "be"] },
+      { type: "fill", title: "Either...or agreement", prompt: "Either the science teacher or the students ___ (present) the demonstration.", answer: "are presenting", explanation: "The nearer subject students is plural, so the verb is are presenting.", },
+      { type: "error", title: "Correct either...or agreement", prompt: "Correct this sentence: Either the keys or the spare lock are in the drawer.", answer: "Either the keys or the spare lock is in the drawer.", explanation: "The nearer subject spare lock is singular, so formal agreement uses is.", },
+      { type: "transform", title: "Join two negative alternatives", prompt: "Rewrite with neither...nor: The red switch does not start the motor. The blue switch does not start it.", answer: "Neither the red switch nor the blue switch starts the motor.", explanation: "Neither...nor joins two rejected alternatives; the singular compound takes starts.", },
+      { type: "rearrange", title: "Order an either...or sentence", prompt: "Arrange the alternatives so the nearer subject controls agreement.", answer: "Either the principal or the teachers are attending the meeting.", explanation: "The nearer subject teachers is plural, so the verb is are attending.", tokens: ["meeting.", "are", "the", "Either", "attending", "teachers", "principal", "or", "the"] },
+    ],
+  },
+  {
+    concept: "Subject–verb agreement",
+    topic: "Complex subjects and intervening phrases",
+    activities: [
+      { type: "mcq", title: "Find the head noun", prompt: "The box of old photographs ___ in the attic.", answer: "is", explanation: "The head noun box is singular; the intervening of old photographs does not change agreement.", options: ["are", "is", "were"] },
+      { type: "fill", title: "Ignore an intervening phrase", prompt: "The list of required materials ___ (include) a compass.", answer: "includes", explanation: "List is the singular head noun, so the verb takes -s despite the plural materials.", },
+      { type: "error", title: "Correct agreement across a phrase", prompt: "Correct this sentence: The quality of the samples vary considerably.", answer: "The quality of the samples varies considerably.", explanation: "Quality is the singular head noun; of the samples is only an intervening phrase.", },
+      { type: "transform", title: "Change the head noun number", prompt: "Rewrite for several boxes: The box of tools is beside the bench.", answer: "The boxes of tools are beside the bench.", explanation: "Changing the head noun box to plural boxes requires the plural verb are.", },
+      { type: "rearrange", title: "Order a complex-subject sentence", prompt: "Arrange the words so the head noun controls the verb across its intervening phrase.", answer: "The results from the final experiment show a clear pattern.", explanation: "Results is the plural head noun; from the final experiment does not control the verb.", tokens: ["pattern.", "from", "show", "a", "The", "experiment", "results", "final", "clear", "the"] },
+    ],
+  },
+];
+
+const buildSecondaryFocusedQuestions = (): GrammarQuestion[] =>
+  SECONDARY_FOCUSED_SPECS.flatMap(({ concept, topic, activities }) =>
+    activities.map((activity, index) =>
+      q(
+        `secondary-focused-${middleRemainingSlug(topic)}-${index + 1}`,
+        activity.type,
+        `${topic}: ${activity.title}`,
+        activity.prompt,
+        activity.answer,
+        activity.explanation,
+        { concept, topic, options: activity.options, tokens: activity.tokens, pairs: activity.pairs },
+      )
+    )
+  );
+
 GRAMMAR_LEVELS.find((level) => level.id === "middle")?.questions.push(...buildMiddleRemainingQuestions());
-GRAMMAR_LEVELS.find((level) => level.id === "secondary")?.questions.push(...buildSecondaryPhrasesClausesQuestions(), ...buildSecondaryAdditionalQuestions());
+GRAMMAR_LEVELS.find((level) => level.id === "secondary")?.questions.push(...buildSecondaryPhrasesClausesQuestions(), ...buildSecondaryAdditionalQuestions(), ...buildSecondaryFocusedQuestions());
 
 export const GRAMMAR_TOTAL = GRAMMAR_LEVELS.reduce((sum, level) => sum + level.questions.length, 0);
 
