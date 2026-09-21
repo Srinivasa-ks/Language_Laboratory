@@ -10,6 +10,7 @@ export type GrammarExerciseType =
 export interface GrammarQuestion {
   id: string;
   type: GrammarExerciseType;
+  concept: string;
   topic: string;
   title: string;
   prompt: string;
@@ -26,8 +27,40 @@ export interface GrammarLevel {
   classes: string;
   blurb: string;
   color: string;
+  concepts: string[];
   questions: GrammarQuestion[];
 }
+
+const conceptForTopic = (topic: string): string => {
+  const rules: [RegExp, string][] = [
+    [/noun|naming|singular|plural|possessive|gender|countable/i, "Nouns"],
+    [/pronoun/i, "Pronouns"],
+    [/article/i, "Articles"],
+    [/determiner/i, "Determiners"],
+    [/adjective|comparison/i, "Adjectives"],
+    [/adverb/i, "Adverbs"],
+    [/preposition/i, "Prepositions"],
+    [/conjunction|connector|cohesion/i, "Conjunctions and connectors"],
+    [/tense|present|past|future/i, "Tenses"],
+    [/modal/i, "Modals"],
+    [/agreement|concord/i, "Subject–verb agreement"],
+    [/phrase/i, "Phrases"],
+    [/clause|relative/i, "Clauses"],
+    [/non-finite|infinitive|gerund|participial/i, "Non-finite verbs"],
+    [/question tag/i, "Question tags"],
+    [/voice/i, "Active and passive voice"],
+    [/speech|reporting/i, "Direct and indirect speech"],
+    [/conditional/i, "Conditionals"],
+    [/modifier/i, "Modifiers"],
+    [/parallel/i, "Parallelism"],
+    [/inversion|emphasis/i, "Emphasis and inversion"],
+    [/punctuation|capital/i, "Punctuation and capitalization"],
+    [/sentence|transformation/i, "Sentence structure and transformation"],
+    [/subject|object|complement|predicate/i, "Sentence elements"],
+    [/formal|academic|hedg|proofread|editing/i, "Formal and academic grammar"],
+  ];
+  return rules.find(([pattern]) => pattern.test(topic))?.[1] ?? "Grammar foundations";
+};
 
 const q = (
   id: string,
@@ -36,10 +69,11 @@ const q = (
   prompt: string,
   answer: string,
   explanation: string,
-  extra: Pick<GrammarQuestion, "options" | "tokens" | "pairs"> & { topic?: string } = {}
+  extra: Pick<GrammarQuestion, "options" | "tokens" | "pairs"> & { topic?: string; concept?: string } = {}
 ): GrammarQuestion => ({
   id,
   type,
+  concept: extra.concept ?? conceptForTopic(extra.topic ?? title),
   title,
   topic: extra.topic ?? title,
   prompt,
@@ -55,6 +89,16 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
     classes: "Nursery · LKG · UKG",
     blurb: "Build confidence with naming words, action words, sounds and simple sentences.",
     color: "#d24a2b",
+    concepts: [
+      "Naming words / Nouns",
+      "Action words / Verbs",
+      "Describing words / Adjectives",
+      "One and many",
+      "Pronouns",
+      "This / That / These / Those",
+      "Simple sentence formation",
+      "Capital letters and basic punctuation",
+    ],
     questions: [
       q("mc-1", "mcq", "Naming words", "Which word names an animal?", "cat", "A cat is a naming word for an animal.", { options: ["run", "cat", "blue"] }),
       q("fill-1", "fill", "A simple sentence", "The sun is ___.", "hot", "We use an adjective to tell us about the sun."),
@@ -85,6 +129,18 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
     classes: "Classes 1–5",
     blurb: "Strengthen nouns, pronouns, verbs, punctuation and the building blocks of clear writing.",
     color: "#0e7c6b",
+    concepts: [
+      "Nouns and noun types",
+      "Pronouns",
+      "Articles",
+      "Singular and plural",
+      "Gender",
+      "Verbs and tenses",
+      "Subject–verb agreement",
+      "Adjectives and adverbs",
+      "Prepositions and conjunctions",
+      "Sentence types and punctuation",
+    ],
     questions: [
       q("mc-1", "mcq", "Subject–verb agreement", "Choose the correct sentence.", "The children are playing.", "The plural subject 'children' takes the plural verb 'are'.", { options: ["The children is playing.", "The children are playing.", "The children am playing."] }),
       q("fill-1", "fill", "Articles", "I saw ___ elephant at the zoo.", "an", "Use 'an' before a vowel sound, as in elephant."),
@@ -119,6 +175,21 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
     classes: "Classes 6–8",
     blurb: "Explore tense, clauses, modifiers, voice and the choices that make sentences precise.",
     color: "#0a8b9e",
+    concepts: [
+      "Nouns and advanced pronouns",
+      "Determiners",
+      "Tenses",
+      "Modals",
+      "Subject–verb agreement",
+      "Degrees of comparison",
+      "Adverbs and prepositions",
+      "Conjunctions",
+      "Phrases and clauses",
+      "Non-finite verbs",
+      "Question tags",
+      "Active and passive voice",
+      "Direct and indirect speech",
+    ],
     questions: [
       q("mc-1", "mcq", "Perfect tense", "By noon, the team ___ the work.", "had completed", "The past perfect shows an action completed before another past time.", { options: ["completes", "had completed", "will complete"] }),
       q("fill-1", "fill", "Prepositions", "She has lived here ___ 2019.", "since", "Use 'since' with the starting point of a period of time."),
@@ -153,6 +224,19 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
     classes: "Classes 9–10",
     blurb: "Master reported speech, conditionals, clauses and formal sentence control for school writing.",
     color: "#a8720a",
+    concepts: [
+      "Advanced tense usage",
+      "Conditionals and modals",
+      "Determiners",
+      "Phrases and clauses",
+      "Non-finite verbs",
+      "Active and passive voice",
+      "Reported speech",
+      "Sentence transformation and combining",
+      "Error correction and editing",
+      "Punctuation",
+      "Subject–verb agreement",
+    ],
     questions: [
       q("mc-1", "mcq", "Conditionals", "If I had known, I ___ you.", "would have told", "This third conditional refers to an unreal past condition and result.", { options: ["tell", "would tell", "would have told"] }),
       q("fill-1", "fill", "Reported speech", "Maya said that she ___ tired.", "was", "Backshift 'is' to 'was' when reporting a past statement."),
@@ -183,6 +267,19 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
     classes: "Classes 11–12",
     blurb: "Work with nuance: modality, inversion, non-finite clauses and academic precision.",
     color: "#8a44a6",
+    concepts: [
+      "Advanced tense distinctions",
+      "Perfect and perfect-continuous forms",
+      "Modality and conditionals",
+      "Relative clauses and complex sentences",
+      "Non-finite constructions",
+      "Inversion",
+      "Parallelism and modifiers",
+      "Connectors and cohesion",
+      "Formal and informal grammar",
+      "Editing and proofreading",
+      "Academic grammar",
+    ],
     questions: [
       q("mc-1", "mcq", "Modal nuance", "The report ___ be submitted by Friday; it is compulsory.", "must", "Must expresses strong obligation, which fits a compulsory deadline.", { options: ["might", "must", "could"] }),
       q("fill-1", "fill", "Subjunctive mood", "It is essential that every applicant ___ present.", "be", "Formal mandative subjunctive uses the base form 'be' after essential that."),
@@ -217,6 +314,20 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
     classes: "Undergraduate · Advanced",
     blurb: "Polish advanced grammar for research, professional communication and critical writing.",
     color: "#2460c0",
+    concepts: [
+      "Advanced sentence structure",
+      "Academic grammar",
+      "Hedging and modality",
+      "Nominalisation",
+      "Cohesion and coherence",
+      "Reporting structures",
+      "Complex clauses",
+      "Advanced non-finite constructions",
+      "Inversion and emphasis",
+      "Parallelism and modifier accuracy",
+      "Formal academic register",
+      "Academic editing and proofreading",
+    ],
     questions: [
       q("mc-1", "mcq", "Cohesion", "Choose the sentence with the clearest reference.", "The study was revised after the reviewers' comments.", "The possessive noun makes the source of the comments explicit and avoids an ambiguous pronoun.", { options: ["It was revised after they commented.", "The study was revised after the reviewers' comments.", "This was revised after their comments."] }),
       q("fill-1", "fill", "Concessive clauses", "Much ___ the evidence suggests otherwise, the claim remains unproven.", "as", "The pattern 'much as' introduces a formal concessive clause."),
@@ -253,3 +364,35 @@ export const grammarKey = (levelId: string, questionId: string) => `grammar:${le
 
 export const grammarDone = (checks: Record<string, boolean>) =>
   Object.keys(checks).filter((key) => key.startsWith("grammar:") && checks[key]).length;
+
+export interface GrammarTopicNode {
+  topic: string;
+  questionIds: string[];
+  activities: GrammarExerciseType[];
+}
+
+export interface GrammarConceptNode {
+  concept: string;
+  topics: GrammarTopicNode[];
+}
+
+export interface GrammarCurriculumNode {
+  levelId: string;
+  concepts: GrammarConceptNode[];
+}
+
+/** Dynamic level → concept → topic → activity navigation data for future browsing UI. */
+export const GRAMMAR_CURRICULUM: GrammarCurriculumNode[] = GRAMMAR_LEVELS.map((level) => ({
+  levelId: level.id,
+  concepts: Array.from(new Set(level.questions.map((question) => question.concept))).map((concept) => ({
+    concept,
+    topics: Array.from(new Set(level.questions.filter((question) => question.concept === concept).map((question) => question.topic))).map((topic) => {
+      const questions = level.questions.filter((question) => question.concept === concept && question.topic === topic);
+      return {
+        topic,
+        questionIds: questions.map((question) => question.id),
+        activities: Array.from(new Set(questions.map((question) => question.type))),
+      };
+    }),
+  })),
+}));
