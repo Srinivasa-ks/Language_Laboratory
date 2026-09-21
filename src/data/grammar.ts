@@ -1634,7 +1634,89 @@ const buildMiddleRemainingQuestions = (): GrammarQuestion[] =>
     }),
   );
 
+type SecondaryPhraseClauseActivity = {
+  topic: string;
+  type: GrammarExerciseType;
+  title: string;
+  prompt: string;
+  answer: string;
+  explanation: string;
+  options?: string[];
+  tokens?: string[];
+  pairs?: { left: string; right: string }[];
+};
+
+const SECONDARY_PHRASES_CLAUSES_EXPANSION: SecondaryPhraseClauseActivity[] = [
+  { topic: "Noun phrases", type: "mcq", title: "Identify the head noun", prompt: "Which word is the head noun in “Those three remarkably detailed maps were displayed”?", answer: "maps", explanation: "Maps is the noun that the demonstrative, number and adverb modify; it is the head of the noun phrase.", options: ["Those", "detailed", "maps"] },
+  { topic: "Noun phrases", type: "fill", title: "Complete a postmodifier", prompt: "Complete the noun phrase: “The students ___ the robotics club won the prize.”", answer: "from", explanation: "From the robotics club is a prepositional postmodifier identifying which students won.", },
+  { topic: "Noun phrases", type: "error", title: "Order noun modifiers", prompt: "Correct this sentence: The school bought a metal small storage cabinet.", answer: "The school bought a small metal storage cabinet.", explanation: "Size normally precedes material when several adjectives modify the same noun.", },
+  { topic: "Noun phrases", type: "transform", title: "Expand a noun phrase", prompt: "Expand “The proposal was accepted” by adding “for the community garden” as a postmodifier of proposal.", answer: "The proposal for the community garden was accepted.", explanation: "The prepositional phrase follows proposal and narrows which proposal was accepted.", },
+  { topic: "Noun phrases", type: "rearrange", title: "Build a complex noun phrase", prompt: "Arrange the words: from / the / a / handwritten / diary / nineteenth century", answer: "a handwritten diary from the nineteenth century", explanation: "The article and adjective precede the head noun; the period phrase follows it as a postmodifier.", tokens: ["nineteenth", "a", "diary", "from", "handwritten", "century", "the"] },
+
+  { topic: "Verb phrases", type: "mcq", title: "Choose the complete verb phrase", prompt: "Which is the verb phrase in “The volunteers should have been sorting the books”?", answer: "should have been sorting", explanation: "The modal, perfect auxiliary, continuous auxiliary and main verb together form the verb phrase.", options: ["The volunteers", "should have been sorting", "the books"] },
+  { topic: "Verb phrases", type: "fill", title: "Complete a perfect continuous phrase", prompt: "By 6 p.m., the team ___ (work) for eight hours.", answer: "will have been working", explanation: "A duration continuing up to a future time takes will have been plus the -ing form.", },
+  { topic: "Verb phrases", type: "error", title: "Keep auxiliaries in order", prompt: "Correct this sentence: She has writing the final paragraph.", answer: "She has written the final paragraph.", explanation: "Has in the present perfect must be followed by a past participle, written, not the -ing form.", },
+  { topic: "Verb phrases", type: "transform", title: "Add a modal to the verb phrase", prompt: "Rewrite with might: The parcel arrives this evening.", answer: "The parcel might arrive this evening.", explanation: "Might is followed by the base verb arrive and expresses uncertain possibility.", },
+  { topic: "Verb phrases", type: "rearrange", title: "Order a modal perfect phrase", prompt: "Arrange the words: have / The / missed / may / train / she", answer: "She may have missed the train.", explanation: "The subject comes first, followed by modal may, perfect have and the past participle missed.", tokens: ["train.", "may", "She", "missed", "have", "the"] },
+
+  { topic: "Adjective phrases", type: "mcq", title: "Find the adjective phrase", prompt: "Which phrase describes the sculpture in “The sculpture, unusually bright for its age, attracted visitors”?", answer: "unusually bright for its age", explanation: "The phrase is headed by the adjective bright and gives extra information about the sculpture.", options: ["The sculpture", "unusually bright for its age", "attracted visitors"] },
+  { topic: "Adjective phrases", type: "fill", title: "Complete an adjective complement", prompt: "The instructions were clear ___ every new volunteer.", answer: "to", explanation: "Clear to every new volunteer is an adjective phrase with a to-complement.", },
+  { topic: "Adjective phrases", type: "error", title: "Place the intensifier", prompt: "Correct this sentence: The explanation was confusing very for the younger pupils.", answer: "The explanation was very confusing for the younger pupils.", explanation: "The degree adverb very comes before the adjective confusing.", },
+  { topic: "Adjective phrases", type: "transform", title: "Add a reason to an adjective", prompt: "Rewrite with an adjective phrase: “The hikers were tired. They had walked since dawn.”", answer: "The hikers were tired from walking since dawn.", explanation: "From walking since dawn completes the adjective tired and explains the cause.", },
+  { topic: "Adjective phrases", type: "rearrange", title: "Order an adjective phrase", prompt: "Arrange the words: enough / The / was / warm / for / water / swimming", answer: "The water was warm enough for swimming.", explanation: "Enough follows the adjective warm, and for swimming completes the degree phrase.", tokens: ["for", "water", "enough", "The", "swimming", "was", "warm"] },
+
+  { topic: "Adverb phrases", type: "mcq", title: "Choose the manner phrase", prompt: "Which phrase tells how the engineer repaired the bicycle?", answer: "with great patience", explanation: "With great patience is an adverb phrase modifying repaired by describing manner.", options: ["The engineer", "repaired the bicycle", "with great patience"] },
+  { topic: "Adverb phrases", type: "fill", title: "Complete a time phrase", prompt: "The exhibition opens ___ the school holidays.", answer: "during", explanation: "During the school holidays is an adverb phrase of time modifying opens.", },
+  { topic: "Adverb phrases", type: "error", title: "Correct an adverb phrase", prompt: "Correct this sentence: The cyclist rode in a careful mannerly.", answer: "The cyclist rode in a careful manner.", explanation: "Manner is the noun required after in a careful; mannerly is not needed in this phrase.", },
+  { topic: "Adverb phrases", type: "transform", title: "Replace an adverb with a phrase", prompt: "Replace “carefully” with an adverb phrase: “The curator handled the vase carefully.”", answer: "The curator handled the vase with great care.", explanation: "With great care is a prepositional adverb phrase expressing the same manner as carefully.", },
+  { topic: "Adverb phrases", type: "rearrange", title: "Order a place phrase", prompt: "Arrange the words: at / waited / the / We / entrance / quietly", answer: "We waited quietly at the entrance.", explanation: "Quietly modifies waited, while at the entrance gives the place of the waiting.", tokens: ["entrance.", "quietly", "at", "We", "the", "waited"] },
+
+  { topic: "Main and subordinate clauses", type: "mcq", title: "Distinguish a main clause", prompt: "Which clause can stand alone as a complete sentence?", answer: "the audience applauded", explanation: "The clause has a subject and finite verb and expresses a complete thought without a subordinating word.", options: ["although the speech was brief", "the audience applauded", "when the speaker arrived"] },
+  { topic: "Main and subordinate clauses", type: "fill", title: "Complete a subordinate clause", prompt: "The match resumed after the referee ___ the field was safe.", answer: "confirmed", explanation: "After introduces the subordinate time clause after the referee confirmed the field was safe.", },
+  { topic: "Main and subordinate clauses", type: "error", title: "Repair a sentence fragment", prompt: "Correct this fragment: While the students waited outside.", answer: "While the students waited outside, the teacher unlocked the hall.", explanation: "While introduces a subordinate clause, so it must be joined to a main clause.", },
+  { topic: "Main and subordinate clauses", type: "transform", title: "Subordinate the reason", prompt: "Join with because: “The flight was delayed. Thick fog covered the runway.”", answer: "The flight was delayed because thick fog covered the runway.", explanation: "Because introduces the reason clause and joins it to the main clause without changing the meaning.", },
+  { topic: "Main and subordinate clauses", type: "rearrange", title: "Order a complex sentence", prompt: "Arrange the words: the / Although / cancelled / was / continued / event / we", answer: "Although the event was cancelled, we continued.", explanation: "Although introduces the subordinate contrast clause, which is followed by a comma before the main clause.", tokens: ["continued.", "was", "Although", "we", "event", "cancelled,", "the"] },
+
+  { topic: "Noun clauses", type: "mcq", title: "Identify the noun clause", prompt: "Which words act as the object of “wondered” in “We wondered whether the museum was open”?", answer: "whether the museum was open", explanation: "The whether-clause functions as the object of wondered, so it is a noun clause.", options: ["We wondered", "whether the museum was open", "the museum"] },
+  { topic: "Noun clauses", type: "fill", title: "Complete an embedded question", prompt: "The committee has not decided ___ the field trip should be postponed.", answer: "whether", explanation: "Whether introduces an embedded yes-or-no question acting as the object of decided.", },
+  { topic: "Noun clauses", type: "error", title: "Use statement order", prompt: "Correct this sentence: I do not know where is the nearest clinic.", answer: "I do not know where the nearest clinic is.", explanation: "An embedded question uses statement word order: subject before the verb.", },
+  { topic: "Noun clauses", type: "transform", title: "Combine with a noun clause", prompt: "Combine the ideas using what: “The machine needs oil. This surprised the technician.”", answer: "What the machine needed surprised the technician.", explanation: "What the machine needed is a noun clause functioning as the subject of surprised.", },
+  { topic: "Noun clauses", type: "rearrange", title: "Order an object noun clause", prompt: "Arrange the words: knows / nobody / why / the / changed / schedule", answer: "Nobody knows why the schedule changed.", explanation: "Why the schedule changed is an embedded noun clause after knows, so it keeps statement order.", tokens: ["changed.", "why", "Nobody", "schedule", "knows", "the"] },
+
+  { topic: "Relative clauses", type: "mcq", title: "Choose the relative pronoun", prompt: "The architect ___ designed the bridge spoke to our class.", answer: "who", explanation: "Who refers to the person architect and introduces a defining relative clause.", options: ["who", "which", "where"] },
+  { topic: "Relative clauses", type: "fill", title: "Complete a non-defining clause", prompt: "The old theatre, ___ was renovated last year, has reopened.", answer: "which", explanation: "Which refers to the non-human theatre in a non-defining clause set off by commas.", },
+  { topic: "Relative clauses", type: "error", title: "Avoid a double relative marker", prompt: "Correct this sentence: The book which that won the prize is out of print.", answer: "The book that won the prize is out of print.", explanation: "A relative clause needs one relative marker, not both which and that together.", },
+  { topic: "Relative clauses", type: "transform", title: "Join with a relative clause", prompt: "Combine using whose: “I met a dancer. Her costume was made by hand.”", answer: "I met a dancer whose costume was made by hand.", explanation: "Whose shows possession and links the costume to the dancer.", },
+  { topic: "Relative clauses", type: "rearrange", title: "Order a defining relative clause", prompt: "Arrange the words: the / borrowed / I / book / recommended / you", answer: "I recommended the book you borrowed.", explanation: "You borrowed is a defining relative clause modifying the book; the relative pronoun may be omitted as object.", tokens: ["borrowed.", "book", "I", "you", "the", "recommended"] },
+
+  { topic: "Adverb clauses", type: "mcq", title: "Choose the purpose clause", prompt: "Which sentence contains an adverb clause of purpose?", answer: "She saved the file so that nobody would lose the data.", explanation: "So that nobody would lose the data explains the purpose of saving the file.", options: ["She saved the file because it was old.", "She saved the file so that nobody would lose the data.", "She saved the file when the bell rang."] },
+  { topic: "Adverb clauses", type: "fill", title: "Complete a concession clause", prompt: "___ the route was longer, the hikers chose it for its shade.", answer: "Although", explanation: "Although introduces a concession: the route was longer, but the hikers still chose it.", },
+  { topic: "Adverb clauses", type: "error", title: "Use a clause after because", prompt: "Correct this sentence: We postponed the picnic because of it was raining.", answer: "We postponed the picnic because it was raining.", explanation: "Because is followed by a finite clause; because of would need a noun phrase such as the rain.", },
+  { topic: "Adverb clauses", type: "transform", title: "Express a condition", prompt: "Join with unless: “You wear protective gloves. You cannot handle the chemical.”", answer: "Unless you wear protective gloves, you cannot handle the chemical.", explanation: "Unless means if not and introduces the condition required for safe handling.", },
+  { topic: "Adverb clauses", type: "rearrange", title: "Order a time clause", prompt: "Arrange the words: after / we / had eaten / began / the / meeting", answer: "The meeting began after we had eaten.", explanation: "After introduces the earlier subordinate action, while the main clause states when the meeting began.", tokens: ["began", "after", "meeting.", "we", "had", "The", "eaten"] },
+
+  { topic: "Sentence combining", type: "mcq", title: "Choose the best connector", prompt: "The road was flooded, ___ the buses used a different route.", answer: "so", explanation: "So correctly shows the result of the road being flooded.", options: ["but", "so", "although"] },
+  { topic: "Sentence combining", type: "fill", title: "Combine with a relative clause", prompt: "Join the ideas: “The telescope is powerful. It belongs to our science club.” The telescope ___ belongs to our science club is powerful.", answer: "which", explanation: "Which introduces a relative clause describing the telescope.", },
+  { topic: "Sentence combining", type: "error", title: "Remove a conjunction error", prompt: "Correct this sentence: Although the map was old, but it was accurate.", answer: "Although the map was old, it was accurate.", explanation: "Although already marks the contrast, so the extra but must be removed.", },
+  { topic: "Sentence combining", type: "transform", title: "Combine with a participial phrase", prompt: "Combine the ideas: “The players were exhausted. They left the court.”", answer: "Exhausted after the match, the players left the court.", explanation: "The participial phrase gives the players’ condition and avoids repeating the subject.", },
+  { topic: "Sentence combining", type: "rearrange", title: "Balance a compound sentence", prompt: "Arrange the words: and / The / revised / editor / the / published / article / it", answer: "The editor revised the article and published it.", explanation: "And joins two coordinated verb phrases with the shared subject the editor.", tokens: ["published", "The", "it.", "article", "and", "editor", "revised", "the"] },
+];
+
+const buildSecondaryPhrasesClausesQuestions = (): GrammarQuestion[] =>
+  SECONDARY_PHRASES_CLAUSES_EXPANSION.map((activity, index) =>
+    q(
+      `secondary-phrases-clauses-${middleRemainingSlug(activity.topic)}-${index + 1}`,
+      activity.type,
+      `${activity.topic}: ${activity.title}`,
+      activity.prompt,
+      activity.answer,
+      activity.explanation,
+      { concept: "Phrases and clauses", topic: activity.topic, options: activity.options, tokens: activity.tokens, pairs: activity.pairs },
+    ),
+  );
+
 GRAMMAR_LEVELS.find((level) => level.id === "middle")?.questions.push(...buildMiddleRemainingQuestions());
+GRAMMAR_LEVELS.find((level) => level.id === "secondary")?.questions.push(...buildSecondaryPhrasesClausesQuestions());
 
 export const GRAMMAR_TOTAL = GRAMMAR_LEVELS.reduce((sum, level) => sum + level.questions.length, 0);
 
