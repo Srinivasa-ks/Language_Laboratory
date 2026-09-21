@@ -1715,8 +1715,154 @@ const buildSecondaryPhrasesClausesQuestions = (): GrammarQuestion[] =>
     ),
   );
 
+type SecondaryAdditionalActivity = Omit<SecondaryPhraseClauseActivity, "topic">;
+
+const SECONDARY_ADDITIONAL_TOPICS: { topic: string; activities: SecondaryAdditionalActivity[] }[] = [
+  { topic: "Articles", activities: [
+    { type: "mcq", title: "Article with an acronym", prompt: "The panel approved ___ UNESCO initiative after a long discussion.", answer: "the", explanation: "The initiative is a particular one already identified by the context, so it takes the definite article.", options: ["a", "an", "the"] },
+    { type: "fill", title: "Article before a vowel sound", prompt: "The editor interviewed ___ experienced engineer about the bridge.", answer: "an", explanation: "Experienced begins with a vowel sound, so the indefinite article is an.", },
+    { type: "error", title: "Correct a general plural", prompt: "Correct this sentence: The renewable sources can reduce pollution.", answer: "Renewable sources can reduce pollution.", explanation: "Plural nouns used generally do not need the definite article.", },
+    { type: "transform", title: "Make the reference specific", prompt: "Rewrite with the: We discussed a proposal after lunch.", answer: "We discussed the proposal after lunch.", explanation: "The changes a newly introduced proposal into one that is now known to both speakers.", },
+    { type: "rearrange", title: "Order an article contrast", prompt: "Arrange the words: an / unusual / was / It / experiment", answer: "It was an unusual experiment.", explanation: "An precedes the adjective unusual, which begins with a vowel sound, before the singular countable noun.", tokens: ["experiment.", "unusual", "was", "an", "It"] },
+  ]},
+  { topic: "Demonstratives", activities: [
+    { type: "mcq", title: "Singular distance", prompt: "Pointing to one star far above the field, the guide said, “___ star is Vega.”", answer: "That", explanation: "That refers to one singular noun at a distance.", options: ["This", "That", "Those"] },
+    { type: "fill", title: "Plural objects nearby", prompt: "___ samples beside me must be labelled before the lesson ends.", answer: "These", explanation: "These refers to more than one nearby sample.", },
+    { type: "error", title: "Match number and demonstrative", prompt: "Correct this sentence: This results contradict the earlier survey.", answer: "These results contradict the earlier survey.", explanation: "The plural noun results requires the plural demonstrative these.", },
+    { type: "transform", title: "Change singular to plural", prompt: "Rewrite for several nearby observations: This observation is important.", answer: "These observations are important.", explanation: "This observation becomes these observations, and the verb changes from is to are.", },
+    { type: "rearrange", title: "Order a demonstrative statement", prompt: "Arrange the words: those / explain / results / the / variation", answer: "Those results explain the variation.", explanation: "The plural demonstrative those comes directly before the plural noun results.", tokens: ["variation.", "results", "Those", "the", "explain"] },
+  ]},
+  { topic: "Quantifiers", activities: [
+    { type: "mcq", title: "Many with count nouns", prompt: "How ___ pages of the report have you checked?", answer: "many", explanation: "Pages is a plural countable noun, so the question uses many.", options: ["much", "many", "little"] },
+    { type: "fill", title: "Enough for a requirement", prompt: "The evidence is not ___ to support the claim.", answer: "strong enough", explanation: "Enough follows the adjective strong to express the required degree.", },
+    { type: "error", title: "Correct less and fewer", prompt: "Correct this sentence: The new design uses less components.", answer: "The new design uses fewer components.", explanation: "Components is a plural countable noun, so fewer is the precise quantifier.", },
+    { type: "transform", title: "Reduce an amount", prompt: "Rewrite using little: The container contains a small amount of oil.", answer: "The container contains little oil.", explanation: "Little modifies the uncountable noun oil and presents the amount as small or insufficient.", },
+    { type: "rearrange", title: "Order a quantifier question", prompt: "Arrange the words: evidence / how / remains / much / reliable /?", answer: "How much reliable evidence remains?", explanation: "How much modifies the uncountable noun evidence in a question about quantity.", tokens: ["reliable", "remains?", "much", "How", "evidence"] },
+  ]},
+  { topic: "Distributives", activities: [
+    { type: "mcq", title: "Each takes singular agreement", prompt: "Each of the two witnesses ___ a separate statement.", answer: "gave", explanation: "Each focuses on members individually and takes a singular verb form.", options: ["gave", "give", "giving"] },
+    { type: "fill", title: "Both for a pair", prompt: "___ answers were accepted because they expressed the same idea.", answer: "Both", explanation: "Both refers to the two answers together and takes a plural noun.", },
+    { type: "error", title: "Correct either agreement", prompt: "Correct this sentence: Either of the routes lead to the station.", answer: "Either of the routes leads to the station.", explanation: "Either is singular in formal agreement, so the verb is leads.", },
+    { type: "transform", title: "Distribute an action", prompt: "Rewrite with each: The three panels displayed a different colour.", answer: "Each panel displayed a different colour.", explanation: "Each makes the members individual and changes the plural noun phrase to singular.", },
+    { type: "rearrange", title: "Order a distributive phrase", prompt: "Arrange the words: received / Each / participant / a / numbered / badge", answer: "Each participant received a numbered badge.", explanation: "Each precedes a singular countable noun and the sentence then takes singular participant.", tokens: ["badge.", "a", "received", "participant", "Each", "numbered"] },
+  ]},
+  { topic: "Indefinite determiners", activities: [
+    { type: "mcq", title: "Any in a question", prompt: "Did you notice ___ unusual pattern in the data?", answer: "any", explanation: "Any is natural in a question asking whether one or more examples exist.", options: ["any", "every", "each"] },
+    { type: "fill", title: "Every with singular nouns", prompt: "___ applicant must sign the declaration before the interview.", answer: "Every", explanation: "Every refers to all members individually and takes a singular countable noun.", },
+    { type: "error", title: "Correct some and any", prompt: "Correct this sentence: We did not collect some useful responses.", answer: "We did not collect any useful responses.", explanation: "Any is normally used instead of some in a negative statement.", },
+    { type: "transform", title: "Generalise with every", prompt: "Rewrite using every: All the individual page contains a reference.", answer: "Every page contains a reference.", explanation: "Every replaces the awkward all the individual and is followed by singular page.", },
+    { type: "rearrange", title: "Order an indefinite phrase", prompt: "Arrange the words: solution / any / acceptable / is / better / than / none", answer: "Any acceptable solution is better than none.", explanation: "Any introduces one unspecified member of the group of acceptable solutions.", tokens: ["better", "acceptable", "none.", "Any", "is", "solution", "than"] },
+  ]},
+  { topic: "Noun phrases", activities: [
+    { type: "mcq", title: "Head of a noun phrase", prompt: "In “Several extremely bright satellites crossed the sky,” what is the head noun?", answer: "satellites", explanation: "Satellites is the central noun; several and extremely bright modify it.", options: ["Several", "bright", "satellites"] },
+    { type: "fill", title: "Add a determiner", prompt: "Complete the noun phrase: ___ series of careful measurements revealed a pattern.", answer: "A", explanation: "A introduces the singular countable noun phrase series of careful measurements.", },
+    { type: "error", title: "Order postmodifiers", prompt: "Correct this sentence: We examined the samples collected carefully yesterday.", answer: "We examined the samples carefully collected yesterday.", explanation: "Carefully modifies collected and should sit next to the participle it modifies.", },
+    { type: "transform", title: "Nominalise a clause", prompt: "Replace the clause with a noun phrase: The committee decided to postpone the vote.", answer: "The committee made a decision to postpone the vote.", explanation: "Made a decision is a noun phrase built around decision and preserves the meaning.", },
+    { type: "rearrange", title: "Order a noun phrase", prompt: "Arrange the words: several / from / rare / the / archive / manuscripts", answer: "several rare manuscripts from the archive", explanation: "The quantifier and adjective precede the head noun; the prepositional phrase follows it.", tokens: ["archive", "rare", "manuscripts", "several", "from", "the"] },
+  ]},
+  { topic: "Verb phrases", activities: [
+    { type: "mcq", title: "Modal perfect phrase", prompt: "Which verb phrase shows a past possibility? “The parcel ___ before noon.”", answer: "may have arrived", explanation: "May have arrived combines a modal with the perfect infinitive to express past possibility.", options: ["may arrive", "may have arrived", "is arriving"] },
+    { type: "fill", title: "Passive verb phrase", prompt: "The final draft ___ (review) by two editors.", answer: "was reviewed", explanation: "Was reviewed is the past simple passive verb phrase for a singular draft.", },
+    { type: "error", title: "Correct the auxiliary sequence", prompt: "Correct this sentence: The students have been wrote three drafts.", answer: "The students have written three drafts.", explanation: "Present perfect uses have plus the past participle written; been is not needed here.", },
+    { type: "transform", title: "Make a verb phrase interrogative", prompt: "Change to a question: The team could have misread the graph.", answer: "Could the team have misread the graph?", explanation: "Move the modal could before the subject while keeping the perfect phrase intact.", },
+    { type: "rearrange", title: "Order a progressive phrase", prompt: "Arrange the words: been / will / the / monitoring / have / sensors / continuously", answer: "The sensors will have been monitoring continuously.", explanation: "Future perfect continuous uses will have been followed by the -ing main verb.", tokens: ["continuously.", "sensors", "have", "monitoring", "The", "will", "been"] },
+  ]},
+  { topic: "Adjective phrases", activities: [
+    { type: "mcq", title: "Adjective phrase complement", prompt: "Which phrase completes the adjective “responsible” in “The captain was responsible ___ the equipment”?", answer: "for the equipment", explanation: "Responsible takes the preposition for and its noun phrase complement.", options: ["for the equipment", "the equipment responsibly", "to equip"] },
+    { type: "fill", title: "Degree phrase", prompt: "The revised explanation was clear ___ for younger readers.", answer: "enough", explanation: "Enough follows clear to express a sufficient degree.", },
+    { type: "error", title: "Correct adjective order", prompt: "Correct this sentence: The solution was effective surprisingly.", answer: "The solution was surprisingly effective.", explanation: "The adverb surprisingly normally precedes the adjective effective.", },
+    { type: "transform", title: "Expand with a complement", prompt: "Add a complement to make an adjective phrase: The result was uncertain.", answer: "The result was uncertain because the sample was contaminated.", explanation: "The because-clause completes uncertain by giving the reason for the uncertainty.", },
+    { type: "rearrange", title: "Order a degree phrase", prompt: "Arrange the words: too / for / difficult / beginners / was / The / problem", answer: "The problem was too difficult for beginners.", explanation: "Too precedes the adjective difficult, followed by its for-complement.", tokens: ["beginners.", "too", "The", "difficult", "was", "problem", "for"] },
+  ]},
+  { topic: "Adverb phrases", activities: [
+    { type: "mcq", title: "Adverb phrase of place", prompt: "Which phrase tells where the cyclists rested?", answer: "beside the fountain", explanation: "Beside the fountain is a prepositional adverb phrase modifying rested.", options: ["The cyclists", "rested briefly", "beside the fountain"] },
+    { type: "fill", title: "Adverb phrase of manner", prompt: "The speaker answered the challenge ___ .", answer: "with calm confidence", explanation: "With calm confidence is a phrase of manner describing how the speaker answered.", },
+    { type: "error", title: "Correct phrase structure", prompt: "Correct this sentence: The archive opens in weekdays.", answer: "The archive opens on weekdays.", explanation: "On weekdays is the conventional prepositional phrase for repeated days.", },
+    { type: "transform", title: "Replace a manner adverb", prompt: "Replace carefully with an adverb phrase: The nurse labelled the samples carefully.", answer: "The nurse labelled the samples with great care.", explanation: "With great care is an adverb phrase expressing the same manner as carefully.", },
+    { type: "rearrange", title: "Order an adverb phrase", prompt: "Arrange the words: during / worked / the / We / quietly / afternoon", answer: "We worked quietly during the afternoon.", explanation: "Quietly gives manner and during the afternoon gives the time of the work.", tokens: ["afternoon.", "quietly", "We", "during", "worked", "the"] },
+  ]},
+  { topic: "Main and subordinate clauses", activities: [
+    { type: "mcq", title: "Find the independent clause", prompt: "Which clause can stand alone in “Because the road flooded, the match was cancelled”?", answer: "the match was cancelled", explanation: "The clause has a complete subject–verb meaning without the subordinating conjunction.", options: ["Because the road flooded", "the match was cancelled", "Because the match"] },
+    { type: "fill", title: "Complete a main clause", prompt: "Although the forecast was poor, the organisers ___ the event.", answer: "continued", explanation: "The main clause needs a finite verb that completes the contrast introduced by although.", },
+    { type: "error", title: "Join a subordinate clause", prompt: "Correct this fragment: Since the battery was flat.", answer: "Since the battery was flat, the torch could not work.", explanation: "Since introduces a subordinate clause that needs a main clause.", },
+    { type: "transform", title: "Move the subordinate clause", prompt: "Begin with the main clause: When the bell rang, the pupils left the room.", answer: "The pupils left the room when the bell rang.", explanation: "Moving the subordinate clause to the end removes the opening comma while preserving the time relation.", },
+    { type: "rearrange", title: "Order main and subordinate clauses", prompt: "Arrange the words: because / missed / We / the / bus / hurried", answer: "We hurried because we missed the bus.", explanation: "The main clause comes first, followed by the because-clause explaining its reason.", tokens: ["hurried.", "because", "bus", "We", "missed", "the", "we"] },
+  ]},
+  { topic: "Noun clauses", activities: [
+    { type: "mcq", title: "Noun clause as subject", prompt: "Which words are the subject in “What the witness observed surprised the jury”?", answer: "What the witness observed", explanation: "The what-clause functions as a noun phrase and is the subject of surprised.", options: ["the witness", "What the witness observed", "the jury"] },
+    { type: "fill", title: "Embedded yes-no question", prompt: "The researcher asked ___ the sample had been stored correctly.", answer: "whether", explanation: "Whether introduces an embedded yes-no question functioning as the object of asked.", },
+    { type: "error", title: "Correct an embedded question", prompt: "Correct this sentence: Nobody knows what does the symbol mean.", answer: "Nobody knows what the symbol means.", explanation: "Noun clauses use statement order, with the subject before the verb.", },
+    { type: "transform", title: "Nominalise an explanation", prompt: "Combine using why: The engine stopped. This remains unclear.", answer: "Why the engine stopped remains unclear.", explanation: "Why the engine stopped is a noun clause functioning as the subject.", },
+    { type: "rearrange", title: "Order a noun clause", prompt: "Arrange the words: explained / how / the / works / guide / the / device", answer: "The guide explained how the device works.", explanation: "How the device works is the object noun clause after explained and keeps statement order.", tokens: ["device", "explained", "works.", "The", "how", "guide", "the"] },
+  ]},
+  { topic: "Relative clauses", activities: [
+    { type: "mcq", title: "Relative adverb", prompt: "The year ___ the observatory opened was unusually dry.", answer: "when", explanation: "When refers to a time and introduces a relative clause modifying year.", options: ["when", "who", "whose"] },
+    { type: "fill", title: "Possessive relative", prompt: "The artist ___ mural won the prize visited our school.", answer: "whose", explanation: "Whose expresses possession: the mural belongs to the artist.", },
+    { type: "error", title: "Correct a relative pronoun", prompt: "Correct this sentence: The laboratory where we visited was closed.", answer: "The laboratory that we visited was closed.", explanation: "Where refers to a place adverbially; the object of visited needs that or which.", },
+    { type: "transform", title: "Make a non-defining clause", prompt: "Join with which: The bridge reopened in May. It had been closed for repairs.", answer: "The bridge, which had been closed for repairs, reopened in May.", explanation: "Commas mark the extra, non-defining information about the bridge.", },
+    { type: "rearrange", title: "Order a relative clause", prompt: "Arrange the words: the / solved / puzzle / I / was / difficult", answer: "The puzzle I solved was difficult.", explanation: "I solved is a defining relative clause modifying puzzle; the object relative pronoun is omitted.", tokens: ["difficult.", "solved", "The", "was", "I", "puzzle"] },
+  ]},
+  { topic: "Adverb clauses", activities: [
+    { type: "mcq", title: "Adverb clause of reason", prompt: "Which sentence contains a reason clause?", answer: "We stayed indoors because the air quality was poor.", explanation: "Because the air quality was poor explains why we stayed indoors.", options: ["We stayed indoors when the bell rang.", "We stayed indoors because the air quality was poor.", "We stayed indoors so that we could read."] },
+    { type: "fill", title: "Purpose clause", prompt: "The team repeated the test so that it ___ verify the result.", answer: "could", explanation: "Could expresses the purpose in a past context after so that.", },
+    { type: "error", title: "Correct a conditional clause", prompt: "Correct this sentence: If the alarm will ring, leave the building.", answer: "If the alarm rings, leave the building.", explanation: "A first conditional uses the present simple in the if-clause, not will.", },
+    { type: "transform", title: "Join with although", prompt: "Combine: The evidence was limited. The conclusion was reliable.", answer: "Although the evidence was limited, the conclusion was reliable.", explanation: "Although introduces the contrast between limited evidence and a reliable conclusion.", },
+    { type: "rearrange", title: "Order an adverb clause", prompt: "Arrange the words: before / checked / we / left / the / map / carefully", answer: "We checked the map carefully before we left.", explanation: "Before introduces the subordinate time clause after the completed main action.", tokens: ["left.", "the", "before", "We", "carefully", "map", "we", "checked"] },
+  ]},
+  { topic: "Sentence combining", activities: [
+    { type: "mcq", title: "Combine with contrast", prompt: "Choose the best combination: The route was longer. It was safer.", answer: "Although the route was longer, it was safer.", explanation: "Although clearly signals the contrast between length and safety.", options: ["Because the route was longer, it was safer.", "Although the route was longer, it was safer.", "The route was longer so it was safer."] },
+    { type: "fill", title: "Combine with a result", prompt: "The river rose quickly, ___ the residents moved to higher ground.", answer: "so", explanation: "So joins the first event to its result.", },
+    { type: "error", title: "Repair a run-on", prompt: "Correct this sentence: The bell rang the pupils left the hall.", answer: "The bell rang, so the pupils left the hall.", explanation: "A connector and comma are needed to join the two independent clauses clearly.", },
+    { type: "transform", title: "Combine with a noun clause", prompt: "Combine using that: The report confirmed it. The bridge was safe.", answer: "The report confirmed that the bridge was safe.", explanation: "That introduces the content clause functioning as the object of confirmed.", },
+    { type: "rearrange", title: "Order a complex combination", prompt: "Arrange the words: who / won / The / student / thanked / was / her / team", answer: "The student who won was thanked by her team.", explanation: "Who won modifies student, and the complete sentence uses the passive was thanked.", tokens: ["team.", "who", "her", "student", "won", "The", "was", "thanked", "by"] },
+  ]},
+  { topic: "Infinitives", activities: [
+    { type: "mcq", title: "Infinitive of purpose", prompt: "The class visited the museum ___ about local history.", answer: "to learn", explanation: "To learn is an infinitive expressing the purpose of the visit.", options: ["learning", "to learn", "learned"] },
+    { type: "fill", title: "Bare infinitive after a modal", prompt: "The volunteers must ___ the equipment before leaving.", answer: "check", explanation: "A modal such as must is followed by the bare base form check.", },
+    { type: "error", title: "Correct an infinitive complement", prompt: "Correct this sentence: The witness agreed telling the truth.", answer: "The witness agreed to tell the truth.", explanation: "Agree is followed by a to-infinitive, not an -ing form.", },
+    { type: "transform", title: "Express a result with too", prompt: "Combine using too...to: The box was very heavy. I could not lift it.", answer: "The box was too heavy for me to lift.", explanation: "Too heavy for me to lift expresses that the weight prevented the action.", },
+    { type: "rearrange", title: "Order an infinitive phrase", prompt: "Arrange the words: hopes / to / The / finish / team / early", answer: "The team hopes to finish early.", explanation: "Hopes takes a to-infinitive, which expresses the team’s aim.", tokens: ["early.", "to", "team", "finish", "The", "hopes"] },
+  ]},
+  { topic: "Gerunds", activities: [
+    { type: "mcq", title: "Gerund after a preposition", prompt: "The students succeeded by ___ the evidence carefully.", answer: "analysing", explanation: "A gerund follows the preposition by and names the method of succeeding.", options: ["analyse", "analysing", "to analyse"] },
+    { type: "fill", title: "Gerund as object", prompt: "Our coach recommended ___ before the race.", answer: "stretching", explanation: "Recommend is followed by an -ing form when the activity is its object.", },
+    { type: "error", title: "Correct a gerund subject", prompt: "Correct this sentence: Collecting old maps help historians.", answer: "Collecting old maps helps historians.", explanation: "The gerund phrase is singular as the subject, so the verb must be helps.", },
+    { type: "transform", title: "Replace an infinitive subject", prompt: "Rewrite with a gerund: To recycle saves useful materials.", answer: "Recycling saves useful materials.", explanation: "The gerund recycling functions as the subject and keeps the original meaning.", },
+    { type: "rearrange", title: "Order a gerund phrase", prompt: "Arrange the words: enjoys / analysing / She / historical / maps", answer: "She enjoys analysing historical maps.", explanation: "Enjoy is followed by a gerund phrase functioning as its object.", tokens: ["historical", "enjoys", "maps.", "analysing", "She"] },
+  ]},
+  { topic: "Participles", activities: [
+    { type: "mcq", title: "Past participle adjective", prompt: "The ___ window needs replacing after the storm.", answer: "broken", explanation: "Broken is a past participle functioning as an adjective describing window.", options: ["breaking", "broken", "break"] },
+    { type: "fill", title: "Present participle modifier", prompt: "The ___ lecture kept the audience interested.", answer: "engaging", explanation: "Engaging is a present participle describing the lecture’s effect.", },
+    { type: "error", title: "Correct a dangling participle", prompt: "Correct this sentence: Walking through the gallery, the paintings impressed Mira.", answer: "Walking through the gallery, Mira admired the paintings.", explanation: "The opening participial phrase must describe Mira, not the paintings.", },
+    { type: "transform", title: "Reduce a relative clause", prompt: "Reduce the clause: The documents that were signed yesterday are confidential.", answer: "The documents signed yesterday are confidential.", explanation: "The passive relative clause can be reduced to the past-participial phrase signed yesterday.", },
+    { type: "rearrange", title: "Order a participial phrase", prompt: "Arrange the words: covered / The / path / fallen / leaves / was / with", answer: "The path was covered with fallen leaves.", explanation: "Fallen is a past participle modifying leaves inside the prepositional phrase.", tokens: ["leaves.", "covered", "with", "The", "fallen", "was", "path"] },
+  ]},
+  { topic: "Perfect and passive non-finite forms", activities: [
+    { type: "mcq", title: "Perfect infinitive", prompt: "She claims ___ the instructions before the test began.", answer: "to have read", explanation: "To have read is a perfect infinitive showing an earlier completed action.", options: ["to read", "to have read", "reading"] },
+    { type: "fill", title: "Passive infinitive", prompt: "The design is expected ___ (approve) next week.", answer: "to be approved", explanation: "The passive infinitive uses to be plus the past participle approved.", },
+    { type: "error", title: "Correct a perfect gerund", prompt: "Correct this sentence: He apologised for to have missed the meeting.", answer: "He apologised for having missed the meeting.", explanation: "After the preposition for, use the perfect gerund having missed.", },
+    { type: "transform", title: "Use a passive perfect form", prompt: "Rewrite formally with having been: The committee had reviewed the plan, so the plan was approved.", answer: "Having been reviewed by the committee, the plan was approved.", explanation: "Having been reviewed is a passive perfect participial clause showing that the plan received the earlier action.", },
+    { type: "rearrange", title: "Order a passive non-finite phrase", prompt: "Arrange the words: to / ready / be / The / report / published / is", answer: "The report is ready to be published.", explanation: "To be published is a passive infinitive because the report receives the action.", tokens: ["published.", "ready", "The", "to", "is", "report", "be"] },
+  ]},
+];
+
+const buildSecondaryAdditionalQuestions = (): GrammarQuestion[] =>
+  SECONDARY_ADDITIONAL_TOPICS.flatMap(({ topic, activities }) =>
+    activities.map((activity, index) =>
+      q(
+        `secondary-additional-${middleRemainingSlug(topic)}-${index + 1}`,
+        activity.type,
+        `${topic}: ${activity.title}`,
+        activity.prompt,
+        activity.answer,
+        activity.explanation,
+        { concept: ["Articles", "Demonstratives", "Quantifiers", "Distributives", "Indefinite determiners"].includes(topic) ? "Determiners" : ["Infinitives", "Gerunds", "Participles", "Perfect and passive non-finite forms"].includes(topic) ? "Non-finite verbs" : "Phrases and clauses", topic, options: activity.options, tokens: activity.tokens, pairs: activity.pairs },
+      )
+    )
+  );
+
 GRAMMAR_LEVELS.find((level) => level.id === "middle")?.questions.push(...buildMiddleRemainingQuestions());
-GRAMMAR_LEVELS.find((level) => level.id === "secondary")?.questions.push(...buildSecondaryPhrasesClausesQuestions());
+GRAMMAR_LEVELS.find((level) => level.id === "secondary")?.questions.push(...buildSecondaryPhrasesClausesQuestions(), ...buildSecondaryAdditionalQuestions());
 
 export const GRAMMAR_TOTAL = GRAMMAR_LEVELS.reduce((sum, level) => sum + level.questions.length, 0);
 
