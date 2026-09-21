@@ -19,7 +19,8 @@ const inputCls =
 
 const labelCls = "mb-1.5 block font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-chalk/60";
 
-const doneCount = (p: AllProgress, id: string) => Object.values(p[id] ?? {}).filter(Boolean).length;
+const doneCount = (p: AllProgress, id: string) =>
+  Object.entries(p[id] ?? {}).filter(([key, value]) => value && !key.startsWith("grammar:")).length;
 
 export default function LearnerGate({ profiles, progress, onEnter, onResetProgress, onRemoveProfile }: Props) {
   const [name, setName] = useState("");

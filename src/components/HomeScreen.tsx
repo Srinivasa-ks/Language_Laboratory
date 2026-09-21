@@ -10,6 +10,8 @@ interface Props {
   joinedAt?: number;
   lastSeen?: number;
   checks: ChecksMap;
+  grammarDone: number;
+  grammarTotal: number;
   onOpenSound: (id: string, level: LevelId) => void;
   onSurprise: () => void;
 }
@@ -57,6 +59,8 @@ export default function HomeScreen({
   joinedAt,
   lastSeen,
   checks,
+  grammarDone,
+  grammarTotal,
   onOpenSound,
   onSurprise,
 }: Props) {
@@ -184,6 +188,19 @@ export default function HomeScreen({
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-line bg-card p-4 shadow-[0_2px_0_rgba(20,48,42,0.07)] sm:p-5">
+        <div>
+          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-ember">Station 05 · Grammar Lab</p>
+          <p className="mt-1 font-display text-[17px] font-bold text-ink">Build accuracy from first words to advanced writing.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[11px] tabular-nums text-fog">{grammarDone}/{grammarTotal} exercises complete</span>
+          <span className="h-2 w-24 overflow-hidden rounded-full bg-paper">
+            <span className="block h-full rounded-full bg-ember" style={{ width: `${grammarTotal ? (grammarDone / grammarTotal) * 100 : 0}%` }} />
+          </span>
         </div>
       </div>
 

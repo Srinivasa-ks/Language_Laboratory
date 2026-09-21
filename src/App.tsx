@@ -4,6 +4,7 @@ import LearnerGate from "./components/LearnerGate";
 import HomeScreen from "./components/HomeScreen";
 import PracticeBench from "./components/PracticeBench";
 import SkillsLab from "./components/SkillsLab";
+import GrammarLab from "./components/GrammarLab";
 import VowelChart from "./components/VowelChart";
 import {
   IconArrow,
@@ -25,6 +26,7 @@ import {
   VOWELS,
   type LevelId,
 } from "./data/phonemes";
+import { GRAMMAR_TOTAL, grammarDone } from "./data/grammar";
 import {
   GUEST_ID,
   displayNameFor,
@@ -262,7 +264,11 @@ export default function App() {
       ),
     [checks]
   );
-  const doneCount = useMemo(() => Object.values(checks).filter(Boolean).length, [checks]);
+  const doneCount = useMemo(
+    () => Object.entries(checks).filter(([key, value]) => value && !key.startsWith("grammar:")).length,
+    [checks]
+  );
+  const grammarCompleted = useMemo(() => grammarDone(checks), [checks]);
 
   const doneBySound = useMemo(() => {
     const m = new Map<string, number>();
@@ -295,6 +301,14 @@ export default function App() {
       if (mine[key]) delete mine[key];
       else mine[key] = true;
       return { ...prev, [activeId]: mine };
+    });
+  };
+
+  const completeGrammar = (key: string) => {
+    if (!activeId) return;
+    setAllProgress((prev) => {
+      if (prev[activeId]?.[key]) return prev;
+      return { ...prev, [activeId]: { ...(prev[activeId] ?? {}), [key]: true } };
     });
   };
 
@@ -444,12 +458,29 @@ export default function App() {
               model voice: your device's en-GB speech engine
             </p>
           </div>
+          <nav aria-label="Lab stations" className="mx-auto flex w-full max-w-6xl gap-1 overflow-x-auto border-t border-pine-3/70 pt-2.5">
+            {[
+              ["home", "00 Home"],
+              ["sound-map", "01 Sounds"],
+              ["practice-bench", "03 Bench"],
+              ["skills-lab", "04 Skills"],
+              ["grammar-lab", "05 Grammar"],
+            ].map(([id, label]) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                className="shrink-0 rounded-md px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-chalk/55 transition-colors hover:bg-pine-3 hover:text-honey"
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
         </div>
       </header>
 
       <main className="relative z-10">
         {/* ════════════════ STATION 00 · HOME SCREEN ════════════════ */}
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16">
+        <section id="home" className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16">
           <Reveal>
             <HomeScreen
               userName={userName}
@@ -458,6 +489,8 @@ export default function App() {
               joinedAt={learner?.createdAt}
               lastSeen={learner?.lastSeen}
               checks={checks}
+              grammarDone={grammarCompleted}
+              grammarTotal={GRAMMAR_TOTAL}
               onOpenSound={openSound}
               onSurprise={surprise}
             />
@@ -465,7 +498,7 @@ export default function App() {
         </section>
 
         {/* ════════════════ STATION 01 · SOUND MAP ════════════════ */}
-        <section className="mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pt-16">
+        <section id="sound-map" className="mx-auto max-w-6xl px-4 pb-16 pt-12 sm:px-6 sm:pt-16">
           <Reveal>
             <div className="flex flex-wrap items-end justify-between gap-6">
               <div className="max-w-2xl">
@@ -638,7 +671,7 @@ export default function App() {
         </section>
 
         {/* ════════════════ STATION 03 · PRACTICE BENCH ════════════════ */}
-        <section ref={benchRef} className="scroll-mt-36">
+        <section id="practice-bench" ref={benchRef} className="scroll-mt-36">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
             <Reveal>
               <div className="flex flex-wrap items-end justify-between gap-4">
@@ -674,7 +707,7 @@ export default function App() {
         </section>
 
         {/* ════════════════ STATION 04 · SKILLS LAB ════════════════ */}
-        <section className="scroll-mt-36 border-t border-line bg-chalk/60">
+        <section id="skills-lab" className="scroll-mt-36 border-t border-line bg-chalk/60">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
             <Reveal>
               <div className="flex flex-wrap items-end justify-between gap-4">
@@ -701,6 +734,31 @@ export default function App() {
                 speaking={speech.speaking}
                 onJumpToBench={() => benchRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
               />
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ════════════════ STATION 05 · GRAMMAR LAB ════════════════ */}
+        <section id="grammar-lab" className="scroll-mt-36 border-t border-line bg-paper">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+            <Reveal>
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.28em] text-ember">
+                    Station 05 · Grammar lab
+                  </p>
+                  <h2 className="mt-3 font-display text-[clamp(1.7rem,3.6vw,2.5rem)] font-extrabold tracking-tight text-ink">
+                    Grammar that grows with you.
+                  </h2>
+                </div>
+                <p className="max-w-xl text-[13.5px] leading-relaxed text-fog">
+                  Seven exercise types across six learner levels, with instant explanations and
+                  progress saved to {isGuest ? "this device" : `${userName}'s profile`}.
+                </p>
+              </div>
+            </Reveal>
+            <Reveal delay={120} className="mt-8">
+              <GrammarLab checks={checks} onComplete={completeGrammar} />
             </Reveal>
           </div>
         </section>

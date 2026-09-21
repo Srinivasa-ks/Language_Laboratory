@@ -26,7 +26,7 @@ async function cacheAsset(cache, url) {
 
 async function warmCache() {
   const cache = await caches.open(CACHE);
-  const home = await cacheAsset(cache, new URL("./", self.location.origin).href);
+  const home = await cacheAsset(cache, new URL("./", self.registration.scope).href);
   if (!home) return;
   const html = await home.text();
   const refs = [...new Set([...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]))];
