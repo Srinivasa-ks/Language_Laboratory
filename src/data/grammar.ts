@@ -1315,6 +1315,8 @@ export const GRAMMAR_LEVELS: GrammarLevel[] = [
       "Punctuation",
       "Subject–verb agreement",
       "Figures of Speech",
+      "Phrasal Verbs",
+      "Idioms and Expressions",
     ],
     questions: [
       q("mc-1", "mcq", "Conditionals", "If I had known, I ___ you.", "would have told", "This third conditional refers to an unreal past condition and result.", { options: ["tell", "would tell", "would have told"] }),
@@ -2360,7 +2362,96 @@ const buildSecondaryFiguresOfSpeechQuestions = (): GrammarQuestion[] =>
   );
 
 GRAMMAR_LEVELS.find((level) => level.id === "middle")?.questions.push(...buildMiddleRemainingQuestions());
-GRAMMAR_LEVELS.find((level) => level.id === "secondary")?.questions.push(...buildSecondaryPhrasesClausesQuestions(), ...buildSecondaryAdditionalQuestions(), ...buildSecondaryFocusedQuestions(), ...buildSecondaryFiguresOfSpeechQuestions());
+
+const SECONDARY_PHRASAL_IDIOM_SPECS: SecondaryExpansionSpec[] = [
+{ concept: "Phrasal Verbs", topic: "Common phrasal verbs", activities: [
+  { type: "mcq", title: "Choose a familiar phrasal verb", prompt: "The school librarian asked us to ___ the borrowed books by Friday.", answer: "give back", explanation: "Give back means to return something to the person or place it came from.", options: ["give back", "look after", "turn up"] },
+  { type: "identify", title: "Identify the phrasal verb", prompt: "In “Nisha ran into her cousin at the science fair,” identify the phrasal verb.", answer: "ran into", explanation: "Ran into is a two-word verb meaning met unexpectedly; it is not about physically running into a person here.", options: ["Nisha", "ran into", "science fair"] },
+  { type: "fill", title: "Complete a school instruction", prompt: "Please ___ the lights before you leave the art room. (switch)", answer: "switch off", explanation: "Switch off means turn a device or light off, and it fits this practical instruction.", },
+  { type: "transform", title: "Replace a single verb", prompt: "Rewrite using a phrasal verb: The coach cancelled the practice because of rain.", answer: "The coach called off the practice because of rain.", explanation: "Call off means cancel, so it preserves the meaning in a natural school context.", },
+  { type: "rearrange", title: "Order a common phrasal-verb sentence", prompt: "Arrange the words: up / the / picked / student / litter", answer: "The student picked up the litter.", explanation: "Pick up means lift or collect something; the object litter follows the separable phrasal verb.", tokens: ["litter.", "picked", "The", "up", "student", "the"] },
+] },
+{ concept: "Phrasal Verbs", topic: "Separable and inseparable phrasal verbs", activities: [
+  { type: "mcq", title: "Place a pronoun correctly", prompt: "Which sentence is correct?", answer: "Please turn it down; the music is too loud.", explanation: "Turn down is separable, but a pronoun must come between the verb and particle.", options: ["Please turn down it; the music is too loud.", "Please turn it down; the music is too loud.", "Please turn down the music it."] },
+  { type: "fill", title: "Keep an inseparable verb together", prompt: "The hikers ___ an old fort on their route. (come across)", answer: "came across", explanation: "Come across means find or meet by chance and cannot be split: came across an old fort.", },
+  { type: "error", title: "Correct particle placement", prompt: "Correct this sentence: The monitor looked the answer up it online.", answer: "The monitor looked up the answer online.", explanation: "Look up can be separated with a noun object, but the extra pronoun it is incorrect; the sentence needs only the answer.", },
+  { type: "transform", title: "Move a noun object", prompt: "Rewrite with the object between the verb and particle: The volunteers handed out the leaflets.", answer: "The volunteers handed the leaflets out.", explanation: "Hand out is separable, so a full noun object may stand between handed and out.", },
+  { type: "matching", title: "Match verbs with their patterns", prompt: "Match each phrasal verb with the useful pattern it follows.", answer: "look after=inseparable|turn on=separable|run into=inseparable", explanation: "Look after and run into stay together, while turn on can separate around a noun object.", pairs: [{ left: "look after", right: "inseparable" }, { left: "turn on", right: "separable" }, { left: "run into", right: "inseparable" }] },
+] },
+{ concept: "Phrasal Verbs", topic: "Meaning in context", activities: [
+  { type: "mcq", title: "Infer meaning from context", prompt: "After three failed attempts, the robotics team finally figured out why the sensor stopped. What does figured out mean?", answer: "understood or solved", explanation: "In this context, figured out means discovered the reason through thinking and testing.", options: ["forgot", "understood or solved", "carried away"] },
+  { type: "identify", title: "Interpret a travel phrase", prompt: "In “We set off before sunrise to reach the hilltop,” what does set off mean?", answer: "started a journey", explanation: "The time before sunrise and the goal of reaching the hilltop show that set off means began travelling.", options: ["started a journey", "stopped moving", "changed direction"] },
+  { type: "fill", title: "Use context to choose a verb", prompt: "The debate became noisy, so the chairperson asked everyone to ___ and listen. (calm)", answer: "calm down", explanation: "Calm down means become or make less agitated, which suits the chairperson's request.", },
+  { type: "transform", title: "Explain a contextual phrasal verb", prompt: "Rewrite using a single-word verb: The editor looked over my article before publication.", answer: "The editor reviewed my article before publication.", explanation: "Look over means examine or review carefully enough to check something.", },
+  { type: "rearrange", title: "Build a context-rich sentence", prompt: "Arrange the words: after / the / match / we / cheered / our / team / on", answer: "We cheered our team on after the match.", explanation: "Cheer on means encourage a person or team; the time phrase comes at the end.", tokens: ["on", "team", "after", "We", "our", "the", "cheered", "match."] },
+] },
+{ concept: "Phrasal Verbs", topic: "Phrasal verbs in sentences", activities: [
+  { type: "mcq", title: "Select the natural sentence", prompt: "Which sentence uses take up correctly?", answer: "Mira took up photography during the holidays.", explanation: "Take up means begin a hobby or activity, so photography is a suitable object.", options: ["Mira took up the bus at noon.", "Mira took up photography during the holidays.", "Mira took up loudly during the holidays."] },
+  { type: "fill", title: "Complete a meaningful sentence", prompt: "The committee will ___ the complaint before announcing its decision. (look)", answer: "look into", explanation: "Look into means investigate, which is what a committee does before deciding a complaint.", },
+  { type: "error", title: "Repair a phrasal-verb sentence", prompt: "Correct this sentence: The new student gets along the classmates well.", answer: "The new student gets along with the classmates well.", explanation: "Get along requires the preposition with before the people one has a good relationship with.", },
+  { type: "transform", title: "Change the sentence focus", prompt: "Rewrite using put off: The organisers delayed the sports day because of the storm.", answer: "The organisers put off the sports day because of the storm.", explanation: "Put off means postpone, so it accurately replaces delayed without changing the reason.", },
+  { type: "matching", title: "Match phrasal verbs to sentence meanings", prompt: "Match each phrasal verb with its meaning in a sentence.", answer: "bring up=mention|carry on=continue|work out=solve or understand", explanation: "The surrounding sentence determines whether a phrasal verb means mention, continue or solve.", pairs: [{ left: "bring up", right: "mention" }, { left: "carry on", right: "continue" }, { left: "work out", right: "solve or understand" }] },
+] },
+{ concept: "Phrasal Verbs", topic: "Phrasal verb transformation", activities: [
+  { type: "transform", title: "Transform a verb into a phrasal verb", prompt: "Rewrite using find out: The class discovered the museum's opening time.", answer: "The class found out the museum's opening time.", explanation: "Find out means discover information; found is its past form in this sentence.", },
+  { type: "fill", title: "Change the tense of a phrasal verb", prompt: "By next week, the technicians will have ___ the faulty wire. (remove)", answer: "taken out", explanation: "Take out can mean remove; the future perfect uses will have taken out before the object.", },
+  { type: "error", title: "Correct a transformed sentence", prompt: "Correct this sentence: The audience was looking forward the final performance.", answer: "The audience was looking forward to the final performance.", explanation: "Look forward to is followed by the preposition to before a noun or -ing form.", },
+  { type: "mcq", title: "Choose an equivalent transformation", prompt: "Which sentence has the same meaning as “Please continue with the rehearsal”?", answer: "Please carry on with the rehearsal.", explanation: "Carry on means continue, and carry on with correctly keeps the activity as its complement.", options: ["Please carry out with the rehearsal.", "Please carry on with the rehearsal.", "Please carry over the rehearsal."] },
+  { type: "rearrange", title: "Transform words into a request", prompt: "Arrange the words using a phrasal verb: could / you / fill / this / form / in / please", answer: "Could you fill in this form, please?", explanation: "Fill in means complete a form, and the polite question begins with could.", tokens: ["in", "please?", "this", "Could", "fill", "form", "you"] },
+] },
+{ concept: "Idioms and Expressions", topic: "Common idioms", activities: [
+  { type: "mcq", title: "Recognise a common idiom", prompt: "If a classmate says, “That test was a piece of cake,” what does the idiom mean?", answer: "The test was very easy.", explanation: "A piece of cake is an idiom meaning something was easy, not a literal dessert.", options: ["The test included cake.", "The test was very easy.", "The test was impossible."] },
+  { type: "identify", title: "Identify an idiomatic expression", prompt: "Which phrase in the sentence is an idiom? “After the announcement, the secret was out of the bag.”", answer: "out of the bag", explanation: "Out of the bag means revealed or no longer secret.", options: ["After the announcement", "the secret", "out of the bag"] },
+  { type: "fill", title: "Complete a familiar idiom", prompt: "When the captain encouraged the nervous players, she told them to keep their ___ up.", answer: "chins", explanation: "Keep your chin up means remain cheerful and hopeful during a difficulty.", },
+  { type: "transform", title: "Replace a literal explanation", prompt: "Rewrite using an idiom: Aarav revealed the surprise accidentally.", answer: "Aarav let the cat out of the bag accidentally.", explanation: "Let the cat out of the bag means reveal a secret, matching the accidental disclosure.", },
+  { type: "matching", title: "Match everyday idioms", prompt: "Match each idiom with its common meaning.", answer: "break the ice=start a friendly conversation|hit the books=study hard|under the weather=feeling unwell", explanation: "These idioms are understood figuratively in ordinary school conversations.", pairs: [{ left: "break the ice", right: "start a friendly conversation" }, { left: "hit the books", right: "study hard" }, { left: "under the weather", right: "feeling unwell" }] },
+] },
+{ concept: "Idioms and Expressions", topic: "Meaning in context", activities: [
+  { type: "mcq", title: "Infer an idiom from a situation", prompt: "The winning team practised every afternoon, so their success did not happen by chance. Which phrase best describes it?", answer: "They earned it through hard work.", explanation: "The context shows effort and preparation rather than luck; the idiom “put in the hours” captures this.", options: ["They put in the hours.", "They spilled the beans.", "They were on thin ice."] },
+  { type: "identify", title: "Interpret an expression", prompt: "In “Leena was on thin ice after ignoring the lab rules,” what does on thin ice suggest?", answer: "She was in a risky situation.", explanation: "On thin ice warns that someone's position is unsafe and another mistake could cause trouble.", options: ["She was skating.", "She was in a risky situation.", "She was feeling relaxed."] },
+  { type: "fill", title: "Choose an idiom from context", prompt: "The two friends disagreed at first, but they finally saw eye to eye about the project. They finally ___ .", answer: "agreed", explanation: "See eye to eye means agree, especially about an opinion or decision.", },
+  { type: "transform", title: "Explain an idiom plainly", prompt: "Rewrite without the idiom: The volunteers went the extra mile to make the fundraiser welcoming.", answer: "The volunteers made an extra effort to make the fundraiser welcoming.", explanation: "Go the extra mile means do more than is expected, so make an extra effort preserves the meaning.", },
+  { type: "rearrange", title: "Place an idiom in context", prompt: "Arrange the words: before / the / exam / I / was / a / bundle / of / nerves", answer: "I was a bundle of nerves before the exam.", explanation: "A bundle of nerves describes someone who is extremely anxious, and the time phrase completes the context.", tokens: ["nerves", "a", "exam.", "I", "of", "before", "was", "bundle", "the"] },
+] },
+{ concept: "Idioms and Expressions", topic: "Matching idioms with meanings", activities: [
+  { type: "matching", title: "Match idioms about communication", prompt: "Match each communication idiom with its meaning.", answer: "spill the beans=reveal a secret|get the message=understand the hint|hear it through the grapevine=learn through rumours", explanation: "Each idiom describes a different way information is revealed, understood or passed on.", pairs: [{ left: "spill the beans", right: "reveal a secret" }, { left: "get the message", right: "understand the hint" }, { left: "hear it through the grapevine", right: "learn through rumours" }] },
+  { type: "mcq", title: "Match by meaning", prompt: "Which idiom means “to face a difficult task bravely”?", answer: "bite the bullet", explanation: "Bite the bullet means accept and deal with something unpleasant or difficult.", options: ["bite the bullet", "see red", "call it a day"] },
+  { type: "fill", title: "Supply the matching idiom", prompt: "The debate became so heated that the moderator decided to ___ and end it for now. (stop working)", answer: "call it a day", explanation: "Call it a day means stop an activity, especially after spending enough time on it.", },
+  { type: "identify", title: "Identify the meaning pair", prompt: "In “The new timetable is still up in the air,” which meaning matches the idiom?", answer: "It has not been decided yet.", explanation: "Up in the air means uncertain or undecided, not literally floating.", options: ["It has not been decided yet.", "It has been printed clearly.", "It is flying above the school."] },
+  { type: "transform", title: "Use the matched meaning", prompt: "Rewrite using an idiom meaning “be very happy”: The players were very happy after the final whistle.", answer: "The players were on cloud nine after the final whistle.", explanation: "On cloud nine is an idiom for feeling extremely happy or delighted.", },
+] },
+{ concept: "Idioms and Expressions", topic: "Using idioms appropriately", activities: [
+  { type: "mcq", title: "Choose an appropriate register", prompt: "Which sentence uses an idiom naturally in a friendly message to a teammate?", answer: "Great job—you really nailed it!", explanation: "Nail it is an informal expression meaning perform something extremely well, suitable for a friendly message.", options: ["Great job—you really nailed it!", "Great job—you combusted the examination.", "Great job—you are beneath the weather!"] },
+  { type: "error", title: "Correct an idiom", prompt: "Correct this sentence: After months of practice, the choir hit the nail on the head in the concert.", answer: "After months of practice, the choir nailed it in the concert.", explanation: "Hit the nail on the head means identify something exactly, whereas nailed it means perform something very well.", },
+  { type: "fill", title: "Use an idiom in advice", prompt: "If you want to improve your speech, practise regularly and remember that practice makes ___ .", answer: "perfect", explanation: "Practice makes perfect is suitable advice about improving a skill through repeated effort.", },
+  { type: "transform", title: "Adapt an idiom to a formal setting", prompt: "Rewrite for a formal school report without the idiom: The project was a piece of cake for the team.", answer: "The team completed the project very easily.", explanation: "A formal report should state the meaning directly rather than use the conversational idiom piece of cake.", },
+  { type: "rearrange", title: "Use an idiom politely", prompt: "Arrange the words as friendly advice: take / your / time / and / do / not / jump / to / conclusions", answer: "Take your time and do not jump to conclusions.", explanation: "Jump to conclusions means decide too quickly without enough evidence; the complete sentence gives considerate advice.", tokens: ["conclusions.", "your", "do", "Take", "to", "time", "not", "and", "jump"] },
+] },
+{ concept: "Idioms and Expressions", topic: "Idioms in sentences", activities: [
+  { type: "mcq", title: "Complete an idiomatic sentence", prompt: "The mystery was difficult, but the detective eventually ___ the truth.", answer: "got to the bottom of", explanation: "Get to the bottom of means investigate until the real cause or truth is known.", options: ["got to the bottom of", "stood under the weather", "broke the ice with"] },
+  { type: "fill", title: "Complete a sentence naturally", prompt: "When the lights went out during the play, the actors had to ___ and continue without the microphones.", answer: "make do", explanation: "Make do means manage with what is available when the preferred resources are missing.", },
+  { type: "error", title: "Fix an idiom in a sentence", prompt: "Correct this sentence: Priya was feeling in seventh heaven after losing the final.", answer: "Priya was feeling down in the dumps after losing the final.", explanation: "Feeling down in the dumps means sad; in seventh heaven would mean extremely happy and conflicts with the context.", },
+  { type: "transform", title: "Add an idiom to a sentence", prompt: "Rewrite with an idiom meaning “start immediately”: The volunteers began cleaning the beach immediately.", answer: "The volunteers got the ball rolling by cleaning the beach.", explanation: "Get the ball rolling means start an activity or process, and the sentence shows the first action.", },
+  { type: "matching", title: "Match idioms to complete sentences", prompt: "Match each idiom to the sentence where it fits best.", answer: "a storm in a teacup=The argument was small but seemed dramatic.|when pigs fly=My brother says he will tidy his room when pigs fly.|on the same page=The partners agreed about the plan.", explanation: "The surrounding meaning makes each figurative expression appropriate for one sentence.", pairs: [{ left: "a storm in a teacup", right: "The argument was small but seemed dramatic." }, { left: "when pigs fly", right: "My brother says he will tidy his room when pigs fly." }, { left: "on the same page", right: "The partners agreed about the plan." }] },
+] },
+];
+
+const buildSecondaryPhrasalIdiomQuestions = (): GrammarQuestion[] =>
+SECONDARY_PHRASAL_IDIOM_SPECS.flatMap(({ concept, topic, activities }) =>
+  activities.map((activity, index) =>
+    q(
+      `secondary-${middleRemainingSlug(concept)}-${middleRemainingSlug(topic)}-${index + 1}`,
+      activity.type,
+      `${topic}: ${activity.title}`,
+      activity.prompt,
+      activity.answer,
+      activity.explanation,
+      { concept, topic, options: activity.options, tokens: activity.tokens, pairs: activity.pairs },
+    ),
+  ),
+);
+
+GRAMMAR_LEVELS.find((level) => level.id === "secondary")?.questions.push(...buildSecondaryPhrasesClausesQuestions(), ...buildSecondaryAdditionalQuestions(), ...buildSecondaryFocusedQuestions(), ...buildSecondaryFiguresOfSpeechQuestions(), ...buildSecondaryPhrasalIdiomQuestions());
 
 export const GRAMMAR_TOTAL = GRAMMAR_LEVELS.reduce((sum, level) => sum + level.questions.length, 0);
 
